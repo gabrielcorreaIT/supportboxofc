@@ -1,15 +1,28 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { useParams, useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Textarea } from "@/components/ui/textarea"
-import { Separator } from "@/components/ui/separator"
-import { ArrowLeft, Clock, MessageSquare, Package, AlertTriangle, User, Send } from "lucide-react"
-import { UserNav } from "@/components/user-nav"
-import { ServerLogo } from "@/components/server-logo"
+import { useState, useEffect } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Textarea } from "@/components/ui/textarea";
+import { Separator } from "@/components/ui/separator";
+import {
+  ArrowLeft,
+  Clock,
+  MessageSquare,
+  Package,
+  AlertTriangle,
+  User,
+  Send,
+} from "lucide-react";
+import { UserNav } from "@/components/user-nav";
 
 // Mock data para detalhes do chamado
 const mockTicketDetails = {
@@ -75,30 +88,31 @@ const mockTicketDetails = {
       },
     ],
   },
-}
+};
 
 export default function TicketDetailsPage() {
-  const params = useParams()
-  const router = useRouter()
-  const ticketId = params.id as string
-  const [ticket, setTicket] = useState<any>(null)
-  const [newComment, setNewComment] = useState("")
-  const [isLoading, setIsLoading] = useState(true)
-  const [isSendingComment, setIsSendingComment] = useState(false)
+  const params = useParams();
+  const router = useRouter();
+  const ticketId = params.id as string;
+  const [ticket, setTicket] = useState<any>(null);
+  const [newComment, setNewComment] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSendingComment, setIsSendingComment] = useState(false);
 
   useEffect(() => {
     // Simular carregamento dos dados
     setTimeout(() => {
-      const ticketData = mockTicketDetails[ticketId as keyof typeof mockTicketDetails]
-      setTicket(ticketData || null)
-      setIsLoading(false)
-    }, 1000)
-  }, [ticketId])
+      const ticketData =
+        mockTicketDetails[ticketId as keyof typeof mockTicketDetails];
+      setTicket(ticketData || null);
+      setIsLoading(false);
+    }, 1000);
+  }, [ticketId]);
 
   const handleSendComment = async () => {
-    if (!newComment.trim()) return
+    if (!newComment.trim()) return;
 
-    setIsSendingComment(true)
+    setIsSendingComment(true);
 
     // Simular envio do comentário
     setTimeout(() => {
@@ -107,88 +121,88 @@ export default function TicketDetailsPage() {
         agent: "Gabriel Borges",
         date: new Date().toISOString(),
         message: newComment,
-      }
+      };
 
       setTicket({
         ...ticket,
         interactions: [...ticket.interactions, newInteraction],
-      })
+      });
 
-      setNewComment("")
-      setIsSendingComment(false)
-    }, 1500)
-  }
+      setNewComment("");
+      setIsSendingComment(false);
+    }, 1500);
+  };
 
   const formatDate = (dateString: string) => {
-    const date = new Date(dateString)
+    const date = new Date(dateString);
     return date.toLocaleString("pt-BR", {
       day: "2-digit",
       month: "2-digit",
       year: "numeric",
       hour: "2-digit",
       minute: "2-digit",
-    })
-  }
+    });
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
       case "open":
-        return "bg-blue-500"
+        return "bg-blue-500";
       case "pending":
-        return "bg-supportbox"
+        return "bg-supportbox";
       case "in-progress":
-        return "bg-purple-500"
+        return "bg-purple-500";
       case "resolved":
-        return "bg-green-500"
+        return "bg-green-500";
       default:
-        return "bg-gray-500"
+        return "bg-gray-500";
     }
-  }
+  };
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case "critical":
-        return "bg-red-500"
+        return "bg-red-500";
       case "high":
-        return "bg-orange-500"
+        return "bg-orange-500";
       case "medium":
-        return "bg-supportbox"
+        return "bg-supportbox";
       case "low":
-        return "bg-green-500"
+        return "bg-green-500";
       default:
-        return "bg-gray-500"
+        return "bg-gray-500";
     }
-  }
+  };
 
   const translateStatus = (status: string) => {
     switch (status) {
       case "open":
-        return "Aberto"
+        return "Aberto";
       case "pending":
-        return "Pendente"
+        return "Pendente";
       case "in-progress":
-        return "Em Andamento"
+        return "Em Andamento";
       case "resolved":
-        return "Resolvido"
+        return "Resolvido";
       default:
-        return status
+        return status;
     }
-  }
+  };
 
   const translatePriority = (priority: string) => {
     switch (priority) {
       case "critical":
-        return "Crítica"
+        return "Crítica";
       case "high":
-        return "Alta"
+        return "Alta";
       case "medium":
-        return "Média"
+        return "Média";
       case "low":
-        return "Baixa"
+        return "Baixa";
       default:
-        return priority
+        return priority;
     }
-  }
+  };
 
   if (isLoading) {
     return (
@@ -196,9 +210,16 @@ export default function TicketDetailsPage() {
         <header className="border-b border-supportbox/10 bg-white">
           <div className="container mx-auto py-4 px-4 flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <ServerLogo size={50} />
+              {/* Logo corrigido */}
+              <img
+                src="/IconeLogo.jpg"
+                alt="Logo SupportBox"
+                className="w-12 h-12 object-contain"
+              />
               <div>
-                <h1 className="text-2xl font-bold tracking-tight">SupportBox</h1>
+                <h1 className="text-2xl font-bold tracking-tight">
+                  SupportBox
+                </h1>
                 <p className="text-sm text-muted-foreground">Smart HelpDesk</p>
               </div>
             </div>
@@ -211,7 +232,7 @@ export default function TicketDetailsPage() {
           </div>
         </main>
       </div>
-    )
+    );
   }
 
   if (!ticket) {
@@ -220,9 +241,16 @@ export default function TicketDetailsPage() {
         <header className="border-b border-supportbox/10 bg-white">
           <div className="container mx-auto py-4 px-4 flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <ServerLogo size={50} />
+              {/* Logo corrigido */}
+              <img
+                src="/IconeLogo.jpg"
+                alt="Logo SupportBox"
+                className="w-12 h-12 object-contain"
+              />
               <div>
-                <h1 className="text-2xl font-bold tracking-tight">SupportBox</h1>
+                <h1 className="text-2xl font-bold tracking-tight">
+                  SupportBox
+                </h1>
                 <p className="text-sm text-muted-foreground">Smart HelpDesk</p>
               </div>
             </div>
@@ -232,14 +260,19 @@ export default function TicketDetailsPage() {
         <main className="flex-1 container mx-auto py-6 px-4">
           <div className="text-center py-12">
             <h2 className="text-2xl font-bold mb-2">Chamado não encontrado</h2>
-            <p className="text-muted-foreground mb-4">O chamado solicitado não existe ou foi removido.</p>
-            <Button onClick={() => router.push("/dashboard")} className="bg-supportbox hover:bg-supportbox-dark">
+            <p className="text-muted-foreground mb-4">
+              O chamado solicitado não existe ou foi removido.
+            </p>
+            <Button
+              onClick={() => router.push("/dashboard")}
+              className="bg-supportbox hover:bg-supportbox-dark"
+            >
               Voltar ao Dashboard
             </Button>
           </div>
         </main>
       </div>
-    )
+    );
   }
 
   return (
@@ -247,7 +280,12 @@ export default function TicketDetailsPage() {
       <header className="border-b border-supportbox/10 bg-white">
         <div className="container mx-auto py-4 px-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <ServerLogo size={50} />
+            {/* Logo corrigido */}
+            <img
+              src="/IconeLogo.jpg"
+              alt="Logo SupportBox"
+              className="w-12 h-12 object-contain"
+            />
             <div>
               <h1 className="text-2xl font-bold tracking-tight">SupportBox</h1>
               <p className="text-sm text-muted-foreground">Smart HelpDesk</p>
@@ -281,15 +319,21 @@ export default function TicketDetailsPage() {
                 <div>
                   <CardTitle className="text-2xl">{ticket.title}</CardTitle>
                   <CardDescription className="mt-2 text-base">
-                    {ticket.type === "incident" ? "Incidente" : "Solicitação"} {ticket.id} • {ticket.category}
+                    {ticket.type === "incident" ? "Incidente" : "Solicitação"}{" "}
+                    {ticket.id} • {ticket.category}
                   </CardDescription>
                 </div>
               </div>
               <div className="flex gap-2">
-                <Badge variant="secondary" className={`${getPriorityColor(ticket.priority)} text-white`}>
+                <Badge
+                  variant="secondary"
+                  className={`${getPriorityColor(ticket.priority)} text-white`}
+                >
                   {translatePriority(ticket.priority)}
                 </Badge>
-                <Badge className={`${getStatusColor(ticket.status)} text-white`}>
+                <Badge
+                  className={`${getStatusColor(ticket.status)} text-white`}
+                >
                   {translateStatus(ticket.status)}
                 </Badge>
               </div>
@@ -298,7 +342,9 @@ export default function TicketDetailsPage() {
           <CardContent className="space-y-6">
             <div>
               <h3 className="font-semibold mb-2">Descrição</h3>
-              <p className="text-muted-foreground leading-relaxed">{ticket.description}</p>
+              <p className="text-muted-foreground leading-relaxed">
+                {ticket.description}
+              </p>
             </div>
 
             <div className="flex items-center text-sm text-muted-foreground gap-6">
@@ -318,7 +364,10 @@ export default function TicketDetailsPage() {
               <h3 className="font-semibold mb-4">Histórico de Interações</h3>
               <div className="space-y-4">
                 {ticket.interactions.map((interaction: any) => (
-                  <div key={interaction.id} className="flex gap-3 p-4 bg-gray-50 rounded-lg">
+                  <div
+                    key={interaction.id}
+                    className="flex gap-3 p-4 bg-gray-50 rounded-lg"
+                  >
                     <div className="flex-shrink-0">
                       <div className="w-8 h-8 bg-supportbox/20 rounded-full flex items-center justify-center">
                         <User className="h-4 w-4 text-supportbox" />
@@ -326,10 +375,16 @@ export default function TicketDetailsPage() {
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
-                        <span className="font-medium text-sm">{interaction.agent}</span>
-                        <span className="text-xs text-muted-foreground">{formatDate(interaction.date)}</span>
+                        <span className="font-medium text-sm">
+                          {interaction.agent}
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          {formatDate(interaction.date)}
+                        </span>
                       </div>
-                      <p className="text-sm text-muted-foreground leading-relaxed">{interaction.message}</p>
+                      <p className="text-sm text-muted-foreground leading-relaxed">
+                        {interaction.message}
+                      </p>
                     </div>
                   </div>
                 ))}
@@ -375,9 +430,9 @@ export default function TicketDetailsPage() {
 
       <footer className="border-t border-supportbox/10 py-4 bg-gray-50">
         <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          © 2023 SupportBox. Todos os direitos reservados.
+          © 2026 SupportBox. Todos os direitos reservados.
         </div>
       </footer>
     </div>
-  )
+  );
 }
