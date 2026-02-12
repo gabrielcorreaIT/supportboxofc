@@ -5,7 +5,7 @@ import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "SupportBox",
+  title: "SupportBox - Solicitante",
   description:
     "Sistema interno de abertura e acompanhamento de chamados de TI.",
 };
