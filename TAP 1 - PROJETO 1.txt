@@ -1,0 +1,226 @@
+Nome do Projeto: SupportBox
+
+
+Ambiente Organizacional / Principais áreas funcionais envolvidas:
+
+- TI (Suporte a sistemas, Desenvolvimento/Negócio, Redes/Segurança): Construção técnica do sistema, desde o planejamento até a implementação e manutenção. Monitorar a performance e a disponibilidade do sistema, garantir que a infraestrutura necessária para o funcionamento do sistema (servidores, redes) esteja no lugar.
+
+- Área de Projetos: Coordenar e planejar o andamento do projeto, garantindo que os prazos sejam cumpridos e os recursos sejam adequados.
+
+- RH (Recursos Humanos): Gestão de tickets relacionados a recursos humanos, como por exemplo: Criação de Novos usuários de colaboradores recém admitidos, restrição de acesso em situações de desligamentos, férias, afastamento ou mudança setorial do colaborador, níveis de acesso de acordo com a hierarquia empresarial. (Colaborador, Coordenador, Gerente, Diretor).
+
+- Financeiro: Definir e integrar fluxos de processos financeiros que envolvem o HelpDesk (Ajustes e relatórios via base de dados, correção de incidentes e atendimento de requisições relacionadas ao sistema financeiro, monitoramento e controle dos custos do projeto.
+
+- Central de Atendimento / SAC: Definir fluxos de trabalho de tickets para questões relacionadas a atendimentos frequentes para os clientes. Indicar e auxiliar em integrações com outros sistemas de atendimento ao cliente (como chatbots, e-mail ou redes sociais da empresa).
+
+- Marketing: Contribuir na definição de como comunicar e promover o uso do sistema internamente. Participar da definição de mensagens automáticas e comunicações no sistema (como alertas ou notificações).
+
+- Jurídico: Garantir que o sistema esteja de acordo com as regulamentações e políticas da empresa, principalmente no que diz respeito à proteção de dados. Garantir que as integrações e as comunicações com clientes ou fornecedores estejam em conformidade com a legislação vigente.
+
+- Gestão Executiva (Diretores e Líderes da empresa): Fornecer uma visão estratégica para o projeto, garantindo que o HelpDesk esteja alinhado aos objetivos da empresa. Aprovação de orçamento e recursos e avaliar os resultados e a eficácia do sistema após a implementação.
+
+
+
+Objetivos finais (Justificativas):
+
+
+1. Eficiência no Atendimento e Resolução de Problemas
+Objetivo: Reduzir o tempo de resposta e o tempo de resolução dos tickets, garantindo que os problemas sejam solucionados rapidamente.
+Como medir: Tempo médio de atendimento(TMA), taxa de satisfação do usuário (SLA/Avaliação) e tempo de primeira resposta.
+
+2. Centralização e Organização das Solicitações
+Objetivo: Prover um único ponto de entrada para todas as solicitações e problemas, seja no setor de TI ou em outras áreas da empresa, centralizando o gerenciamento de tickets.
+Como medir: A quantidade de tickets recebidos por área/setor, a eficácia na categorização e priorização, e a redução de solicitações duplicadas.
+
+3. Melhoria na Comunicação Interna e com os Usuários
+Objetivo: Facilitar a comunicação entre os usuários finais (colaboradores) e a equipe de suporte, garantindo que as interações sejam claras e eficientes.
+Como medir: Qualidade do feedback dos usuários, tempo de resposta nas comunicações e acompanhamento de notificações e alertas em tempo real.
+
+4. Automatização, Integração e Redução de Processos Manuais
+Objetivo: Automatizar tarefas repetitivas, como escalonamento de tickets, respostas automáticas a solicitações comuns, ou notificações de status e integração a outros sistemas que a empresa utiliza (CRM).
+Como medir: Número de processos automatizados e a redução do esforço manual envolvido na resolução de tickets.
+
+5. Escalabilidade e Flexibilidade
+Objetivo: Garantir que o sistema de HelpDesk seja escalável, permitindo que se ajuste conforme a empresa cresce ou muda suas necessidades. O sistema também deve ser flexível para se adaptar às diferentes demandas de setores e tipos de solicitações.
+Como medir: Capacidade de integrar novos departamentos ou áreas de serviço sem problemas, facilidade em atualizar e expandir funcionalidades.
+
+6. Segurança e Conformidade com Regulamentações
+Objetivo: Proteger dados sensíveis, garantindo a segurança tanto dos dados dos usuários quanto dos processos internos de atendimento.
+Como medir: Níveis de conformidade com as leis de proteção de dados (como LGPD, GDPR), monitoramento de acessos e implementação de criptografia ou controles de segurança.
+
+7. Melhoria Contínua e Análise de Desempenho
+Objetivo: Fornecer métricas e relatórios detalhados que ajudem na análise de desempenho e na melhoria contínua dos processos de suporte.
+Como medir: Taxas de satisfação dos usuários, tempo de resolução, análise de problemas recorrentes, e a implementação de melhorias com base em feedbacks.
+
+8. Adoção e Engajamento dos Usuários
+Objetivo: Garantir que os usuários adotem o HelpDesk como a principal ferramenta para resolver problemas e realizar solicitações, criando um ambiente colaborativo entre os setores.
+Como medir: Taxa de adoção do sistema (número de usuários ativos), nível de engajamento e feedback positivo dos colaboradores.
+
+9. Capacitação e Suporte ao Usuário
+Objetivo: Oferecer recursos de autoatendimento, como FAQs, tutoriais ou base de conhecimento, para que os usuários possam resolver problemas simples por conta própria, reduzindo a carga de trabalho da equipe de suporte.
+Como medir: Redução no número de tickets para problemas simples, aumento no uso de recursos de autoatendimento e satisfação dos usuários com esses recursos.
+
+10. Controle e Gestão de Escalonamento de Tickets
+Objetivo: Implementar uma lógica clara para escalonamento de tickets, garantindo que os problemas mais críticos ou com maior prioridade sejam tratados primeiro, e que os tickets sejam direcionados para as equipes corretas de maneira eficiente.
+Como medir: Tempo de resposta em cada nível de prioridade e taxa de resolução dentro do prazo esperado.
+
+11. Satisfação do Usuário (Clientes e Colaboradores)
+Objetivo: Garantir que o HelpDesk forneça uma experiência satisfatória para os usuários internos (colaboradores).
+Como medir: Índices de satisfação do cliente/usuário, Net Promoter Score (NPS), e feedback qualitativo sobre a experiência de uso.
+
+12. Redução de Custos e Eficiência Operacional
+Objetivo: Garantir que o HelpDesk contribua para a redução de custos operacionais, ao otimizar processos, reduzir erros e aumentar a produtividade da equipe.
+Como medir: Economia de tempo e recursos, redução de problemas repetitivos ou não resolvidos, e eficiência na alocação de recursos da equipe.
+
+13. Acompanhamento de Tendências e Problemas Recorrentes
+Objetivo: Identificar padrões de problemas recorrentes para possibilitar ações corretivas ou preventivas, como melhorias nos processos ou treinamentos adicionais.
+Como medir: Análise de relatórios sobre os tipos de problemas mais frequentes e ações corretivas implementadas com base em tendências identificadas.
+
+
+
+
+Premissas / Hipóteses:
+
+Disponibilidade de Recursos Humanos:
+A equipe de TI, incluindo desenvolvedores, analistas e administradores, estará disponível para trabalhar no desenvolvimento, implementação e manutenção do sistema HelpDesk.
+
+Apoio da Alta Direção:
+O projeto contará com o suporte e a aprovação da alta gestão da organização, incluindo recursos financeiros e tecnológicos.
+
+Infraestrutura de TI Adequada:
+A infraestrutura de TI da empresa será capaz de suportar o sistema HelpDesk, incluindo servidores, rede e equipamentos necessários para garantir o desempenho e a disponibilidade do sistema.
+
+Integração com Outros Sistemas:
+O sistema HelpDesk será capaz de integrar-se com outros sistemas já existentes na organização, como CRM ou sistema de monitoramento de TI.
+
+Disponibilidade de Ferramentas e Tecnologias:
+As tecnologias necessárias para o desenvolvimento e implementação do sistema, como frameworks, plataformas de desenvolvimento, bancos de dados e ferramentas de automação, estarão disponíveis.
+
+Capacitação e Treinamento dos Usuários:
+Será possível treinar os usuários finais, como técnicos de suporte e demais envolvidos no processo de atendimento, para utilizarem o sistema HelpDesk de maneira eficiente.
+
+Necessidade de Personalização:
+O sistema precisará ser adaptado ou personalizado para atender às necessidades específicas da área de TI, como tipos de chamados, fluxos de trabalho e relatórios.
+
+Segurança da Informação:
+O sistema será desenvolvido de acordo com as melhores práticas de segurança da informação, garantindo a proteção dos dados sensíveis de chamados e dos usuários.
+
+Manutenção e Suporte Pós-Implementação:
+Haverá uma equipe dedicada para a manutenção contínua do sistema, incluindo atualizações, resolução de problemas e suporte técnico para os usuários.
+
+Conformidade com Normas e Regulamentações:
+O sistema HelpDesk deverá estar em conformidade com as normas e regulamentos de privacidade e segurança de dados aplicáveis (por exemplo, GDPR, LGPD, ISO 27001).
+
+Disponibilidade de Orçamento:
+O orçamento necessário para o desenvolvimento, implementação e operação do sistema HelpDesk será aprovado e mantido ao longo do ciclo de vida do projeto.
+
+Testes e Validação:
+Será possível realizar testes adequados antes da implementação, com a participação de usuários-chave e da equipe técnica, para validar que o sistema atende aos requisitos e funciona conforme esperado.
+
+
+
+
+Objetivos Imediatos (os Requisitos Técnicos e de Performance do Resultado
+do Projeto, tanto Produto ou Serviço):
+
+Requisitos Técnicos:
+
+a. Escalabilidade:
+O sistema deve ser capaz de suportar um aumento no número de usuários ou na quantidade de chamados sem perder desempenho.
+Deve ser escalável tanto em termos de capacidade de processamento quanto de armazenamento de dados.
+
+b. Integração com Sistemas Existentes:
+O sistema HelpDesk deve ser integrado a outros sistemas corporativos, como Active Directory para autenticação, Sistemas de Monitoramento de TI, CRM, ERP, entre outros, para facilitar a troca de informações.
+A integração com ferramentas de comunicação, como e-mail e chat, deve ser fácil e eficiente.
+
+c. Armazenamento de Dados:
+O sistema deve possuir um banco de dados eficiente para armazenar todas as informações de chamados, históricos de usuários, interações e soluções.
+O banco de dados deve permitir fácil recuperação de dados e backup regular para garantir a continuidade do serviço.
+
+d. Segurança:
+O sistema deve ter mecanismos robustos de autenticação e autorização para garantir que apenas usuários autorizados tenham acesso a informações sensíveis.
+As comunicações dentro do sistema devem ser criptografadas para proteger dados confidenciais.
+Deve estar em conformidade com as normas de segurança de TI (como LGPD, GDPR, ISO 27001) para garantir a proteção de dados pessoais e informações críticas.
+
+e. Compatibilidade Multiplataforma:
+O sistema deve ser acessível em várias plataformas (Windows, macOS, Linux) e dispositivos (desktop, mobile).
+A interface web e a versão mobile devem ser responsivas e funcionar sem falhas, independentemente do dispositivo utilizado.
+
+f. Customização e Flexibilidade:
+O sistema deve permitir a personalização de fluxos de trabalho, categorias de chamados, níveis de prioridade e tipos de suporte, adaptando-se às necessidades específicas da organização.
+A configuração do sistema deve ser simples, permitindo ajustes rápidos sem necessidade de intervenção técnica complexa.
+
+
+2. Requisitos de Performance:
+
+a. Tempo de Resposta Rápido:
+O sistema deve ser altamente responsivo, com tempo de resposta de menos de 2 segundos para a maioria das operações realizadas pelos usuários (criação de chamados, busca de informações, etc.).
+O carregamento das páginas e dashboards deve ser rápido para não prejudicar a experiência do usuário.
+
+b. Alta Disponibilidade e Confiabilidade:
+O sistema deve garantir alta disponibilidade, com tempo de inatividade mínimo (idealmente menos de 1% de downtime).
+O sistema deve ser capaz de operar 24/7, com uma arquitetura de redundância para garantir continuidade do serviço.
+
+c. Capacidade de Suporte a Múltiplos Usuários Simultâneos:
+O sistema deve ser capaz de lidar com um grande número de usuários simultâneos (técnicos de suporte, usuários finais) sem degradação de desempenho.
+A carga de solicitações de chamados e a interação simultânea entre usuários e agentes de suporte deve ser gerida eficientemente.
+
+d. Eficiência no Processamento de Chamados:
+O sistema deve ser otimizado para processar chamados de forma rápida, desde sua criação até a resolução, com indicadores claros de tempo de resposta e tempo de resolução.
+A prioridade dos chamados deve ser bem definida, e os técnicos devem ser capazes de gerenciar vários chamados simultaneamente sem sobrecarga.
+
+
+
+Tempo: 2 Anos (Dúvida perguntar sobre o tempo de conclusão e se o TCC será em grupo).
+
+
+Custos: Não tem.
+
+
+Pessoas: 5.
+
+
+Qualidade (padrões, normas): Privacidade e segurança: ISO/IEC 27001 (Gestão de Segurança da Informação), ISO/IEC 27018 (Proteção de Dados Pessoais em Nuvem), LGPD (Lei Geral de Proteção de Dados), GDPR (General Data Protection Regulation). Qualidade:ISO/IEC 25010 (Qualidade de Produto de Software), CMMI (Capability Maturity Model Integration), ITIL (Information Technology Infrastructure Library), SLA.
+
+
+Impactos no cliente
+Positivos: Melhoria no Atendimento e Suporte, Maior facilidade de Comunicação, Aumento da Satisfação do Cliente, Transparência e Controle, Rastreabilidade de demandas, Redução de Erros Humanos.
+Negativos: Curva de Aprendizado e Adoção, Problemas com a Personalização, Dependência Sistêmica e Resistência à Mudança/Implantação do sistema.
+
+
+Impactos na Organização responsável pelo projeto
+Positivo: Aumento da Eficiência Operacional, Melhoria na Gestão de Incidentes e Problemas, Redução de Custos Operacionais, Melhoria no Cumprimento de SLA, Maior Visibilidade e Controle para Gestores.
+Negativo: Custo Inicial e Complexidade de Implementação, Resistência à Mudança e Adoção do Sistema, Dependência Sistêmica e Riscos Técnicos e Possível Diminuição da Interação Humana.
+
+
+Impactos no Time de Projeto
+Positivo: Desenvolvimento de Novas Habilidades e Competências, Maior Colaboração e Trabalho em Equipe, Satisfação Profissional e Reconhecimento.
+Negativo: Sobrecarga de Trabalho e Pressão, Desafios de Comunicação e Alinhamento, Riscos de Falha na Implementação e Testes, Resistência Interna e Conflitos de Interesse.
+
+Geração de Conhecimento
+Domínio de Novas Tecnologias, Aprendizagem de documentação, Aprendizagem de novas técnicas para desenvolvimento.
+
+STAKEHOLDERS
+UNIGOIAS e Grupo.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
