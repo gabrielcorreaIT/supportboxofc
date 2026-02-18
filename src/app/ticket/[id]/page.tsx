@@ -147,15 +147,15 @@ export default function TicketDetailsPage() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "open":
-        return "bg-blue-500";
-      case "pending":
-        return "bg-supportbox";
+        return "bg-blue-500"; // 🔵 AZUL: Item novo, aguardando início. Cor neutra e convidativa.
       case "in-progress":
-        return "bg-purple-500";
+        return "bg-indigo-500"; // 🟣 ÍNDIGO/ROXO: Indica "ação e movimento". Muito usado em sistemas Kanban para tarefas ativas.
+      case "pending":
+        return "bg-supportbox"; // 🟠 LARANJA: "Atenção/Pausado". Mostra que o chamado está travado esperando alguém.
       case "resolved":
-        return "bg-green-500";
+        return "bg-emerald-500"; // 🟢 VERDE ESMERALDA: Sucesso! Chamado finalizado e resolvido.
       default:
-        return "bg-gray-500";
+        return "bg-slate-400"; // ⚪ CINZA: Cor de fallback (reserva) neutra.
     }
   };
 
