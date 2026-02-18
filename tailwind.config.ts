@@ -1,13 +1,16 @@
-import type { Config } from "tailwindcss"
+import type { Config } from "tailwindcss";
 
 const config = {
   darkMode: ["class"],
   content: [
-    "./pages/**/*.{ts,tsx}",
-    "./components/**/*.{ts,tsx}",
-    "./app/**/*.{ts,tsx}",
-    "./src/**/*.{ts,tsx}",
-    "*.{js,ts,jsx,tsx,mdx}",
+    // 🎯 O ajuste principal está aqui:
+    // Agora o Tailwind olha para tudo dentro de "src" (app, components, lib, features)
+    "./src/**/*.{ts,tsx,js,jsx,mdx}",
+
+    // (Opcional) Mantemos estes comentados por segurança caso você ainda tenha algo na raiz durante a migração.
+    // Depois pode apagar:
+    // "./app/**/*.{ts,tsx}",
+    // "./components/**/*.{ts,tsx}",
   ],
   prefix: "",
   theme: {
@@ -82,6 +85,6 @@ const config = {
     },
   },
   plugins: [require("tailwindcss-animate")],
-} satisfies Config
+} satisfies Config;
 
-export default config
+export default config;
