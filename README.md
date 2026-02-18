@@ -47,9 +47,7 @@ Abaixo está o mapeamento atualizado da arquitetura e dos arquivos do repositór
 │       └── page.tsx            # Página inicial do sistema
 │
 ├── components/                 # Componentes de interface reutilizáveis
-│
 ├── lib/                        # Funções utilitárias, helpers e configurações internas
-│
 ├── styles/                     # 🎨 Arquivos adicionais de estilo (caso utilizados fora do App Router)
 ├── supportboxdocumentos/       # 📁 Documentações, anexos ou arquivos auxiliares do projeto
 │
