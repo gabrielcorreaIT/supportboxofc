@@ -20,6 +20,8 @@ import { useState, useRef, useEffect } from "react";
 import { MessageSquare, X, Send, Bot, User } from "lucide-react";
 // Importação oficial do SDK do Google Generative AI para uso no front-end
 import { GoogleGenerativeAI } from "@google/generative-ai";
+// Importação do hook do Next.js para ler a URL atual
+import { usePathname } from "next/navigation";
 
 /**
  * Interface que define o formato exato de cada balão de mensagem no chat.
@@ -32,7 +34,12 @@ type Message = {
 
 export function AIAgent() {
   // =========================================================================
-  // 1. ESTADOS DO COMPONENTE (React State)
+  // 1. LÓGICA DE VISIBILIDADE (ROTEAMENTO)
+  // =========================================================================
+  const pathname = usePathname(); // Descobre qual é a URL atual do navegador
+
+  // =========================================================================
+  // 2. ESTADOS DO COMPONENTE (React State)
   // =========================================================================
 
   const [isOpen, setIsOpen] = useState(false); // Controla a visibilidade da janela do chat
@@ -49,7 +56,7 @@ export function AIAgent() {
   ]);
 
   // =========================================================================
-  // 2. CONTROLE DE INTERFACE (Auto-Scroll)
+  // 3. CONTROLE DE INTERFACE (Auto-Scroll)
   // =========================================================================
 
   // Referência invisível que fica no final da lista de mensagens para ancorar a rolagem
@@ -66,7 +73,7 @@ export function AIAgent() {
   }, [messages, isTyping]);
 
   // =========================================================================
-  // 3. INTEGRAÇÃO COM A INTELIGÊNCIA ARTIFICIAL (Gemini API)
+  // 4. INTEGRAÇÃO COM A INTELIGÊNCIA ARTIFICIAL (Gemini API)
   // =========================================================================
 
   /**
@@ -133,8 +140,13 @@ export function AIAgent() {
   };
 
   // =========================================================================
-  // 4. RENDERIZAÇÃO DA INTERFACE (Tailwind CSS + Lucide Icons)
+  // 5. TRAVA DE EXIBIÇÃO E RENDERIZAÇÃO DA INTERFACE
   // =========================================================================
+
+  // Se a pessoa estiver na tela de administração (Agente de TI), o robô não renderiza nada!
+  if (pathname?.includes("/agente")) {
+    return null;
+  }
 
   return (
     <>

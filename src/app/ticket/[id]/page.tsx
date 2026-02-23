@@ -1,3 +1,19 @@
+/**
+ * ============================================================================
+ * COMPONENTE: TicketDetailsPage (Detalhes do Chamado do Solicitante)
+ * PROJETO: SupportBox
+ * ============================================================================
+ * * DESCRIÇÃO:
+ * Esta página exibe os detalhes de um chamado específico selecionado pelo usuário.
+ * Ela mostra a descrição original, os metadados (status, prioridade) e a
+ * linha do tempo de interações (chat) entre o solicitante e o agente de TI.
+ * Permite também que o usuário adicione novos comentários.
+ * * * ARQUITETURA E ESTADO:
+ * - Utiliza `useParams` do Next.js para capturar o ID do chamado na URL (ex: /chamados/T-1001).
+ * - Utiliza estados de carregamento (Loading) para simular o tempo de resposta
+ * de uma API real.
+ */
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -24,7 +40,13 @@ import {
 } from "lucide-react";
 import { UserNav } from "@/components/user-nav";
 
-// Mock data para detalhes do chamado
+/**
+ * =========================================================================
+ * MOCK DATA: Bando de Dados Simulado
+ * =========================================================================
+ * Simula a resposta de uma API para detalhes de chamados.
+ * A chave do objeto é o ID do chamado, facilitando a busca.
+ */
 const mockTicketDetails = {
   "T-1001": {
     id: "T-1001",
@@ -91,16 +113,28 @@ const mockTicketDetails = {
 };
 
 export default function TicketDetailsPage() {
+  // =========================================================================
+  // 1. ESTADOS DO COMPONENTE E ROTEAMENTO
+  // =========================================================================
   const params = useParams();
   const router = useRouter();
+
+  // Captura o ID da URL. Ex: se for /chamado/T-1001, ticketId = "T-1001"
   const ticketId = params.id as string;
+
+  // Estados de Dados
   const [ticket, setTicket] = useState<any>(null);
   const [newComment, setNewComment] = useState("");
+
+  // Estados de Interface (Feedback Visual)
   const [isLoading, setIsLoading] = useState(true);
   const [isSendingComment, setIsSendingComment] = useState(false);
 
+  // =========================================================================
+  // 2. CICLO DE VIDA (BUSCA DOS DADOS)
+  // =========================================================================
   useEffect(() => {
-    // Simular carregamento dos dados
+    // Simula uma busca no banco de dados com delay de 1 segundo
     setTimeout(() => {
       const ticketData =
         mockTicketDetails[ticketId as keyof typeof mockTicketDetails];
@@ -109,16 +143,24 @@ export default function TicketDetailsPage() {
     }, 1000);
   }, [ticketId]);
 
+  // =========================================================================
+  // 3. FUNÇÕES DE AÇÃO (HANDLERS)
+  // =========================================================================
+
+  /**
+   * handleSendComment: Simula o envio de uma nova mensagem no chat do chamado.
+   * Adiciona o comentário na lista atual de interações do ticket.
+   */
   const handleSendComment = async () => {
     if (!newComment.trim()) return;
 
     setIsSendingComment(true);
 
-    // Simular envio do comentário
+    // Simula o tempo de rede para salvar a mensagem no banco
     setTimeout(() => {
       const newInteraction = {
         id: ticket.interactions.length + 1,
-        agent: "Gabriel Borges",
+        agent: "Gabriel Borges", // Usuário mockado logado
         date: new Date().toISOString(),
         message: newComment,
       };
@@ -128,11 +170,16 @@ export default function TicketDetailsPage() {
         interactions: [...ticket.interactions, newInteraction],
       });
 
-      setNewComment("");
+      setNewComment(""); // Limpa o campo de texto
       setIsSendingComment(false);
     }, 1500);
   };
 
+  // =========================================================================
+  // 4. FUNÇÕES AUXILIARES (FORMATADORES)
+  // =========================================================================
+
+  /** Formata a data do padrão ISO para o padrão brasileiro (DD/MM/AAAA HH:MM) */
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleString("pt-BR", {
@@ -144,21 +191,23 @@ export default function TicketDetailsPage() {
     });
   };
 
+  /** Retorna a classe de cor (Tailwind) com base no Status do chamado */
   const getStatusColor = (status: string) => {
     switch (status) {
       case "open":
-        return "bg-blue-500"; // 🔵 AZUL: Item novo, aguardando início. Cor neutra e convidativa.
+        return "bg-blue-500"; // 🔵 AZUL: Item novo, aguardando início.
       case "in-progress":
-        return "bg-indigo-500"; // 🟣 ÍNDIGO/ROXO: Indica "ação e movimento". Muito usado em sistemas Kanban para tarefas ativas.
+        return "bg-indigo-500"; // 🟣 ROXO: Em andamento.
       case "pending":
-        return "bg-supportbox"; // 🟠 LARANJA: "Atenção/Pausado". Mostra que o chamado está travado esperando alguém.
+        return "bg-supportbox"; // 🟠 LARANJA: Pendente/Pausado.
       case "resolved":
-        return "bg-emerald-500"; // 🟢 VERDE ESMERALDA: Sucesso! Chamado finalizado e resolvido.
+        return "bg-emerald-500"; // 🟢 VERDE: Resolvido.
       default:
-        return "bg-slate-400"; // ⚪ CINZA: Cor de fallback (reserva) neutra.
+        return "bg-slate-400"; // ⚪ CINZA: Fallback
     }
   };
 
+  /** Retorna a classe de cor (Tailwind) com base na Prioridade do chamado */
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case "critical":
@@ -174,6 +223,7 @@ export default function TicketDetailsPage() {
     }
   };
 
+  /** Traduz o termo técnico do Status para o usuário final */
   const translateStatus = (status: string) => {
     switch (status) {
       case "open":
@@ -189,6 +239,7 @@ export default function TicketDetailsPage() {
     }
   };
 
+  /** Traduz o termo técnico da Prioridade para o usuário final */
   const translatePriority = (priority: string) => {
     switch (priority) {
       case "critical":
@@ -204,13 +255,18 @@ export default function TicketDetailsPage() {
     }
   };
 
+  // =========================================================================
+  // 5. RENDERIZAÇÃO DA INTERFACE (JSX)
+  // =========================================================================
+
+  // --- ESTADO 1: TELA DE CARREGAMENTO (LOADING) ---
   if (isLoading) {
     return (
       <div className="min-h-screen flex flex-col">
+        {/* Header estático durante o loading */}
         <header className="border-b border-supportbox/10 bg-white">
           <div className="container mx-auto py-4 px-4 flex items-center justify-between">
             <div className="flex items-center gap-4">
-              {/* Logo corrigido */}
               <img
                 src="/IconeLogo.jpg"
                 alt="Logo SupportBox"
@@ -226,6 +282,7 @@ export default function TicketDetailsPage() {
             <UserNav />
           </div>
         </header>
+        {/* Spinner centralizado */}
         <main className="flex-1 container mx-auto py-6 px-4">
           <div className="flex items-center justify-center h-64">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-supportbox"></div>
@@ -235,13 +292,14 @@ export default function TicketDetailsPage() {
     );
   }
 
+  // --- ESTADO 2: TELA DE ERRO (CHAMADO NÃO ENCONTRADO - 404) ---
   if (!ticket) {
     return (
       <div className="min-h-screen flex flex-col">
+        {/* Header estático do erro */}
         <header className="border-b border-supportbox/10 bg-white">
           <div className="container mx-auto py-4 px-4 flex items-center justify-between">
             <div className="flex items-center gap-4">
-              {/* Logo corrigido */}
               <img
                 src="/IconeLogo.jpg"
                 alt="Logo SupportBox"
@@ -257,6 +315,7 @@ export default function TicketDetailsPage() {
             <UserNav />
           </div>
         </header>
+        {/* Mensagem de Erro e Botão de Voltar */}
         <main className="flex-1 container mx-auto py-6 px-4">
           <div className="text-center py-12">
             <h2 className="text-2xl font-bold mb-2">Chamado não encontrado</h2>
@@ -275,12 +334,13 @@ export default function TicketDetailsPage() {
     );
   }
 
+  // --- ESTADO 3: TELA PRINCIPAL DO CHAMADO (SUCESSO) ---
   return (
     <div className="min-h-screen flex flex-col">
+      {/* --- CABEÇALHO GLOBAL --- */}
       <header className="border-b border-supportbox/10 bg-white">
         <div className="container mx-auto py-4 px-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            {/* Logo corrigido */}
             <img
               src="/IconeLogo.jpg"
               alt="Logo SupportBox"
@@ -295,22 +355,26 @@ export default function TicketDetailsPage() {
         </div>
       </header>
 
+      {/* --- CONTEÚDO DA PÁGINA --- */}
       <main className="flex-1 container mx-auto py-6 px-4 space-y-6">
+        {/* Botão de Voltar */}
         <div className="flex items-center gap-4">
           <Button
             variant="ghost"
             onClick={() => router.push("/dashboard")}
             className="text-supportbox hover:text-supportbox-dark hover:bg-supportbox/10"
           >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Voltar
+            <ArrowLeft className="h-4 w-4 mr-2" /> Voltar
           </Button>
         </div>
 
+        {/* --- CARTÃO DE DETALHES DO CHAMADO --- */}
         <Card className="border-supportbox/20">
+          {/* Cabeçalho do Cartão (Título, Ícones e Badges de Status) */}
           <CardHeader>
             <div className="flex justify-between items-start">
               <div className="flex gap-3 items-start">
+                {/* Ícone condicional baseado no tipo do chamado */}
                 {ticket.type === "incident" ? (
                   <AlertTriangle className="h-6 w-6 text-red-500 mt-1" />
                 ) : (
@@ -339,7 +403,10 @@ export default function TicketDetailsPage() {
               </div>
             </div>
           </CardHeader>
+
+          {/* Corpo do Cartão */}
           <CardContent className="space-y-6">
+            {/* Descrição Original do Problema */}
             <div>
               <h3 className="font-semibold mb-2">Descrição</h3>
               <p className="text-muted-foreground leading-relaxed">
@@ -347,6 +414,7 @@ export default function TicketDetailsPage() {
               </p>
             </div>
 
+            {/* Metadados (Data de criação e Número de Interações) */}
             <div className="flex items-center text-sm text-muted-foreground gap-6">
               <div className="flex items-center">
                 <Clock className="mr-2 h-4 w-4" />
@@ -360,6 +428,7 @@ export default function TicketDetailsPage() {
 
             <Separator />
 
+            {/* --- LISTA DE INTERAÇÕES (TIMELINE/CHAT) --- */}
             <div>
               <h3 className="font-semibold mb-4">Histórico de Interações</h3>
               <div className="space-y-4">
@@ -368,11 +437,13 @@ export default function TicketDetailsPage() {
                     key={interaction.id}
                     className="flex gap-3 p-4 bg-gray-50 rounded-lg"
                   >
+                    {/* Avatar Padrão */}
                     <div className="flex-shrink-0">
                       <div className="w-8 h-8 bg-supportbox/20 rounded-full flex items-center justify-center">
                         <User className="h-4 w-4 text-supportbox" />
                       </div>
                     </div>
+                    {/* Mensagem e Dados do Autor */}
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
                         <span className="font-medium text-sm">
@@ -393,6 +464,7 @@ export default function TicketDetailsPage() {
 
             <Separator />
 
+            {/* --- CAIXA DE NOVO COMENTÁRIO --- */}
             <div>
               <h3 className="font-semibold mb-3">Adicionar Comentário</h3>
               <div className="space-y-3">
@@ -406,6 +478,7 @@ export default function TicketDetailsPage() {
                 <div className="flex justify-end">
                   <Button
                     onClick={handleSendComment}
+                    // Desabilita se o campo estiver vazio ou se estiver enviando
                     disabled={!newComment.trim() || isSendingComment}
                     className="bg-supportbox hover:bg-supportbox-dark"
                   >
@@ -428,6 +501,7 @@ export default function TicketDetailsPage() {
         </Card>
       </main>
 
+      {/* --- RODAPÉ GLOBAL --- */}
       <footer className="border-t border-supportbox/10 py-4 bg-gray-50">
         <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
           © 2026 SupportBox. Todos os direitos reservados.
