@@ -60,8 +60,8 @@ export default function LoginPage() {
   const [recoveryEmail, setRecoveryEmail] = useState("");
 
   // CREDENCIAIS DE TESTE (Mock para apresentação)
-  const validUsername = "gabrielbor28@hotmail.com";
-  const validPassword = "Uni@2025";
+  const validUsername = "solicitante@hotmail.com";
+  const validPassword = "unigoias123";
 
   // =========================================================================
   // 2. FUNÇÕES DE AÇÃO (HANDLERS)
