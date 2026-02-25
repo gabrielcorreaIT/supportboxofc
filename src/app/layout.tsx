@@ -17,7 +17,7 @@ import { GeistSans } from "geist/font/sans"; // Fonte principal do projeto (sem 
 import { GeistMono } from "geist/font/mono"; // Fonte monoespaçada (ideal para códigos ou números de protocolo)
 import { Analytics } from "@vercel/analytics/next"; // Ferramenta da Vercel para medir acessos e tráfego
 import "./globals.css"; // Importação do arquivo que carrega o Tailwind e as cores base
-import { AIAgent } from "@/components/AIAgent"; // O nosso assistente virtual inteligente
+import { ConditionalAIAgent } from "@/components/conditional-ai-agent"; // O nosso assistente virtual inteligente
 
 // =========================================================================
 // 2. METADADOS (SEO e Configurações do Navegador)
@@ -62,7 +62,7 @@ export default function RootLayout({
         <Analytics />
 
         {/* Nosso Agente de IA flutuante. Como está no Layout, ele vai acompanhar o usuário em qualquer página que ele navegar! */}
-        <AIAgent />
+        <ConditionalAIAgent />
       </body>
     </html>
   );

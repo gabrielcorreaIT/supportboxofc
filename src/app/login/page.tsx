@@ -12,234 +12,176 @@
  * - NOTA: A autenticação atual utiliza dados "Mock" (simulados) para fins de
  * apresentação. Em produção, a função `handleLogin` deve ser conectada
  * ao backend real.
+ * ============================================================================
+ * * UI/UX Premium:
+ * - Design minimalista com foco na conversão (acesso rápido).
+ * - Efeitos de profundidade com sombras orgânicas (shadow-2xl).
+ * - Inputs modernos com ícones integrados (Lucide React) e focus rings.
+ * - Micro-interações nos botões (hover:scale, transition-all).
+ * ============================================================================
  */
 
 "use client";
 
-import type React from "react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-} from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import { Mail, CheckCircle } from "lucide-react";
+import { Mail, Lock, ArrowRight, ShieldCheck } from "lucide-react";
+// Se você estiver usando o botão do shadcn/ui, descomente a linha abaixo e remova o componente Button no final do arquivo.
+// import { Button } from "@/components/ui/button";
 
-export default function LoginPage() {
-  // =========================================================================
-  // 1. ESTADOS DO COMPONENTE E ROTEAMENTO
-  // =========================================================================
+export default function LoginSolicitantePage() {
   const router = useRouter();
-
-  // Controle dos campos do formulário
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [rememberMe, setRememberMe] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Controle de interface (Feedback visual)
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
-
-  // Controle do Modal de Esqueci a Senha
-  const [forgotPasswordOpen, setForgotPasswordOpen] = useState(false);
-  const [recoveryEmail, setRecoveryEmail] = useState("");
-
-  // CREDENCIAIS DE TESTE (Mock para apresentação)
-  const validUsername = "solicitante@hotmail.com";
-  const validPassword = "unigoias123";
-
-  // =========================================================================
-  // 2. FUNÇÕES DE AÇÃO (HANDLERS)
-  // =========================================================================
-
-  /**
-   * handleLogin: Executada ao submeter o formulário.
-   * Faz a validação dos campos, simula um tempo de carregamento de rede
-   * e valida as credenciais contra os dados de teste.
-   */
+  // Simulação de Login para a Apresentação
   const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault(); // Impede o recarregamento padrão da página
-    setError(""); // Limpa erros anteriores
-
-    // Validação inicial
-    if (!username || !password) {
-      setError("Por favor, preencha todos os campos.");
-      return;
-    }
-
-    setIsLoading(true); // Ativa o estado de carregamento do botão
-
-    // Simulando uma chamada assíncrona de API (delay de 1.5s)
-    setTimeout(() => {
-      setIsLoading(false);
-
-      // Verificação das credenciais mockadas
-      if (username === validUsername && password === validPassword) {
-        router.push("/dashboard"); // Redireciona para o painel do solicitante
-      } else {
-        setError("Usuário ou senha incorretos. Tente novamente.");
-      }
-    }, 1500);
-  };
-
-  /**
-   * handleForgotPassword: Executada ao clicar em "Esqueceu a senha?".
-   * Captura o e-mail digitado (ou o e-mail válido de teste) e abre o Modal de aviso.
-   */
-  const handleForgotPassword = (e: React.MouseEvent) => {
     e.preventDefault();
-    e.stopPropagation(); // Impede que o clique dispare o envio do formulário sem querer
+    setIsSubmitting(true);
 
-    setRecoveryEmail(username || validUsername);
-    setForgotPasswordOpen(true); // Abre a janela de diálogo (Dialog)
+    // Simula um delay de rede para mostrar o efeito de "Entrando..." no botão
+    setTimeout(() => {
+      // Salva a sessão e redireciona para o Dashboard do Solicitante
+      localStorage.setItem("supportbox_user", "true");
+      router.push("/dashboard");
+    }, 800);
   };
 
-  // =========================================================================
-  // 3. RENDERIZAÇÃO DA INTERFACE (JSX)
-  // =========================================================================
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
-      {/* --- CARTÃO PRINCIPAL DE LOGIN --- */}
-      <Card className="w-full max-w-md border-supportbox/20">
-        {/* Cabeçalho com Logo e Título */}
-        <CardHeader className="space-y-4 items-center text-center">
-          <div className="flex flex-col items-center space-y-4">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 relative overflow-hidden p-4">
+      {/* --- BACKGROUND ESTRUTURAL --- */}
+      <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-supportbox/10 rounded-full blur-3xl pointer-events-none"></div>
+      <div className="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-supportbox/10 rounded-full blur-3xl pointer-events-none"></div>
+
+      {/* --- CARTÃO DE LOGIN --- */}
+      <div className="relative w-full max-w-[420px] bg-white rounded-[2rem] shadow-2xl shadow-supportbox/5 border border-slate-100 p-8 sm:p-10 z-10 animate-in fade-in zoom-in-95 duration-500">
+        {/* Cabeçalho do Login (Logo e Título) */}
+        <div className="flex flex-col items-center text-center mb-10">
+          {/* --- LOGO AUMENTADO AQUI --- */}
+          {/* Mudamos de w-16/h-16 para w-24/h-24 e adicionamos p-2 */}
+          <div className="w-24 h-24 bg-white rounded-2xl shadow-md border border-slate-100 flex items-center justify-center mb-6 transform transition-transform hover:scale-105 p-2">
             <img
               src="/IconeLogo.jpg"
-              alt="Logo SupportBox"
-              className="w-32 h-32 object-contain"
+              alt="SupportBox Logo"
+              // A imagem agora ocupa todo o espaço disponível no container maior
+              className="w-full h-full object-contain"
             />
-            <h1 className="text-3xl font-bold text-gray-800 tracking-tight">
-              SupportBox
-            </h1>
-            <CardDescription>Sistema de Suporte de TI</CardDescription>
           </div>
-        </CardHeader>
 
-        {/* Corpo do Cartão: Formulário */}
-        <CardContent>
-          <form onSubmit={handleLogin} className="space-y-4">
-            {/* Mensagem de Erro Condicional */}
-            {error && (
-              <div className="bg-red-50 text-red-500 p-3 rounded-md text-sm">
-                {error}
-              </div>
-            )}
+          <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">
+            SupportBox
+          </h1>
+          <p className="text-sm font-medium text-slate-500 mt-2 flex items-center gap-1 justify-center">
+            <ShieldCheck className="w-4 h-4 text-supportbox" />
+            Portal Seguro do Colaborador
+          </p>
+        </div>
 
-            {/* Campo: E-mail */}
-            <div className="space-y-2">
-              <Label htmlFor="username">E-mail</Label>
-              <Input
-                id="username"
+        {/* Formulário */}
+        <form onSubmit={handleLogin} className="space-y-5">
+          {/* Campo de E-mail */}
+          <div className="space-y-1.5">
+            <label className="text-sm font-semibold text-slate-700 pl-1">
+              E-mail corporativo
+            </label>
+            <div className="relative group">
+              <Mail className="w-5 h-5 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2 group-focus-within:text-supportbox transition-colors" />
+              <input
                 type="email"
-                placeholder="Seu e-mail"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                className="border-supportbox/20 focus:ring-supportbox/30"
-                disabled={isLoading}
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="nome@empresa.com.br"
+                className="w-full h-12 pl-12 pr-4 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-supportbox/20 focus:border-supportbox transition-all"
               />
             </div>
+          </div>
 
-            {/* Campo: Senha e Link de Recuperação */}
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="password">Senha</Label>
-                <span
-                  onClick={handleForgotPassword}
-                  className="text-xs text-supportbox hover:underline cursor-pointer"
-                >
-                  Esqueceu a senha?
-                </span>
-              </div>
-              <Input
-                id="password"
+          {/* Campo de Senha */}
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between pl-1">
+              <label className="text-sm font-semibold text-slate-700">
+                Senha
+              </label>
+              <a
+                href="#"
+                className="text-xs font-semibold text-supportbox hover:underline hover:text-supportbox-dark transition-colors"
+              >
+                Esqueceu a senha?
+              </a>
+            </div>
+            <div className="relative group">
+              <Lock className="w-5 h-5 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2 group-focus-within:text-supportbox transition-colors" />
+              <input
                 type="password"
-                placeholder="Sua senha"
+                required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="border-supportbox/20 focus:ring-supportbox/30"
-                disabled={isLoading}
+                placeholder="••••••••"
+                className="w-full h-12 pl-12 pr-4 bg-slate-50 border border-slate-200 rounded-xl text-sm tracking-widest focus:bg-white focus:outline-none focus:ring-2 focus:ring-supportbox/20 focus:border-supportbox transition-all"
               />
             </div>
+          </div>
 
-            {/* Checkbox: Lembrar de mim */}
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="remember"
-                checked={rememberMe}
-                onCheckedChange={(checked) => setRememberMe(checked as boolean)}
-                disabled={isLoading}
-              />
-              <Label htmlFor="remember" className="text-sm">
-                Lembrar de mim
-              </Label>
-            </div>
-
-            {/* Botão de Submissão (Altera texto se estiver carregando) */}
-            <Button
-              type="submit"
-              className="w-full bg-supportbox hover:bg-supportbox-dark"
-              disabled={isLoading}
+          {/* Lembrar de mim */}
+          <div className="flex items-center pt-2 pl-1">
+            <input
+              id="remember"
+              type="checkbox"
+              className="w-4 h-4 text-supportbox bg-slate-100 border-slate-300 rounded focus:ring-supportbox cursor-pointer"
+            />
+            <label
+              htmlFor="remember"
+              className="ml-2 text-sm text-slate-600 font-medium cursor-pointer select-none"
             >
-              {isLoading ? "Entrando..." : "Entrar"}
-            </Button>
-          </form>
-        </CardContent>
+              Lembrar de mim
+            </label>
+          </div>
 
-        {/* Rodapé do Cartão */}
-        <CardFooter className="flex justify-center border-t border-supportbox/10 pt-4">
-          <p className="text-xs text-muted-foreground">
-            © 2026 SupportBox. Todos os direitos reservados.
-          </p>
-        </CardFooter>
-      </Card>
+          {/* Botão de Entrar */}
+          <Button
+            type="submit"
+            disabled={isSubmitting || !email || !password}
+            className="w-full h-12 rounded-xl bg-supportbox hover:bg-supportbox-dark text-white font-bold text-base shadow-lg shadow-supportbox/25 transition-all hover:-translate-y-0.5 mt-4"
+          >
+            {isSubmitting ? (
+              <span className="flex items-center justify-center gap-2">
+                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                Entrando...
+              </span>
+            ) : (
+              <span className="flex items-center justify-center gap-2">
+                Acessar Portal <ArrowRight className="w-5 h-5" />
+              </span>
+            )}
+          </Button>
+        </form>
+      </div>
 
-      {/* --- MODAL FLUTUANTE DE RECUPERAÇÃO DE SENHA (DIALOG) --- */}
-      <Dialog open={forgotPasswordOpen} onOpenChange={setForgotPasswordOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-supportbox/20 mb-4">
-              <CheckCircle className="h-6 w-6 text-supportbox" />
-            </div>
-            <DialogTitle className="text-center">
-              Instruções Enviadas
-            </DialogTitle>
-            <DialogDescription className="text-center pt-2">
-              As instruções para redefinição de senha foram enviadas para o
-              e-mail cadastrado:
-              <div className="flex items-center justify-center gap-1 mt-2 font-medium">
-                <Mail className="h-4 w-4" />
-                <span>{recoveryEmail}</span>
-              </div>
-            </DialogDescription>
-          </DialogHeader>
-
-          <DialogFooter className="sm:justify-center">
-            <Button
-              variant="default"
-              onClick={() => setForgotPasswordOpen(false)}
-              className="bg-supportbox hover:bg-supportbox-dark"
-            >
-              Entendi
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {/* Footer Minimalista */}
+      <div className="mt-8 text-center text-xs font-medium text-slate-400 relative z-10">
+        <p>© 2026 SupportBox. Todos os direitos reservados.</p>
+        <p className="mt-1 opacity-70">Plataforma de TI Inteligente</p>
+      </div>
     </div>
+  );
+}
+
+// =========================================================================
+// COMPONENTE BUTTON LOCAL (Se não estiver usando shadcn/ui)
+// =========================================================================
+function Button({
+  children,
+  className,
+  ...props
+}: React.ButtonHTMLAttributes<HTMLButtonElement>) {
+  return (
+    <button
+      className={`flex items-center justify-center disabled:opacity-70 disabled:cursor-not-allowed ${className}`}
+      {...props}
+    >
+      {children}
+    </button>
   );
 }
