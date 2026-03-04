@@ -19,6 +19,7 @@
  * resolver o problema sozinho através da dica da IA.
  * * 🛠️ DEPENDÊNCIAS PRINCIPAIS:
  * - @google/generative-ai: Integração com a LLM (Gemini 2.5 Flash).
+ * * - @/lib/db: Camada de acesso ao banco de dados Supabase (PostgreSQL).
  * - react-markdown: Converte a resposta crua da IA em HTML formatado e legível.
  * - canvas-confetti: Efeito visual para gamificar a resolução de problemas (Step 4).
  * - tailwindcss & lucide-react: Estilização premium (Glassmorphism) e ícones da interface.
@@ -26,7 +27,7 @@
  */
 
 "use client";
-
+import { db } from "@/lib/db"; // Importação do nosso cérebro de banco de dados conectado à nuvem
 import { useState } from "react";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import ReactMarkdown from "react-markdown";
@@ -63,6 +64,7 @@ export default function TicketForm() {
   const [problemDescription, setProblemDescription] = useState("");
   const [aiSuggestion, setAiSuggestion] = useState("");
   const [category, setCategory] = useState("");
+  const [protocolNumber, setProtocolNumber] = useState(""); // Novo estado para guardar o ID gerado
 
   // Estados de loading e transição de telas
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -76,6 +78,7 @@ export default function TicketForm() {
     setProblemDescription("");
     setCategory("");
     setAiSuggestion("");
+    setProtocolNumber("");
   };
 
   // Envia a descrição do problema para o Google Gemini analisar
@@ -136,15 +139,27 @@ export default function TicketForm() {
     setStep(4);
   };
 
-  // Envia o chamado formal para a equipe de TI (Simulação)
-  const handleSubmitTicket = (e: React.FormEvent) => {
+  /**
+   * ATUALIZADO: Submete o chamado REAL para o banco de dados (Supabase)
+   */
+  const handleSubmitTicket = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    setTimeout(() => {
+    try {
+      // O 'await' faz o sistema esperar a confirmação de gravação lá na nuvem
+      const idGerado = await db.createTicket(problemDescription, category);
+
+      // Salva o ID (Protocolo) retornado pelo banco para mostrar na tela de sucesso
+      setProtocolNumber(idGerado);
+
       setIsTicketCreated(true);
+    } catch (error) {
+      console.error("Erro ao salvar chamado na nuvem:", error);
+      alert("Houve um problema ao conectar com o servidor. Tente novamente.");
+    } finally {
       setIsSubmitting(false);
-    }, 1500);
+    }
   };
 
   // =========================================================================
@@ -326,7 +341,8 @@ export default function TicketForm() {
                   Chamado registrado!
                 </h2>
                 <p className="text-lg text-gray-500 max-w-md mx-auto">
-                  Sua solicitação já está no painel da nossa equipe técnica.
+                  Sua solicitação já está no banco de dados e disponível para
+                  nossa equipe.
                 </p>
 
                 <div className="inline-block bg-gray-50 border border-gray-200 rounded-2xl px-6 py-4 mt-6 shadow-inner">
@@ -334,7 +350,8 @@ export default function TicketForm() {
                     Protocolo de Atendimento
                   </p>
                   <p className="text-2xl font-mono font-bold text-supportbox">
-                    #REQ-{Math.floor(Math.random() * 10000)}
+                    {/* Exibe o protocolo REAL gerado lá no db.ts (ex: CH-5432) */}
+                    {protocolNumber || "#REQ-PENDENTE"}
                   </p>
                 </div>
               </div>
@@ -397,7 +414,7 @@ export default function TicketForm() {
                             Acesso (Senhas, Permissões, E-mail)
                           </option>
                           <option value="rede">
-                            Rede / Internet (Conexão, Wi-Fi)
+                            Redede / Internet (Conexão, Wi-Fi)
                           </option>
                         </select>
                       </div>
@@ -417,7 +434,7 @@ export default function TicketForm() {
                         className="w-2/3 h-14 rounded-xl bg-supportbox hover:bg-supportbox-dark text-white text-base shadow-md hover:shadow-lg transition-all hover:-translate-y-0.5"
                       >
                         {isSubmitting
-                          ? "Registrando na Fila..."
+                          ? "Salvando na Nuvem..."
                           : "Enviar para a TI"}
                         {!isSubmitting && <Send className="w-5 h-5 ml-2" />}
                       </Button>
