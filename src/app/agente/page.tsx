@@ -1,17 +1,13 @@
 /**
  * ============================================================================
- * COMPONENTE: AgenteDashboard (Painel do Setor de TI)
- * PROJETO: SupportBox
+ * 📦 COMPONENTE: AgenteDashboard (Painel do Setor de TI)
+ * 💻 PROJETO: SupportBox
  * ============================================================================
- * * DESCRIÇÃO:
+ * 📝 DESCRIÇÃO:
  * Tela principal de uso exclusivo dos técnicos de TI (Agentes).
  * Exibe a fila de chamados em tempo real, conectada ao Supabase.
- * * * ARQUITETURA DE DADOS (Supabase Integration):
- * - Polling Inteligente: Utiliza um `setInterval` dentro do `useEffect` para
- * buscar novos chamados na nuvem a cada 3 segundos, criando um efeito de
- * "Tempo Real" sem a necessidade de WebSockets complexos.
- * - Atualização Otimista: Ao resolver um chamado, a interface é atualizada
- * imediatamente no estado local, enquanto o Supabase processa no background.
+ * Agora utiliza o `TicketAgentModal` para exibir detalhes e interagir
+ * (chat/resolução) com os chamados de forma modular e limpa.
  * ============================================================================
  */
 
@@ -19,7 +15,8 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { db, Ticket } from "@/lib/db"; // Importando nosso motor do banco de dados e a tipagem
+import { db, Ticket } from "@/lib/db";
+import { TicketAgentModal } from "@/components/ticket-agent-modal"; // <-- NOSSO NOVO MODAL AQUI!
 import {
   AlertCircle,
   Clock,
@@ -29,8 +26,6 @@ import {
   TicketIcon,
   User,
   LogOut,
-  X,
-  CheckCircle,
   LayoutDashboard,
   Settings,
   Users,
@@ -42,31 +37,26 @@ export default function AgenteDashboard() {
   // 1. ESTADOS DO COMPONENTE
   // =========================================================================
   const router = useRouter();
-
-  // A lista de chamados agora começa vazia e será preenchida pela nuvem
   const [tickets, setTickets] = useState<Ticket[]>([]);
-
-  // Controla qual chamado foi clicado para abrir no Modal
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
 
   // =========================================================================
   // 2. LÓGICA DE SEGURANÇA E CONEXÃO COM A NUVEM (SUPABASE)
   // =========================================================================
+
+  // Função extraída para fora do useEffect para que o Modal também possa chamá-la
+  const fetchTickets = async () => {
+    const data = await db.getTickets();
+    setTickets(data);
+  };
+
   useEffect(() => {
-    // Verifica se a chave de autenticação existe no navegador do usuário
     const isAuth = localStorage.getItem("supportbox_agent_auth");
     if (!isAuth) {
       router.push("/loginagente");
       return;
     }
 
-    // Função interna que busca os dados no Supabase
-    const fetchTickets = async () => {
-      const data = await db.getTickets();
-      setTickets(data);
-    };
-
-    // 1ª Chamada: Carrega os tickets assim que a tela abre
     fetchTickets();
 
     // RADAR (Polling): A cada 3 segundos, busca tickets novos silenciosamente
@@ -74,7 +64,6 @@ export default function AgenteDashboard() {
       fetchTickets();
     }, 3000);
 
-    // Limpeza: desliga o radar se o agente fechar a tela
     return () => clearInterval(interval);
   }, [router]);
 
@@ -87,23 +76,8 @@ export default function AgenteDashboard() {
     router.push("/loginagente");
   };
 
-  /**
-   * ATUALIZADO: Altera o status do chamado no Supabase para "Concluído"
-   */
-  const handleResolveTicket = async () => {
-    if (!selectedTicket) return;
-
-    // 1. Manda a ordem para a nuvem (Supabase) atualizar o banco real
-    await db.updateTicketStatus(selectedTicket.id, "Concluído");
-
-    // 2. Atualiza a tela do agente imediatamente (Atualização Otimista)
-    const updatedTickets = tickets.map((t) =>
-      t.id === selectedTicket.id ? { ...t, status: "Concluído" } : t,
-    );
-
-    setTickets(updatedTickets);
-    setSelectedTicket(null); // Fecha o Modal
-  };
+  // NOTA: A antiga função 'handleResolveTicket' foi removida daqui,
+  // pois agora toda a lógica de resolução e comentários vive dentro do TicketAgentModal!
 
   // =========================================================================
   // 4. RENDERIZAÇÃO DA INTERFACE (JSX + Tailwind)
@@ -195,8 +169,11 @@ export default function AgenteDashboard() {
               <p className="text-sm text-slate-500 font-medium">Aguardando</p>
               <p className="text-3xl font-bold text-slate-800">
                 {
-                  tickets.filter((t) => t.status === "Aguardando Atendimento")
-                    .length
+                  tickets.filter(
+                    (t) =>
+                      t.status === "Aguardando Atendimento" ||
+                      t.status === "Pendente",
+                  ).length
                 }
               </p>
             </div>
@@ -219,7 +196,11 @@ export default function AgenteDashboard() {
             <div>
               <p className="text-sm text-slate-500 font-medium">Urgentes</p>
               <p className="text-3xl font-bold text-slate-800">
-                {tickets.filter((t) => t.priority === "Urgente").length}
+                {
+                  tickets.filter(
+                    (t) => t.priority === "Urgente" || t.priority === "Crítica",
+                  ).length
+                }
               </p>
             </div>
             <div className="absolute top-0 right-0 w-2 h-full bg-red-500"></div>
@@ -293,9 +274,9 @@ export default function AgenteDashboard() {
                       <td className="py-4 px-6">
                         <span
                           className={`px-3 py-1 rounded-full text-xs font-medium border
-                          ${ticket.status === "Aguardando Atendimento" ? "bg-yellow-50 text-yellow-700 border-yellow-200" : ""}
+                          ${ticket.status === "Aguardando Atendimento" || ticket.status === "Pendente" ? "bg-yellow-50 text-yellow-700 border-yellow-200" : ""}
                           ${ticket.status === "Em Andamento" ? "bg-supportbox/10 text-supportbox border-supportbox/20" : ""}
-                          ${ticket.status === "Concluído" ? "bg-green-50 text-green-700 border-green-200" : ""}
+                          ${ticket.status === "Concluído" || ticket.status === "Resolvido" ? "bg-green-50 text-green-700 border-green-200" : ""}
                         `}
                         >
                           {ticket.status}
@@ -304,7 +285,7 @@ export default function AgenteDashboard() {
                       <td className="py-4 px-6">
                         <span
                           className={`flex items-center gap-1.5 text-xs font-semibold
-                          ${ticket.priority === "Urgente" ? "text-red-600" : ""}
+                          ${ticket.priority === "Urgente" || ticket.priority === "Crítica" ? "text-red-600" : ""}
                           ${ticket.priority === "Alta" ? "text-orange-500" : ""}
                           ${ticket.priority === "Média" ? "text-blue-500" : ""}
                           ${ticket.priority === "Baixa" ? "text-slate-500" : ""}
@@ -312,7 +293,7 @@ export default function AgenteDashboard() {
                         >
                           <div
                             className={`w-2 h-2 rounded-full 
-                            ${ticket.priority === "Urgente" ? "bg-red-600 animate-pulse" : ""}
+                            ${ticket.priority === "Urgente" || ticket.priority === "Crítica" ? "bg-red-600 animate-pulse" : ""}
                             ${ticket.priority === "Alta" ? "bg-orange-500" : ""}
                             ${ticket.priority === "Média" ? "bg-blue-500" : ""}
                             ${ticket.priority === "Baixa" ? "bg-slate-400" : ""}
@@ -322,7 +303,10 @@ export default function AgenteDashboard() {
                         </span>
                       </td>
                       <td className="py-4 px-6 text-slate-500">
-                        {ticket.date}
+                        {ticket.date ||
+                          new Date(ticket.created_at!).toLocaleDateString(
+                            "pt-BR",
+                          )}
                       </td>
                     </tr>
                   ))
@@ -332,79 +316,13 @@ export default function AgenteDashboard() {
           </div>
         </section>
 
-        {/* --- MODAL FLUTUANTE --- */}
-        {selectedTicket && (
-          <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200 border border-slate-200">
-              <div className="bg-slate-50 p-6 border-b border-slate-100 flex justify-between items-start">
-                <div>
-                  <span className="text-supportbox font-bold text-sm bg-supportbox/10 px-2 py-1 rounded-md">
-                    {selectedTicket.id}
-                  </span>
-                  <h2 className="text-2xl font-bold text-slate-800 mt-2">
-                    {selectedTicket.title}
-                  </h2>
-                </div>
-                <button
-                  onClick={() => setSelectedTicket(null)}
-                  className="p-2 hover:bg-slate-200 rounded-full transition-colors"
-                >
-                  <X size={20} className="text-slate-500" />
-                </button>
-              </div>
-
-              <div className="p-6 space-y-6">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="bg-slate-50 p-3 rounded-lg border border-slate-100">
-                    <p className="text-xs text-slate-500 mb-1 font-semibold uppercase tracking-wider">
-                      Solicitante
-                    </p>
-                    <p className="font-medium text-slate-900 flex items-center gap-2">
-                      <User size={16} className="text-slate-400" />{" "}
-                      {selectedTicket.requester}
-                    </p>
-                  </div>
-                  <div className="bg-slate-50 p-3 rounded-lg border border-slate-100">
-                    <p className="text-xs text-slate-500 mb-1 font-semibold uppercase tracking-wider">
-                      Data de Abertura
-                    </p>
-                    <p className="font-medium text-slate-900 flex items-center gap-2">
-                      <Clock size={16} className="text-slate-400" />{" "}
-                      {selectedTicket.date}
-                    </p>
-                  </div>
-                </div>
-
-                <div>
-                  <p className="text-sm font-semibold text-slate-800 mb-2">
-                    Descrição do Problema
-                  </p>
-                  <div className="bg-slate-50/50 p-4 rounded-xl border border-slate-200 text-slate-700 text-sm leading-relaxed shadow-inner">
-                    {selectedTicket.description}
-                  </div>
-                </div>
-              </div>
-
-              <div className="p-6 border-t border-slate-100 bg-slate-50/80 flex justify-end gap-3">
-                <button
-                  onClick={() => setSelectedTicket(null)}
-                  className="px-5 py-2.5 text-sm font-medium text-slate-600 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors shadow-sm"
-                >
-                  Fechar
-                </button>
-
-                {selectedTicket.status !== "Concluído" && (
-                  <button
-                    onClick={handleResolveTicket}
-                    className="px-5 py-2.5 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2 shadow-sm"
-                  >
-                    <CheckCircle size={18} /> Resolver Chamado
-                  </button>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
+        {/* --- MODAL FLUTUANTE SUBSTITUÍDO PELO COMPONENTE IMPORTADO --- */}
+        <TicketAgentModal
+          ticketId={selectedTicket?.id || null}
+          isOpen={!!selectedTicket}
+          onClose={() => setSelectedTicket(null)}
+          onTicketUpdated={fetchTickets}
+        />
       </main>
     </div>
   );

@@ -1,7 +1,26 @@
+/**
+ * ============================================================================
+ * 📦 ARQUIVO: ticket-list.tsx
+ * 💻 PROJETO: SupportBox
+ * * 📝 DESCRIÇÃO:
+ * Este componente é responsável por renderizar a lista dinâmica de chamados
+ * no Portal do Agente (Painel da TI). Ele abandona os dados mockados e
+ * realiza uma busca em tempo real no banco de dados (Supabase) assim que a
+ * tela é montada, exibindo os protocolos abertos pelos solicitantes.
+ * * ⚙️ FUNCIONALIDADES:
+ * - Busca de dados assíncrona (useEffect) via `db.getTickets()`.
+ * - Estado de Loading (Loader2) para feedback visual durante a requisição.
+ * - Filtros em tempo real por Status (Pendente/Concluído) e texto.
+ * - Mapeamento dinâmico de cores de Badges baseadas no status real do banco.
+ * ============================================================================
+ */
+
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { db } from "@/lib/db"; // <-- Importação do nosso cérebro do banco de dados
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -20,135 +39,107 @@ import {
   Package,
   Search,
   AlertTriangle,
+  Loader2,
 } from "lucide-react";
-
-// Dados fictícios para chamados
-const mockTickets = [
-  {
-    id: "T-1001",
-    title: "Não consigo acessar minha conta de e-mail",
-    status: "open",
-    priority: "high",
-    category: "email",
-    created: "2 horas atrás",
-    updated: "30 minutos atrás",
-    messages: 3,
-    type: "incident",
-  },
-  {
-    id: "T-1002",
-    title: "Solicitação de novo notebook",
-    status: "pending",
-    priority: "medium",
-    category: "hardware",
-    created: "1 dia atrás",
-    updated: "5 horas atrás",
-    messages: 2,
-    type: "request",
-  },
-  {
-    id: "T-1003",
-    title: "Problemas de conexão VPN",
-    status: "in-progress",
-    priority: "medium",
-    category: "network",
-    created: "3 dias atrás",
-    updated: "1 dia atrás",
-    messages: 5,
-    type: "incident",
-  },
-  {
-    id: "T-1004",
-    title: "Solicitação de instalação de software",
-    status: "resolved",
-    priority: "low",
-    category: "software",
-    created: "1 semana atrás",
-    updated: "2 dias atrás",
-    messages: 4,
-    type: "request",
-  },
-];
 
 export default function TicketList() {
   const [searchQuery, setSearchQuery] = useState("");
   const [filter, setFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState("all");
+
+  // Novos estados para o Banco de Dados Real
+  const [tickets, setTickets] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
   const router = useRouter();
 
-  // Filtrar chamados com base na consulta de pesquisa, filtro de status e tipo
-  const filteredTickets = mockTickets.filter((ticket) => {
+  // Busca os dados reais do Supabase assim que a tela abre
+  useEffect(() => {
+    async function fetchTickets() {
+      try {
+        setIsLoading(true);
+        // Chama a função que busca todos os chamados lá no db.ts
+        const chamadosReais = await db.getTickets();
+        setTickets(chamadosReais || []);
+      } catch (error) {
+        console.error("Erro ao carregar chamados da nuvem:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchTickets();
+  }, []);
+
+  // Filtrar chamados com base na pesquisa, status e tipo
+  const filteredTickets = tickets.filter((ticket) => {
+    // Alguns bancos usam 'title', outros 'description'. Usamos fallback para os dois.
+    const tituloBusca = (
+      ticket.title ||
+      ticket.description ||
+      ""
+    ).toLowerCase();
+    const idBusca = (ticket.id || "").toLowerCase();
+    const statusTicket = (ticket.status || "").toLowerCase();
+
     const matchesSearch =
-      ticket.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      ticket.id.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesFilter = filter === "all" || ticket.status === filter;
-    const matchesType = typeFilter === "all" || ticket.type === typeFilter;
+      tituloBusca.includes(searchQuery.toLowerCase()) ||
+      idBusca.includes(searchQuery.toLowerCase());
+
+    // Ajuste dos filtros para os status reais do nosso sistema
+    let matchesFilter = filter === "all";
+    if (
+      filter === "pending" &&
+      (statusTicket === "pendente" || statusTicket === "pending")
+    )
+      matchesFilter = true;
+    if (
+      filter === "resolved" &&
+      (statusTicket === "concluído" ||
+        statusTicket === "concluido" ||
+        statusTicket === "resolved")
+    )
+      matchesFilter = true;
+    if (filter === "in-progress" && statusTicket === "em andamento")
+      matchesFilter = true;
+
+    // Se não tiver tipo no banco, assumimos 'incident'
+    const ticketType = ticket.type || "incident";
+    const matchesType = typeFilter === "all" || ticketType === typeFilter;
 
     return matchesSearch && matchesFilter && matchesType;
   });
 
-  // Obter cor do badge de status
+  // Obter cor do badge de status dinamicamente
   const getStatusColor = (status: string) => {
-    switch (status) {
-      case "open":
-        return "bg-blue-500";
-      case "pending":
-        return "bg-supportbox";
-      case "in-progress":
-        return "bg-purple-500";
-      case "resolved":
-        return "bg-green-500";
-      default:
-        return "bg-gray-500";
-    }
+    const s = (status || "").toLowerCase();
+    if (s === "pendente" || s === "aguardando") return "bg-supportbox";
+    if (s === "em andamento") return "bg-purple-500";
+    if (s === "concluído" || s === "concluido" || s === "resolvido")
+      return "bg-green-500";
+    return "bg-gray-500";
   };
 
   // Obter cor do badge de prioridade
   const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case "critical":
-        return "bg-red-500";
-      case "high":
-        return "bg-orange-500";
-      case "medium":
-        return "bg-supportbox";
-      case "low":
-        return "bg-green-500";
-      default:
-        return "bg-gray-500";
-    }
+    const p = (priority || "").toLowerCase();
+    if (p === "critical" || p === "crítica") return "bg-red-500";
+    if (p === "high" || p === "alta") return "bg-orange-500";
+    if (p === "low" || p === "baixa") return "bg-green-500";
+    return "bg-supportbox"; // Padrão é média
   };
 
-  // Traduzir status para português
-  const translateStatus = (status: string) => {
-    switch (status) {
-      case "open":
-        return "Aberto";
-      case "pending":
-        return "Pendente";
-      case "in-progress":
-        return "Em Andamento";
-      case "resolved":
-        return "Resolvido";
-      default:
-        return status;
-    }
-  };
-
-  // Traduzir prioridade para português
-  const translatePriority = (priority: string) => {
-    switch (priority) {
-      case "critical":
-        return "Crítica";
-      case "high":
-        return "Alta";
-      case "medium":
-        return "Média";
-      case "low":
-        return "Baixa";
-      default:
-        return priority;
-    }
+  // Formatar data real vinda do banco (ex: created_at)
+  const formatData = (dataString: string) => {
+    if (!dataString) return "Data desconhecida";
+    const data = new Date(dataString);
+    return data.toLocaleDateString("pt-BR", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
   };
 
   const handleViewDetails = (ticketId: string) => {
@@ -183,68 +174,38 @@ export default function TicketList() {
                 Todos
               </TabsTrigger>
               <TabsTrigger
-                value="open"
-                className="data-[state=active]:bg-supportbox data-[state=active]:text-white"
-              >
-                Abertos
-              </TabsTrigger>
-              <TabsTrigger
-                value="in-progress"
-                className="data-[state=active]:bg-supportbox data-[state=active]:text-white"
-              >
-                Em Andamento
-              </TabsTrigger>
-              <TabsTrigger
-                value="resolved"
-                className="data-[state=active]:bg-supportbox data-[state=active]:text-white"
-              >
-                Resolvidos
-              </TabsTrigger>
-              <TabsTrigger
                 value="pending"
                 className="data-[state=active]:bg-supportbox data-[state=active]:text-white"
               >
                 Pendentes
               </TabsTrigger>
-            </TabsList>
-          </Tabs>
-        </div>
-
-        <div className="flex justify-start">
-          <Tabs
-            defaultValue="all"
-            className="w-auto"
-            onValueChange={setTypeFilter}
-          >
-            <TabsList className="bg-muted/50">
               <TabsTrigger
-                value="all"
+                value="resolved"
                 className="data-[state=active]:bg-supportbox data-[state=active]:text-white"
               >
-                Todos os Tipos
-              </TabsTrigger>
-              <TabsTrigger
-                value="request"
-                className="data-[state=active]:bg-supportbox data-[state=active]:text-white"
-              >
-                Solicitações
-              </TabsTrigger>
-              <TabsTrigger
-                value="incident"
-                className="data-[state=active]:bg-supportbox data-[state=active]:text-white"
-              >
-                Incidentes
+                Concluídos
               </TabsTrigger>
             </TabsList>
           </Tabs>
         </div>
       </div>
 
-      {filteredTickets.length === 0 ? (
+      {/* --- ESTADO DE CARREGANDO --- */}
+      {isLoading ? (
+        <Card className="border-supportbox/20">
+          <CardContent className="pt-6 flex flex-col items-center justify-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin text-supportbox mb-4" />
+            <p className="text-muted-foreground font-medium">
+              Buscando chamados no banco de dados...
+            </p>
+          </CardContent>
+        </Card>
+      ) : filteredTickets.length === 0 ? (
         <Card className="border-supportbox/20">
           <CardContent className="pt-6">
-            <div className="text-center py-6">
-              <p className="text-muted-foreground">
+            <div className="text-center py-10">
+              <Package className="h-10 w-10 text-gray-300 mx-auto mb-3" />
+              <p className="text-muted-foreground text-lg">
                 Nenhum chamado encontrado com os critérios selecionados.
               </p>
             </div>
@@ -260,18 +221,21 @@ export default function TicketList() {
               <CardHeader className="pb-3">
                 <div className="flex justify-between items-start">
                   <div className="flex gap-2 items-start">
-                    {ticket.type === "incident" ? (
+                    {/* fallback para caso não exista o campo type no banco */}
+                    {(ticket.type || "incident") === "incident" ? (
                       <AlertTriangle className="h-5 w-5 text-red-500 mt-1" />
                     ) : (
                       <Package className="h-5 w-5 text-supportbox mt-1" />
                     )}
                     <div>
-                      <CardTitle className="text-lg">{ticket.title}</CardTitle>
-                      <CardDescription className="mt-1">
-                        {ticket.type === "incident"
-                          ? "Incidente"
-                          : "Solicitação"}{" "}
-                        {ticket.id} • {ticket.category}
+                      {/* Mostrar titulo ou parte da descrição */}
+                      <CardTitle className="text-lg">
+                        {ticket.title ||
+                          ticket.description ||
+                          "Chamado sem descrição"}
+                      </CardTitle>
+                      <CardDescription className="mt-1 font-medium text-gray-500">
+                        {ticket.id} • {ticket.category || "Sem categoria"}
                       </CardDescription>
                     </div>
                   </div>
@@ -280,47 +244,37 @@ export default function TicketList() {
                       variant="secondary"
                       className={`${getPriorityColor(ticket.priority)} text-white`}
                     >
-                      {translatePriority(ticket.priority)}
+                      {ticket.priority || "Média"}
                     </Badge>
                     <Badge
-                      className={`${getStatusColor(ticket.status)} text-white`}
+                      className={`${getStatusColor(ticket.status)} text-white px-3 py-1 font-semibold uppercase tracking-wider text-xs`}
                     >
-                      {translateStatus(ticket.status)}
+                      {ticket.status || "Pendente"}
                     </Badge>
                   </div>
                 </div>
               </CardHeader>
               <CardContent className="pb-3">
                 <div className="flex items-center text-sm text-muted-foreground gap-4">
-                  <div className="flex items-center">
-                    <Clock className="mr-1 h-3 w-3" />
-                    <span>Criado {ticket.created}</span>
-                  </div>
-                  <div className="flex items-center">
-                    <MessageSquare className="mr-1 h-3 w-3" />
-                    <span>{ticket.messages} mensagens</span>
+                  <div className="flex items-center font-medium">
+                    <Clock className="mr-1.5 h-4 w-4 text-supportbox/70" />
+                    {/* formata a data de created_at vinda do Supabase */}
+                    <span>
+                      Criado em{" "}
+                      {formatData(ticket.created_at || ticket.created)}
+                    </span>
                   </div>
                 </div>
               </CardContent>
-              <CardFooter className="flex justify-between border-t border-supportbox/10 pt-3">
+              <CardFooter className="flex justify-between border-t border-supportbox/10 pt-3 bg-gray-50/50">
                 <Button
                   variant="ghost"
                   size="sm"
                   className="text-supportbox hover:text-supportbox-dark hover:bg-supportbox/10"
                   onClick={() => handleViewDetails(ticket.id)}
                 >
-                  Ver Detalhes
+                  Ver Detalhes do Protocolo
                 </Button>
-                {ticket.status !== "resolved" && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="border-supportbox/20 text-supportbox hover:text-supportbox-dark hover:bg-supportbox/10 bg-transparent"
-                    onClick={() => handleViewDetails(ticket.id)}
-                  >
-                    Adicionar Comentário
-                  </Button>
-                )}
               </CardFooter>
             </Card>
           ))}
