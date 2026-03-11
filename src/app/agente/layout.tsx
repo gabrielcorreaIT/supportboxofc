@@ -1,41 +1,44 @@
 /**
  * ============================================================================
- * COMPONENTE: AgenteLayout (Layout Exclusivo do Setor de TI)
- * PROJETO: SupportBox
+ * 📦 COMPONENTE: AgenteLayout (Layout Exclusivo do Setor de TI)
+ * 💻 PROJETO: SupportBox
+ * 👨‍💻 DESENVOLVEDOR: Gabriel
  * ============================================================================
- * * DESCRIÇÃO:
- * Este arquivo define o "esqueleto" e as configurações globais específicas
- * para todas as páginas dentro da rota `/agente`.
- * * * ARQUITETURA:
- * No Next.js (App Router), um arquivo `layout.tsx` aninhado permite sobrescrever
- * configurações do layout principal (raiz) sem afetar o resto do sistema.
- * É graças a este arquivo que a aba do navegador exibe "SupportBox - Agentes"
- * aqui, enquanto na tela de abertura de chamados exibe "SupportBox - Solicitante".
+ * 📝 DESCRIÇÃO:
+ * Este é o "esqueleto" mestre de todas as páginas do Agente.
+ * Ele carrega a nossa AgentSidebar fixa na esquerda e injeta o conteúdo
+ * da página atual (children) no lado direito. Isso garante que a barra
+ * lateral nunca pisque ou recarregue ao navegar entre as abas!
+ * ============================================================================
  */
 
 import type { Metadata } from "next";
+// Importamos o componente inteligente da barra lateral
+import { AgentSidebar } from "@/components/AgentSidebar";
 
-/**
- * Objeto de Metadados:
- * Altera as informações da tag <head> do HTML, mudando o título da aba do
- * navegador e a descrição da página para os motores de busca (SEO).
- */
 export const metadata: Metadata = {
   title: "SupportBox - Agentes",
-  description: "Painel de controle para a equipe de TI",
+  description: "Painel de controle e fila de atendimento para a equipe de TI",
 };
 
-/**
- * Função Principal do Layout:
- * @param children - Representa o conteúdo da página atual (neste caso, o `page.tsx`
- * do AgenteDashboard) que será "injetado" dentro deste layout.
- */
 export default function AgenteLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  // Como o visual (Sidebar e fundo) já foi construído direto na page.tsx,
-  // este layout atua apenas como um "wrapper" invisível para aplicar os metadados.
-  return <>{children}</>;
+  return (
+    <div className="flex h-screen overflow-hidden bg-slate-50 relative">
+      {/* Fundo com textura pontilhada elegante */}
+      <div className="absolute inset-0 z-0 opacity-[0.03] pointer-events-none bg-[linear-gradient(to_right,#808080_1px,transparent_1px),linear-gradient(to_bottom,#808080_1px,transparent_1px)] bg-[size:24px_24px]"></div>
+
+      {/* 1. A NOSSA BARRA LATERAL INTELIGENTE FIXA AQUI */}
+      {/* ⚠️ CORREÇÃO: O wrapper z-20 e flex-shrink-0 garante que a barra fique sempre na frente e seja clicável! */}
+      <div className="relative z-20 h-full flex-shrink-0 shadow-xl border-r border-slate-800">
+        <AgentSidebar />
+      </div>
+
+      {/* 2. O CONTEÚDO DINÂMICO (As suas páginas) VAI AQUI DENTRO */}
+      <div className="flex-1 overflow-y-auto relative z-10">{children}</div>
+    </div>
+  );
 }
