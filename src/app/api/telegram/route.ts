@@ -79,7 +79,7 @@ export async function POST(req: Request) {
 
     await sendTelegramMessage(
       chatId,
-      "⏳ <i>Analisando a sua solicitação...</i>",
+      "⏳ <i>Analisando e formatando sua mensagem...</i>",
     );
 
     if (!GEMINI_API_KEY) {
@@ -91,17 +91,14 @@ export async function POST(req: Request) {
     }
 
     // =======================================================================
-    // 1. EXTRAÇÃO DE CONTEXTO GLOBAL (A NOVA MÁGICA)
+    // 1. EXTRAÇÃO DE CONTEXTO GLOBAL
     // =======================================================================
-    // Antes de perguntar para a IA, pegamos como está a fila AGORA no banco.
     const allTickets = await db.getTickets();
-
-    // Filtramos apenas os que não estão concluídos para não poluir a IA
     const activeTickets = allTickets.filter(
       (t) => t.status !== "Concluído" && t.status !== "Resolvido",
     );
 
-    let queueContext = "Nenhum chamado pendente no momento. A fila está limpa!";
+    let queueContext = "Nenhum chamado pendente no momento.";
     if (activeTickets.length > 0) {
       queueContext = activeTickets
         .map(
@@ -112,47 +109,51 @@ export async function POST(req: Request) {
     }
 
     // =======================================================================
-    // 2. PREPARAÇÃO DO CÉREBRO DA IA
+    // 2. PREPARAÇÃO DO CÉREBRO DA IA (PROMPT COM REFORMULAÇÃO FORMAL)
     // =======================================================================
     const promptParts: any[] = [];
 
     const systemPrompt = `
-      Você é um assistente de TI hiper-inteligente integrado a um sistema de HelpDesk chamado SupportBox.
-      Você receberá comandos em TEXTO ou em ÁUDIO.
-      O número do chamado sempre tem o formato CH- seguido de 4 números (ex: CH-1234, CH-0012).
+      Você é um assistente de TI hiper-inteligente integrado ao SupportBox.
+      Você receberá comandos em TEXTO ou ÁUDIO do técnico de suporte.
 
-      *** CONTEXTO ATUAL DA FILA EM TEMPO REAL ***
-      Isto é o que está acontecendo na empresa agora. Use essa lista para responder a dúvidas gerais:
+      *** REGRAS CRÍTICAS DE REFORMULAÇÃO (CAMPO "comment") ***
+      - O técnico muitas vezes fala de forma rápida, informal ou usa gírias (ex: "avisa o cara que o pc morreu").
+      - Você deve SEMPRE reformular o conteúdo para uma linguagem FORMAL, PROFISSIONAL e TÉCNICA.
+      - Exemplo: "Troquei o mouse quebrado" -> "Realizada a substituição do periférico (mouse) por apresentar defeito físico. Testes concluídos com sucesso."
+      - Exemplo: "O sistema tá lento mas já arrumei" -> "Efetuada análise de desempenho no sistema. Foram aplicadas correções de otimização, restabelecendo a performance habitual."
+      - NUNCA use gírias ou primeira pessoa informal no campo "comment".
+
+      *** CONTEXTO ATUAL DA FILA ***
       ${queueContext}
-      ********************************************
 
       AÇÕES PERMITIDAS ("action"):
-      - "ATUALIZAR_STATUS": Muda a fase de um chamado específico. "status_alvo" DEVE ser: "Aguardando Atendimento", "Em Andamento" ou "Concluído".
-      - "COMENTAR": Adiciona uma nota/recado ao histórico de um chamado.
-      - "ATUALIZAR_E_COMENTAR": Altera o status E adiciona um comentário.
-      - "CONSULTAR_ESPECIFICO": O técnico quer saber detalhes de UM chamado ESPECÍFICO pelo ID.
-      - "DUVIDA_GERAL": O técnico fez uma pergunta livre ou geral (ex: "Tem chamado urgente?", "Quantos chamados abertos?", "Qual é o problema do João?"). Você DEVE ler o CONTEXTO ATUAL fornecido acima e formular uma resposta humana completa no campo "resposta_assistente".
-      - "CONVERSAR": O técnico apenas mandou uma saudação (ex: "Oi", "Bom dia").
+      - "ATUALIZAR_STATUS": Muda a fase (status_alvo: "Aguardando Atendimento", "Em Andamento" ou "Concluído").
+      - "COMENTAR": Apenas adiciona uma nota formal.
+      - "ATUALIZAR_E_COMENTAR": Altera status e adiciona nota formal.
+      - "CONSULTAR_ESPECIFICO": Detalhes de um ID.
+      - "DUVIDA_GERAL": Perguntas sobre a fila.
+      - "CONVERSAR": Saudação.
 
-      Responda APENAS com um objeto JSON válido, neste formato EXATO e mais nada:
+      Responda APENAS com um objeto JSON válido:
       {
         "ticket_id": "CH-XXXX" ou null,
-        "action": "ATUALIZAR_STATUS" | "COMENTAR" | "ATUALIZAR_E_COMENTAR" | "CONSULTAR_ESPECIFICO" | "DUVIDA_GERAL" | "CONVERSAR",
-        "status_alvo": "Aguardando Atendimento" | "Em Andamento" | "Concluído" | null,
-        "comment": "Resumo claro do recado (ou null)",
-        "resposta_assistente": "Obrigatório se action for DUVIDA_GERAL ou CONVERSAR. Escreva sua resposta humana e amigável aqui, baseada no contexto se necessário."
+        "action": "...",
+        "status_alvo": "...",
+        "comment": "REFORMULAÇÃO FORMAL E TÉCNICA DA FALA DO TÉCNICO",
+        "resposta_assistente": "Resposta amigável para o técnico no Telegram confirmando a ação."
       }
     `;
 
     promptParts.push({ text: systemPrompt });
 
-    if (text) promptParts.push({ text: `Comando do técnico: "${text}"` });
+    if (text) promptParts.push({ text: `Entrada do técnico: "${text}"` });
 
     if (voice) {
       const base64Audio = await getTelegramAudioBase64(voice.file_id);
       if (base64Audio) {
         promptParts.push({
-          text: "O técnico enviou o seguinte áudio. Ouça com atenção:",
+          text: "Entrada via áudio do técnico para processamento:",
         });
         promptParts.push({
           inlineData: { data: base64Audio, mimeType: "audio/ogg" },
@@ -180,7 +181,7 @@ export async function POST(req: Request) {
     } catch (parseError) {
       await sendTelegramMessage(
         chatId,
-        "⚠️ Erro interno: A IA se confundiu na resposta.",
+        "⚠️ Erro interno na formatação dos dados.",
       );
       return NextResponse.json({ status: "Erro no Parse" });
     }
@@ -189,24 +190,20 @@ export async function POST(req: Request) {
       actionData;
     const ticketIdClean = ticket_id ? ticket_id.toUpperCase().trim() : null;
 
-    // =======================================================================
-    // 4. EXECUÇÃO DAS AÇÕES
-    // =======================================================================
-
-    // AÇÃO A: Dúvida Livre baseada no Contexto ou Conversa Comum
+    // AÇÃO A: Dúvida ou Conversa
     if (action === "DUVIDA_GERAL" || action === "CONVERSAR") {
-      const msg =
-        resposta_assistente || "Desculpe, não consegui formular uma resposta.";
-      await sendTelegramMessage(chatId, `🤖 <b>Assistente:</b>\n${msg}`);
-      return NextResponse.json({ status: "Dúvida respondida" });
+      await sendTelegramMessage(
+        chatId,
+        `🤖 <b>Assistente:</b>\n${resposta_assistente}`,
+      );
+      return NextResponse.json({ status: "Respondido" });
     }
 
-    // Para as outras ações, exige que o ID exista e esteja limpo
     if (!ticketIdClean) {
-      const msg =
-        resposta_assistente ||
-        "Para fazer isso, por favor me informe o número do chamado (ex: CH-1234).";
-      await sendTelegramMessage(chatId, `🤖 <b>Assistente:</b>\n${msg}`);
+      await sendTelegramMessage(
+        chatId,
+        `🤖 <b>Assistente:</b>\n${resposta_assistente || "Por favor, informe o número do chamado."}`,
+      );
       return NextResponse.json({ status: "Falta ID" });
     }
 
@@ -214,19 +211,19 @@ export async function POST(req: Request) {
     if (!ticket) {
       await sendTelegramMessage(
         chatId,
-        `❌ O chamado <b>${ticketIdClean}</b> não foi encontrado na base.`,
+        `❌ Chamado <b>${ticketIdClean}</b> não encontrado.`,
       );
-      return NextResponse.json({ status: "Ticket não encontrado" });
+      return NextResponse.json({ status: "Não encontrado" });
     }
 
-    // AÇÃO B: Consultar Detalhes Específicos
+    // AÇÃO B: Consultar
     if (action === "CONSULTAR_ESPECIFICO") {
-      const msg = `🔍 <b>Detalhes do ${ticket.id}</b>\n\n👤 <b>Solicitante:</b> ${ticket.requester}\n📌 <b>Título:</b> ${ticket.title}\n📊 <b>Status:</b> ${ticket.status}\n🚨 <b>Prioridade:</b> ${ticket.priority}\n\n📝 <b>Descrição:</b>\n<i>${ticket.description}</i>`;
+      const msg = `🔍 <b>Detalhes do ${ticket.id}</b>\n\n👤 <b>Solicitante:</b> ${ticket.requester}\n📊 <b>Status:</b> ${ticket.status}\n🚨 <b>Prioridade:</b> ${ticket.priority}\n\n📝 <b>Descrição:</b>\n<i>${ticket.description}</i>`;
       await sendTelegramMessage(chatId, msg);
-      return NextResponse.json({ status: "Consulta realizada" });
+      return NextResponse.json({ status: "Consultado" });
     }
 
-    // AÇÃO C: Modificar o Banco de Dados
+    // AÇÃO C: Modificar Banco
     let responseMessage = `✅ <b>Chamado ${ticketIdClean} atualizado:</b>\n`;
 
     if (
@@ -234,13 +231,13 @@ export async function POST(req: Request) {
       status_alvo
     ) {
       await db.updateTicketStatus(ticketIdClean, status_alvo);
-      responseMessage += `\n🔄 <b>Novo Status:</b> ${status_alvo}`;
+      responseMessage += `\n🔄 <b>Status:</b> ${status_alvo}`;
 
       if (!comment || comment.toLowerCase() === "null") {
         await db.addTicketComment(
           ticketIdClean,
           "Assistente Virtual",
-          `Status alterado para "${status_alvo}" via Telegram.`,
+          `O status do chamado foi alterado para "${status_alvo}".`,
         );
       }
     }
@@ -251,16 +248,13 @@ export async function POST(req: Request) {
       comment.toLowerCase() !== "null"
     ) {
       await db.addTicketComment(ticketIdClean, "Equipe de TI", comment);
-      responseMessage += `\n💬 <b>Comentário registrado:</b> "${comment}"`;
+      responseMessage += `\n💬 <b>Registro Formal:</b>\n"<i>${comment}</i>"`;
     }
 
     await sendTelegramMessage(chatId, responseMessage);
     return NextResponse.json({ status: "Sucesso" });
   } catch (error) {
-    console.error("Erro fatal no Webhook do Telegram:", error);
-    return NextResponse.json(
-      { status: "Erro interno do servidor" },
-      { status: 500 },
-    );
+    console.error("Erro fatal no Webhook:", error);
+    return NextResponse.json({ status: "Erro interno" }, { status: 500 });
   }
 }
