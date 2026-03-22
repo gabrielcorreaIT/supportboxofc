@@ -1,3 +1,4 @@
+
 /**
  * ============================================================================
  * 📦 ARQUIVO: ticket-list.tsx
@@ -19,7 +20,6 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { db } from "@/lib/db"; // <-- Importação do nosso cérebro do banco de dados
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";

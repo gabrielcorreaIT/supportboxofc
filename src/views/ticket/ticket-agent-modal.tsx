@@ -36,7 +36,12 @@ import {
   AlertTriangle,
   Package,
 } from "lucide-react";
-import { db } from "@/lib/db";
+
+import { 
+  getTicketDetailsAction, 
+  addTicketCommentAction 
+} from "@/controllers/TicketController";
+
 
 interface TicketAgentModalProps {
   ticketId: string | null;
@@ -57,31 +62,22 @@ export function TicketAgentModal({
   const [isSending, setIsSending] = useState(false);
   const [isResolving, setIsResolving] = useState(false);
 
-  // Carrega os dados sempre que o Modal abre ou o ID muda
   useEffect(() => {
-    async function loadTicketData() {
-      if (!ticketId || !isOpen) return;
+  async function loadTicketData() {
+    if (!ticketId || !isOpen) return;
 
-      setIsLoading(true);
-      try {
-        const chamadoReal = await db.getTicketById(ticketId);
-        const comentariosReais = await db.getTicketComments(ticketId);
+    setIsLoading(true);
+    // Chamando o Controller em vez do DB
+    const result = await getTicketDetailsAction(ticketId); 
 
-        if (chamadoReal) {
-          setTicket({
-            ...chamadoReal,
-            interactions: comentariosReais || [],
-          });
-        }
-      } catch (error) {
-        console.error("Erro ao carregar modal:", error);
-      } finally {
-        setIsLoading(false);
-      }
+    if (result.success && result.data) {
+      setTicket(result.data);
     }
+    setIsLoading(false);
+  }
+  loadTicketData();
+}, [ticketId, isOpen]);
 
-    loadTicketData();
-  }, [ticketId, isOpen]);
 
   // Função para a TI enviar uma resposta manual
   const handleSendComment = async () => {
@@ -90,13 +86,9 @@ export function TicketAgentModal({
     setIsSending(true);
     try {
       // Como é o portal do agente, o autor é a Equipe de TI
-      const success = await db.addTicketComment(
-        ticketId,
-        "Equipe de TI",
-        newComment,
-      );
+      const result = await addTicketCommentAction(ticketId, "Equipe de TI", newComment);
 
-      if (success) {
+      if (result.success) {
         const comentariosAtualizados = await db.getTicketComments(ticketId);
         setTicket({ ...ticket, interactions: comentariosAtualizados });
         setNewComment("");

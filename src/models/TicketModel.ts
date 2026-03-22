@@ -33,6 +33,56 @@ export const TicketModel = {
     return data as Ticket;
   },
 
+  async getAllActiveTickets() {
+    const { data, error } = await supabase
+      .from("tickets")
+      .select("*")
+      .eq("status", "Aguardando Atendimento")
+      .order("created_at", { ascending: true });
+
+    if (error) {
+      console.error("Falha ao buscar chamados ativos:", error.message);
+      return [];
+    }
+    return data as Ticket[];
+  },
+
+  async getTicketById(id: string): Promise<Ticket | null> {
+    const { data, error } = await supabase
+      .from("tickets")
+      .select("*")
+      .eq("id", id)
+      .single();
+
+    if (error || !data) {
+      console.error(`Falha ao buscar chamado por ID ${id}:`, error?.message);
+      return null;
+    }
+    return data as Ticket;
+  },
+
+  async insertTicket(ticket: Ticket): Promise<boolean> {
+    const { error } = await supabase.from("tickets").insert([ticket]);
+    if (error) {
+      console.error("Falha ao inserir chamado:", error.message);
+      return false;
+    }
+    return true;
+  },
+
+  async updateTicketStatus(id: string, status: string): Promise<boolean> {
+    const { error } = await supabase
+      .from("tickets")
+      .update({ status })
+      .eq("id", id);
+
+    if (error) {
+      console.error(`Falha ao atualizar status do chamado ${id}:`, error.message);
+      return false;
+    }
+    return true;
+  },
+
   // =========================================================================
   // COMENTÁRIOS E INTERAÇÕES (COMUNICAÇÃO INTERNA)
   // =========================================================================

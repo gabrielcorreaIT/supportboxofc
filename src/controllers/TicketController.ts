@@ -13,7 +13,8 @@
 import { TicketModel } from "@/models/TicketModel";
 import { IAModel } from "@/models/IAModel";
 import { randomUUID } from "crypto";
-import type { Ticket, TicketPriority } from "@/models/types";
+import type { Ticket, TicketPriority, Comment } from "@/models/types";
+
 
 // ============================================================================
 // 1. FLUXO DO SOLICITANTE (Abertura e IA)
