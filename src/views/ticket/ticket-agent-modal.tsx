@@ -39,7 +39,8 @@ import {
 
 import { 
   getTicketDetailsAction, 
-  addTicketCommentAction 
+  addTicketCommentAction,
+  updateTicketStatusAction 
 } from "@/controllers/TicketController";
 
 
@@ -89,8 +90,11 @@ export function TicketAgentModal({
       const result = await addTicketCommentAction(ticketId, "Equipe de TI", newComment);
 
       if (result.success) {
-        const comentariosAtualizados = await db.getTicketComments(ticketId);
-        setTicket({ ...ticket, interactions: comentariosAtualizados });
+        // Recarrega os detalhes para atualizar a UI com o novo comentário
+        const updatedResult = await getTicketDetailsAction(ticketId);
+        if (updatedResult.success && updatedResult.data) {
+          setTicket(updatedResult.data);
+        }
         setNewComment("");
         if (onTicketUpdated) onTicketUpdated(); // Avisa a tabela de trás para atualizar contadores
       }
@@ -107,17 +111,18 @@ export function TicketAgentModal({
 
     setIsResolving(true);
     try {
-      await db.updateTicketStatus(ticketId, "Concluído");
-      await db.addTicketComment(
+      await updateTicketStatusAction(ticketId, "Concluído");
+      await addTicketCommentAction(
         ticketId,
         "Sistema Automático",
         "Chamado encerrado pelo Agente via Portal Web.",
       );
 
-      // Atualiza o estado local para refletir a mudança instantaneamente
-      const chamadoReal = await db.getTicketById(ticketId);
-      const comentariosReais = await db.getTicketComments(ticketId);
-      setTicket({ ...chamadoReal, interactions: comentariosReais || [] });
+      // Atualiza o estado local para refletir a mudança instantaneamente via Controller
+      const result = await getTicketDetailsAction(ticketId);
+      if (result.success && result.data) {
+        setTicket(result.data);
+      }
 
       if (onTicketUpdated) onTicketUpdated();
     } catch (error) {

@@ -153,3 +153,12 @@ export async function addTicketCommentAction(
     return { success: false };
   }
 }
+
+export async function updateTicketStatusAction(id: string, status: string) {
+  try {
+    const success = await TicketModel.updateTicketStatus(id, status);
+    return { success };
+  } catch (e) {
+    return { success: false };
+  }
+}

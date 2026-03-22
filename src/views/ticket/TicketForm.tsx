@@ -18,7 +18,7 @@ import confetti from "canvas-confetti";
 import {
   analyzeProblemAction,
   createTicketAction,
-} from "@/controllers/TicketController";
+} from "../../controllers/TicketController";
 
 import { Button } from "@/views/ui/button"; // Ajuste o caminho conforme instalou o shadcn
 import { Textarea } from "@/views/ui/textarea";

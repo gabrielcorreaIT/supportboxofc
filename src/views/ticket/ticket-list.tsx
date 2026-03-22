@@ -20,6 +20,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { getDashboardDataAction } from "@/controllers/TicketController";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -58,9 +59,11 @@ export default function TicketList() {
     async function fetchTickets() {
       try {
         setIsLoading(true);
-        // Chama a função que busca todos os chamados lá no db.ts
-        const chamadosReais = await db.getTickets();
-        setTickets(chamadosReais || []);
+        // Chama a ação do Controller (Maestro) em vez do banco direto
+        const result = await getDashboardDataAction();
+        if (result.success && result.data) {
+          setTickets(result.data.tickets || []);
+        }
       } catch (error) {
         console.error("Erro ao carregar chamados da nuvem:", error);
       } finally {
