@@ -1,0 +1,285 @@
+classDiagram
+    direction LR
+
+    %% ===== CAMADA DE DOMINIO =====
+
+    class Chamado {
+        <<interface>>
+        +String id
+        +String numero_protocolo
+        +String solicitante
+        +String atribuido_a
+        +String titulo
+        +String descricao
+        +StatusChamado status
+        +PrioridadeChamado prioridade
+        +String categoria
+        +String tipo
+        +String criado_em
+        +String atualizado_em
+    }
+
+    class Comentario {
+        <<interface>>
+        +String id
+        +String chamado_id
+        +String autor
+        +String texto
+        +String criado_em
+    }
+
+    class StatusChamado {
+        <<enumeration>>
+        Aberto
+        Em_Andamento
+        Concluido
+    }
+
+    class PrioridadeChamado {
+        <<enumeration>>
+        Baixa
+        Media
+        Alta
+        Urgente
+    }
+
+    class CategoriaChamado {
+        <<enumeration>>
+        Hardware
+        Software
+        Acesso
+        Rede
+    }
+
+    Chamado --> "1" StatusChamado : status
+    Chamado --> "1" PrioridadeChamado : prioridade
+    Chamado --> "1" CategoriaChamado : categoria
+    Comentario "N" --> "1" Chamado : chamado_id
+
+    %% ===== CAMADA MODEL =====
+
+    class ChamadoModel {
+        <<Model>>
+        +buscarPorProtocolo(numeroProtocolo) Chamado
+        +buscarTodosChamadosAtivos() List~Chamado~
+        +buscarChamadosPorSolicitante(solicitante) List~Chamado~
+        +buscarChamadoPorId(id) Chamado
+        +inserirChamado(chamado) Boolean
+        +atualizarStatusChamado(id, status) Boolean
+        +atribuirChamado(id, nomeTecnico) Boolean
+        +buscarComentariosPorChamadoId(chamadoId) List~Comentario~
+        +inserirComentario(comentario) Boolean
+    }
+
+    class IAModel {
+        <<Model>>
+        +analisarDeflexao(descricaoProblema) ResultadoDeflexao
+        +processarComandoTelegram(partesDaEntrada) ResultadoComandoTelegram
+    }
+
+    class ResultadoDeflexao {
+        <<type>>
+        +Boolean escalado
+        +String sugestao
+    }
+
+    class ResultadoComandoTelegram {
+        <<type>>
+        +String id_chamado
+        +String acao
+        +String status_alvo
+        +String comentario
+        +String resposta_assistente
+    }
+
+    ChamadoModel ..> Chamado : manipula
+    ChamadoModel ..> Comentario : manipula
+    ChamadoModel --> SupabaseClient : persistencia
+    IAModel --> GeminiAPI : inferencia
+    IAModel ..> ResultadoDeflexao : retorna
+    IAModel ..> ResultadoComandoTelegram : retorna
+
+    %% ===== INFRAESTRUTURA EXTERNA =====
+
+    class SupabaseClient {
+        <<External>>
+        +auth SupabaseAuth
+        +from(tabela) QueryBuilder
+    }
+
+    class GeminiAPI {
+        <<External>>
+        +GoogleGenerativeAI(chaveApi)
+        +getGenerativeModel(config) GenerativeModel
+    }
+
+    %% ===== CAMADA CONTROLLER =====
+
+    class AuthController {
+        <<Controller>>
+        +acaoLogin(email, senha) ResultadoLogin
+        +acaoObterUsuarioAtual() InfoUsuario
+        +acaoLogout() ResultadoLogout
+    }
+
+    class ChamadoController {
+        <<Controller>>
+        +acaoAnalisarProblema(descricao) ResultadoAnalise
+        +acaoCriarChamado(titulo, desc, cat, tipo, sol) ResultadoCriacao
+        +acaoObterMeusChamados(solicitante) ResultadoChamados
+        +acaoObterDadosPainel() ResultadoPainel
+        +acaoObterDetalhesChamado(protocolo) ResultadoDetalhes
+        +acaoAdicionarComentario(chamadoId, autor, texto) ResultadoAcao
+        +acaoAtualizarStatus(id, status) ResultadoAcao
+        +acaoAtribuirChamado(chamadoId, nomeTecnico) ResultadoAcao
+    }
+
+    AuthController --> SupabaseClient : autenticacao
+    ChamadoController --> ChamadoModel : delega persistencia
+    ChamadoController --> IAModel : delega triagem IA
+    ChamadoController ..> Chamado : cria e valida
+    ChamadoController ..> Comentario : cria e valida
+
+    %% ===== MIDDLEWARE =====
+
+    class Middleware {
+        <<Middleware>>
+        +middleware(requisicao) NextResponse
+        -jwtExpirado(token) Boolean
+    }
+
+    %% Middleware e autonomo — nao depende de nenhuma classe do projeto
+
+    %% ===== CAMADA VIEW =====
+
+    class FormularioLogin {
+        <<View>>
+        -String email
+        -String senha
+        -Boolean mostrarSenha
+        -Boolean carregando
+        -String erro
+        +enviarFormulario()
+    }
+
+    class PainelSolicitante {
+        <<View>>
+        -String nomeUsuario
+        -Boolean carregando
+        -List~Chamado~ chamados
+        -String protocoloSelecionado
+        -Boolean modalAberto
+        -Boolean saindo
+        +buscarUsuario()
+        +buscarChamados()
+        +realizarLogout()
+    }
+
+    class ListaChamados {
+        <<View>>
+        -List~Chamado~ chamados
+        -Boolean carregando
+        -String termoBusca
+        -String filtroStatus
+        -String protocoloSelecionado
+        -Boolean modalAberto
+        +buscarChamados()
+        +filtrarChamados()
+    }
+
+    class FormularioChamado {
+        <<View>>
+        -Int etapa
+        -String descricaoProblema
+        -String sugestaoIA
+        -String titulo
+        -String categoria
+        -String tipo
+        +analisarProblema()
+        +enviarChamado()
+    }
+
+    class ModalAgenteChamado {
+        <<View>>
+        -Chamado chamado
+        -String novoComentario
+        -Boolean carregando
+        -Boolean apenasLeitura
+        +atualizar()
+        +assumirChamado()
+        +resolverChamado()
+        +enviarComentario()
+    }
+
+    class AgenteIA {
+        <<View>>
+        -Boolean aberto
+        -String entrada
+        -Boolean digitando
+        -List~Mensagem~ mensagens
+        +enviar()
+    }
+
+    class BarraLateralAgente {
+        <<View>>
+        -Boolean saindo
+        -String nomeUsuario
+        +realizarLogout()
+    }
+
+    FormularioLogin --> AuthController : acaoLogin
+    BarraLateralAgente --> AuthController : logout e obterUsuario
+    PainelSolicitante --> AuthController : logout e obterUsuario
+    PainelSolicitante --> ChamadoController : obterMeusChamados
+    FormularioChamado --> ChamadoController : analisar e criar
+    ListaChamados --> ChamadoController : obterDadosPainel
+    ModalAgenteChamado --> ChamadoController : detalhes atribuir atualizar comentar
+    AgenteIA --> ChamadoController : analisarProblema
+
+    PainelSolicitante *-- FormularioChamado : contem
+    PainelSolicitante *-- ModalAgenteChamado : contem apenasLeitura
+    PainelSolicitante *-- AgenteIA : contem
+    ListaChamados *-- ModalAgenteChamado : contem
+
+    %% ===== INTEGRACAO TELEGRAM =====
+
+    class WebhookTelegram {
+        <<API Route>>
+        +POST(requisicao) NextResponse
+        -enviarMensagem(chatId, texto) void
+        -baixarArquivoBase64(fileId) String
+    }
+
+    class AtualizacaoTelegram {
+        <<interface>>
+        +Number update_id
+        +MensagemTelegram message
+    }
+
+    class MensagemTelegram {
+        <<interface>>
+        +Number message_id
+        +Object from
+        +Object chat
+        +String text
+        +Object voice
+    }
+
+    WebhookTelegram --> IAModel : processarComandoTelegram
+    WebhookTelegram --> ChamadoController : atualizar e comentar
+    WebhookTelegram ..> AtualizacaoTelegram : recebe
+    AtualizacaoTelegram --> MensagemTelegram : message
+
+    %% ===== UTILITARIOS =====
+
+    class UtilidadesChamado {
+        <<Utility>>
+        +obterCorStatus(status) String
+        +obterCorPrioridade(prioridade) String
+        +obterInsigniaPrioridade(prioridade) String
+        +formatarData(d) String
+    }
+
+    PainelSolicitante ..> UtilidadesChamado : formatacao
+    ListaChamados ..> UtilidadesChamado : formatacao
+    ModalAgenteChamado ..> UtilidadesChamado : formatacao

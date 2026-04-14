@@ -1,49 +1,102 @@
 /**
- * [M] MODEL: TicketModel
+ * [M] MODEL: ChamadoModel
  * ARQUIVO: src/models/TicketModel.ts
  *
  * Responsavel exclusivo pela persistencia de chamados e comentarios.
  * Sem regras de negocio — isso e papel do Controller.
+ *
+ * Os nomes das colunas no banco (Supabase) permanecem em ingles.
+ * As funcoes de mapeamento convertem entre o esquema do banco
+ * e as interfaces do dominio em portugues.
  */
 import { supabase } from "@/lib/supabase";
-import type { Ticket, Comment } from "./types";
+import type { Chamado, Comentario } from "./types";
 
-export const TicketModel = {
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+/** Mapeia uma linha do banco (colunas em ingles) para a interface Chamado. */
+function mapearChamadoDoBanco(d: any): Chamado {
+  return {
+    id: d.id,
+    numero_protocolo: d.ticket_number,
+    solicitante: d.requester,
+    atribuido_a: d.assigned_to,
+    titulo: d.title,
+    descricao: d.description,
+    status: d.status,
+    prioridade: d.priority,
+    categoria: d.category,
+    tipo: d.type,
+    criado_em: d.created_at,
+    atualizado_em: d.updated_at,
+  };
+}
+
+/** Mapeia a interface Chamado para as colunas do banco (ingles). */
+function mapearChamadoParaBanco(c: Chamado): Record<string, unknown> {
+  return {
+    id: c.id,
+    ticket_number: c.numero_protocolo,
+    requester: c.solicitante,
+    assigned_to: c.atribuido_a,
+    title: c.titulo,
+    description: c.descricao,
+    status: c.status,
+    priority: c.prioridade,
+    category: c.categoria,
+    type: c.tipo,
+    created_at: c.criado_em,
+    updated_at: c.atualizado_em,
+  };
+}
+
+/** Mapeia uma linha do banco para a interface Comentario. */
+function mapearComentarioDoBanco(d: any): Comentario {
+  return {
+    id: d.id,
+    chamado_id: d.ticket_id,
+    autor: d.author,
+    texto: d.text,
+    criado_em: d.created_at,
+  };
+}
+
+export const ChamadoModel = {
   // -- CHAMADOS --
 
-  async getByProtocol(ticketNumber: string): Promise<Ticket | null> {
+  async buscarPorProtocolo(numeroProtocolo: string): Promise<Chamado | null> {
     const { data, error } = await supabase
       .from("tickets")
       .select("*")
-      .eq("ticket_number", ticketNumber)
+      .eq("ticket_number", numeroProtocolo)
       .single();
 
     if (error || !data) return null;
-    return data as Ticket;
+    return mapearChamadoDoBanco(data);
   },
 
-  async getAllActiveTickets(): Promise<Ticket[]> {
+  async buscarTodosChamadosAtivos(): Promise<Chamado[]> {
     const { data, error } = await supabase
       .from("tickets")
       .select("*")
       .order("created_at", { ascending: false });
 
     if (error) return [];
-    return data as Ticket[];
+    return (data as any[]).map(mapearChamadoDoBanco);
   },
 
-  async getTicketsByRequester(requester: string): Promise<Ticket[]> {
+  async buscarChamadosPorSolicitante(solicitante: string): Promise<Chamado[]> {
     const { data, error } = await supabase
       .from("tickets")
       .select("*")
-      .eq("requester", requester)
+      .eq("requester", solicitante)
       .order("created_at", { ascending: false });
 
     if (error) return [];
-    return data as Ticket[];
+    return (data as any[]).map(mapearChamadoDoBanco);
   },
 
-  async getTicketById(id: string): Promise<Ticket | null> {
+  async buscarChamadoPorId(id: string): Promise<Chamado | null> {
     const { data, error } = await supabase
       .from("tickets")
       .select("*")
@@ -51,11 +104,13 @@ export const TicketModel = {
       .single();
 
     if (error || !data) return null;
-    return data as Ticket;
+    return mapearChamadoDoBanco(data);
   },
 
-  async insertTicket(ticket: Ticket): Promise<boolean> {
-    const { error } = await supabase.from("tickets").insert([ticket]);
+  async inserirChamado(chamado: Chamado): Promise<boolean> {
+    const { error } = await supabase
+      .from("tickets")
+      .insert([mapearChamadoParaBanco(chamado)]);
     if (error) {
       console.error("Falha ao inserir chamado:", error.message);
       return false;
@@ -63,7 +118,7 @@ export const TicketModel = {
     return true;
   },
 
-  async updateTicketStatus(id: string, status: string): Promise<boolean> {
+  async atualizarStatusChamado(id: string, status: string): Promise<boolean> {
     const { error } = await supabase
       .from("tickets")
       .update({ status, updated_at: new Date().toISOString() })
@@ -73,11 +128,11 @@ export const TicketModel = {
     return true;
   },
 
-  async assignTicket(id: string, technicianName: string): Promise<boolean> {
+  async atribuirChamado(id: string, nomeTecnico: string): Promise<boolean> {
     const { error } = await supabase
       .from("tickets")
       .update({
-        assigned_to: technicianName,
+        assigned_to: nomeTecnico,
         status: "Em Andamento",
         updated_at: new Date().toISOString(),
       })
@@ -89,24 +144,24 @@ export const TicketModel = {
 
   // -- COMENTARIOS --
 
-  async getCommentsByTicketId(ticketId: string): Promise<Comment[]> {
+  async buscarComentariosPorChamadoId(chamadoId: string): Promise<Comentario[]> {
     const { data, error } = await supabase
       .from("comments")
       .select("*")
-      .eq("ticket_id", ticketId)
+      .eq("ticket_id", chamadoId)
       .order("created_at", { ascending: true });
 
     if (error) return [];
-    return data as Comment[];
+    return (data as any[]).map(mapearComentarioDoBanco);
   },
 
-  async insertComment(commentData: Comment): Promise<boolean> {
+  async inserirComentario(comentario: Comentario): Promise<boolean> {
     const { error } = await supabase.from("comments").insert([
       {
-        ticket_id: commentData.ticket_id,
-        author: commentData.author,
-        text: commentData.text,
-        created_at: commentData.created_at ?? new Date().toISOString(),
+        ticket_id: comentario.chamado_id,
+        author: comentario.autor,
+        text: comentario.texto,
+        created_at: comentario.criado_em ?? new Date().toISOString(),
       },
     ]);
 

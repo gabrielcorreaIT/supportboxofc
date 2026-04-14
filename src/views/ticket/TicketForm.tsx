@@ -1,94 +1,94 @@
 /**
- * [V] VIEW: TicketForm (Formulario do Solicitante com Triagem IA)
+ * [V] VIEW: FormularioChamado (Formulario do Solicitante com Triagem IA)
  * ARQUIVO: src/views/ticket/TicketForm.tsx
  */
 "use client";
 
 import { useState } from "react";
 import ReactMarkdown from "react-markdown";
-import { analyzeProblemAction, createTicketAction } from "@/controllers/TicketController";
+import { acaoAnalisarProblema, acaoCriarChamado } from "@/controllers/TicketController";
 import {
   Bot, AlertTriangle, Send, Sparkles, CheckCircle2,
   ClipboardCheck, ArrowRight, Cpu,
 } from "lucide-react";
 
-interface TicketFormProps {
-  requesterName: string;
+interface PropsFormularioChamado {
+  nomeSolicitante: string;
 }
 
-export function TicketForm({ requesterName }: TicketFormProps) {
-  const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
-  const [problemDescription, setProblemDescription] = useState("");
-  const [aiSuggestion, setAiSuggestion] = useState("");
-  const [title, setTitle] = useState("");
-  const [category, setCategory] = useState("");
-  const [type, setType] = useState<"incident" | "service_request">("incident");
-  const [protocolNumber, setProtocolNumber] = useState("");
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isTicketCreated, setIsTicketCreated] = useState(false);
+export function FormularioChamado({ nomeSolicitante }: PropsFormularioChamado) {
+  const [etapa, setEtapa] = useState<1 | 2 | 3 | 4>(1);
+  const [descricaoProblema, setDescricaoProblema] = useState("");
+  const [sugestaoIA, setSugestaoIA] = useState("");
+  const [titulo, setTitulo] = useState("");
+  const [categoria, setCategoria] = useState("");
+  const [tipo, setTipo] = useState<"incident" | "service_request">("incident");
+  const [numeroProtocolo, setNumeroProtocolo] = useState("");
+  const [analisando, setAnalisando] = useState(false);
+  const [enviando, setEnviando] = useState(false);
+  const [chamadoCriado, setChamadoCriado] = useState(false);
 
-  const handleResetFlow = () => {
-    setStep(1);
-    setIsTicketCreated(false);
-    setProblemDescription("");
-    setTitle("");
-    setCategory("");
-    setType("incident");
-    setAiSuggestion("");
-    setProtocolNumber("");
+  const reiniciarFluxo = () => {
+    setEtapa(1);
+    setChamadoCriado(false);
+    setDescricaoProblema("");
+    setTitulo("");
+    setCategoria("");
+    setTipo("incident");
+    setSugestaoIA("");
+    setNumeroProtocolo("");
   };
 
-  const handleAnalyzeProblem = async () => {
-    if (!problemDescription.trim()) return;
-    setIsAnalyzing(true);
+  const analisarProblema = async () => {
+    if (!descricaoProblema.trim()) return;
+    setAnalisando(true);
     try {
-      const response = await analyzeProblemAction(problemDescription);
-      if (!response.success || response.isEscalated) {
-        setStep(3);
+      const resposta = await acaoAnalisarProblema(descricaoProblema);
+      if (!resposta.sucesso || resposta.escalado) {
+        setEtapa(3);
       } else {
-        setAiSuggestion(response.suggestion ?? "");
-        setStep(2);
+        setSugestaoIA(resposta.sugestao ?? "");
+        setEtapa(2);
       }
     } catch {
-      setStep(3);
+      setEtapa(3);
     } finally {
-      setIsAnalyzing(false);
+      setAnalisando(false);
     }
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+  const tratarTecla = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      if (problemDescription.trim() && !isAnalyzing) handleAnalyzeProblem();
+      if (descricaoProblema.trim() && !analisando) analisarProblema();
     }
   };
 
-  const handleSubmitTicket = async (e: React.FormEvent) => {
+  const enviarChamado = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
+    setEnviando(true);
     try {
-      const response = await createTicketAction(
-        title, problemDescription, category, type, requesterName,
+      const resposta = await acaoCriarChamado(
+        titulo, descricaoProblema, categoria, tipo, nomeSolicitante,
       );
-      if (response.success) {
-        setProtocolNumber(response.protocolNumber ?? "");
-        setIsTicketCreated(true);
+      if (resposta.sucesso) {
+        setNumeroProtocolo(resposta.numeroProtocolo ?? "");
+        setChamadoCriado(true);
       } else {
-        alert("Erro: " + response.error);
+        alert("Erro: " + resposta.erro);
       }
     } catch {
       alert("Falha na comunicacao com o servidor.");
     } finally {
-      setIsSubmitting(false);
+      setEnviando(false);
     }
   };
 
   return (
     <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 p-6 sm:p-8">
 
-      {/* STEP 1: Descricao do problema */}
-      {step === 1 && (
+      {/* ETAPA 1: Descricao do problema */}
+      {etapa === 1 && (
         <div>
           <div className="text-center mb-6">
             <div className="w-16 h-16 bg-blue-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
@@ -104,17 +104,17 @@ export function TicketForm({ requesterName }: TicketFormProps) {
           <div className="space-y-4 max-w-2xl mx-auto">
             <textarea
               placeholder="Ex: Minha impressora parou de funcionar..."
-              value={problemDescription}
-              onChange={(e) => setProblemDescription(e.target.value)}
-              onKeyDown={handleKeyDown}
+              value={descricaoProblema}
+              onChange={(e) => setDescricaoProblema(e.target.value)}
+              onKeyDown={tratarTecla}
               className="w-full min-h-[140px] resize-none rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 p-4 text-base focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 focus:outline-none transition-all dark:text-white dark:placeholder:text-slate-400"
             />
             <button
-              onClick={handleAnalyzeProblem}
-              disabled={!problemDescription.trim() || isAnalyzing}
+              onClick={analisarProblema}
+              disabled={!descricaoProblema.trim() || analisando}
               className="w-full h-12 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
-              {isAnalyzing ? (
+              {analisando ? (
                 <><Bot className="w-5 h-5 animate-pulse" /> Analisando...</>
               ) : (
                 <><Sparkles className="w-5 h-5" /> Buscar Solucao Automatica</>
@@ -124,8 +124,8 @@ export function TicketForm({ requesterName }: TicketFormProps) {
         </div>
       )}
 
-      {/* STEP 2: Sugestao da IA */}
-      {step === 2 && (
+      {/* ETAPA 2: Sugestao da IA */}
+      {etapa === 2 && (
         <div className="space-y-6 max-w-2xl mx-auto">
           <div className="bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-xl overflow-hidden">
             <div className="bg-emerald-100 dark:bg-emerald-900/40 p-4 flex items-center gap-3 text-emerald-700 dark:text-emerald-400">
@@ -136,18 +136,18 @@ export function TicketForm({ requesterName }: TicketFormProps) {
               </div>
             </div>
             <div className="p-6 prose prose-emerald dark:prose-invert max-w-none text-slate-700 dark:text-slate-300">
-              <ReactMarkdown>{aiSuggestion}</ReactMarkdown>
+              <ReactMarkdown>{sugestaoIA}</ReactMarkdown>
             </div>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <button
-              onClick={() => { handleResetFlow(); setStep(4); }}
+              onClick={() => { reiniciarFluxo(); setEtapa(4); }}
               className="h-12 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold transition-all flex items-center justify-center gap-2"
             >
               <CheckCircle2 className="w-5 h-5" /> Resolveu meu problema!
             </button>
             <button
-              onClick={() => setStep(3)}
+              onClick={() => setEtapa(3)}
               className="h-12 rounded-xl border-2 border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 font-semibold transition-all flex items-center justify-center gap-2"
             >
               <AlertTriangle className="w-5 h-5" /> Preciso da equipe de TI
@@ -156,8 +156,8 @@ export function TicketForm({ requesterName }: TicketFormProps) {
         </div>
       )}
 
-      {/* STEP 3: Formulario de abertura */}
-      {step === 3 && !isTicketCreated && (
+      {/* ETAPA 3: Formulario de abertura */}
+      {etapa === 3 && !chamadoCriado && (
         <div className="max-w-2xl mx-auto">
           <div className="text-center mb-6">
             <div className="w-14 h-14 bg-slate-100 dark:bg-slate-700 rounded-xl flex items-center justify-center mx-auto mb-3">
@@ -166,13 +166,13 @@ export function TicketForm({ requesterName }: TicketFormProps) {
             <h2 className="text-xl font-bold text-slate-900 dark:text-white">Abertura de Chamado</h2>
             <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Preencha os dados para registrar formalmente.</p>
           </div>
-          <form onSubmit={handleSubmitTicket} className="space-y-4">
+          <form onSubmit={enviarChamado} className="space-y-4">
             <div>
               <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Titulo</label>
               <input
                 type="text"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
+                value={titulo}
+                onChange={(e) => setTitulo(e.target.value)}
                 placeholder="Resumo breve do problema"
                 required
                 className="mt-1 w-full h-11 px-4 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-sm focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 focus:outline-none dark:text-white"
@@ -181,8 +181,8 @@ export function TicketForm({ requesterName }: TicketFormProps) {
             <div>
               <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Descricao</label>
               <textarea
-                value={problemDescription}
-                onChange={(e) => setProblemDescription(e.target.value)}
+                value={descricaoProblema}
+                onChange={(e) => setDescricaoProblema(e.target.value)}
                 rows={3}
                 required
                 className="mt-1 w-full resize-none rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 p-4 text-sm focus:ring-2 focus:ring-blue-500/30 focus:outline-none dark:text-white"
@@ -192,8 +192,8 @@ export function TicketForm({ requesterName }: TicketFormProps) {
               <div>
                 <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Categoria</label>
                 <select
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value)}
+                  value={categoria}
+                  onChange={(e) => setCategoria(e.target.value)}
                   required
                   className="mt-1 w-full h-11 px-4 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-sm focus:ring-2 focus:ring-blue-500/30 focus:outline-none appearance-none cursor-pointer dark:text-white"
                 >
@@ -207,8 +207,8 @@ export function TicketForm({ requesterName }: TicketFormProps) {
               <div>
                 <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Tipo</label>
                 <select
-                  value={type}
-                  onChange={(e) => setType(e.target.value as "incident" | "service_request")}
+                  value={tipo}
+                  onChange={(e) => setTipo(e.target.value as "incident" | "service_request")}
                   className="mt-1 w-full h-11 px-4 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-sm focus:ring-2 focus:ring-blue-500/30 focus:outline-none appearance-none cursor-pointer dark:text-white"
                 >
                   <option value="incident">Incidente</option>
@@ -219,25 +219,25 @@ export function TicketForm({ requesterName }: TicketFormProps) {
             <div className="flex gap-3 pt-2">
               <button
                 type="button"
-                onClick={() => setStep(1)}
+                onClick={() => setEtapa(1)}
                 className="w-1/3 h-11 rounded-xl border-2 border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 font-semibold hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors text-sm"
               >
                 Voltar
               </button>
               <button
                 type="submit"
-                disabled={isSubmitting}
+                disabled={enviando}
                 className="w-2/3 h-11 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold transition-all disabled:opacity-50 flex items-center justify-center gap-2 text-sm"
               >
-                {isSubmitting ? "Salvando..." : <><Send className="w-4 h-4" /> Enviar Chamado</>}
+                {enviando ? "Salvando..." : <><Send className="w-4 h-4" /> Enviar Chamado</>}
               </button>
             </div>
           </form>
         </div>
       )}
 
-      {/* STEP 3: Confirmacao de criacao */}
-      {step === 3 && isTicketCreated && (
+      {/* ETAPA 3: Confirmacao de criacao */}
+      {etapa === 3 && chamadoCriado && (
         <div className="py-8 flex flex-col items-center text-center space-y-6">
           <div className="w-20 h-20 bg-blue-50 dark:bg-blue-900/30 border-2 border-blue-200 dark:border-blue-800 rounded-full flex items-center justify-center">
             <ClipboardCheck className="w-10 h-10 text-blue-600 dark:text-blue-400" />
@@ -247,11 +247,11 @@ export function TicketForm({ requesterName }: TicketFormProps) {
             <p className="text-slate-500 dark:text-slate-400 mt-2">Acompanhe o andamento na sua lista de chamados.</p>
             <div className="inline-block bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl px-5 py-3 mt-4">
               <p className="text-xs text-slate-400 uppercase font-semibold mb-1">Protocolo</p>
-              <p className="text-xl font-mono font-bold text-blue-600 dark:text-blue-400">{protocolNumber}</p>
+              <p className="text-xl font-mono font-bold text-blue-600 dark:text-blue-400">{numeroProtocolo}</p>
             </div>
           </div>
           <button
-            onClick={handleResetFlow}
+            onClick={reiniciarFluxo}
             className="h-11 px-6 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold transition-all flex items-center gap-2"
           >
             Novo Chamado <ArrowRight className="w-4 h-4" />
@@ -259,8 +259,8 @@ export function TicketForm({ requesterName }: TicketFormProps) {
         </div>
       )}
 
-      {/* STEP 4: Problema resolvido pela IA */}
-      {step === 4 && (
+      {/* ETAPA 4: Problema resolvido pela IA */}
+      {etapa === 4 && (
         <div className="py-8 flex flex-col items-center text-center space-y-6">
           <div className="w-20 h-20 bg-emerald-50 dark:bg-emerald-900/30 border-2 border-emerald-200 dark:border-emerald-800 rounded-full flex items-center justify-center">
             <CheckCircle2 className="w-10 h-10 text-emerald-600 dark:text-emerald-400" />
@@ -270,7 +270,7 @@ export function TicketForm({ requesterName }: TicketFormProps) {
             <p className="text-slate-500 dark:text-slate-400 mt-2">A equipe de TI agradece e segue a disposicao.</p>
           </div>
           <button
-            onClick={handleResetFlow}
+            onClick={reiniciarFluxo}
             className="h-11 px-6 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold transition-all"
           >
             Nova Solicitacao

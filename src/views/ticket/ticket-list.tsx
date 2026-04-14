@@ -1,57 +1,57 @@
 /**
- * [V] VIEW: TicketList (Lista de chamados do Agente)
+ * [V] VIEW: ListaChamados (Lista de chamados do Agente)
  * ARQUIVO: src/views/ticket/ticket-list.tsx
  */
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { getDashboardDataAction } from "@/controllers/TicketController";
-import { TicketAgentModal } from "@/views/ticket/ticket-agent-modal";
-import type { Ticket } from "@/models/types";
-import { getStatusColor, getPriorityColor, formatDate } from "@/lib/ticket-utils";
+import { acaoObterDadosPainel } from "@/controllers/TicketController";
+import { ModalAgenteChamado } from "@/views/ticket/ticket-agent-modal";
+import type { Chamado } from "@/models/types";
+import { obterCorStatus, obterCorPrioridade, formatarData } from "@/lib/ticket-utils";
 import { Clock, Package, Search, AlertTriangle, Loader2, RefreshCw } from "lucide-react";
 
-type StatusFilter = "all" | "open" | "in-progress" | "done";
+type FiltroStatus = "todos" | "abertos" | "em-andamento" | "concluidos";
 
-export default function TicketList() {
-  const [tickets, setTickets] = useState<Ticket[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
-  const [selectedProtocol, setSelectedProtocol] = useState<string | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+export default function ListaChamados() {
+  const [chamados, setChamados] = useState<Chamado[]>([]);
+  const [carregando, setCarregando] = useState(true);
+  const [termoBusca, setTermoBusca] = useState("");
+  const [filtroStatus, setFiltroStatus] = useState<FiltroStatus>("todos");
+  const [protocoloSelecionado, setProtocoloSelecionado] = useState<string | null>(null);
+  const [modalAberto, setModalAberto] = useState(false);
 
-  const fetchTickets = useCallback(async () => {
-    setIsLoading(true);
+  const buscarChamados = useCallback(async () => {
+    setCarregando(true);
     try {
-      const result = await getDashboardDataAction();
-      if (result.success && result.data) setTickets(result.data.tickets);
+      const resultado = await acaoObterDadosPainel();
+      if (resultado.sucesso && resultado.dados) setChamados(resultado.dados.chamados);
     } catch (error) {
       console.error("Erro ao carregar chamados:", error);
     } finally {
-      setIsLoading(false);
+      setCarregando(false);
     }
   }, []);
 
-  useEffect(() => { fetchTickets(); }, [fetchTickets]);
+  useEffect(() => { buscarChamados(); }, [buscarChamados]);
 
-  const filteredTickets = tickets.filter((ticket) => {
-    const texto = `${ticket.title} ${ticket.ticket_number} ${ticket.requester}`.toLowerCase();
-    const matchesSearch = texto.includes(searchQuery.toLowerCase());
+  const chamadosFiltrados = chamados.filter((chamado) => {
+    const texto = `${chamado.titulo} ${chamado.numero_protocolo} ${chamado.solicitante}`.toLowerCase();
+    const correspondeAoBuscar = texto.includes(termoBusca.toLowerCase());
 
-    let matchesStatus = statusFilter === "all";
-    if (statusFilter === "open" && ticket.status === "Aberto") matchesStatus = true;
-    if (statusFilter === "in-progress" && ticket.status === "Em Andamento") matchesStatus = true;
-    if (statusFilter === "done" && ticket.status === "Concluído") matchesStatus = true;
+    let correspondeAoStatus = filtroStatus === "todos";
+    if (filtroStatus === "abertos" && chamado.status === "Aberto") correspondeAoStatus = true;
+    if (filtroStatus === "em-andamento" && chamado.status === "Em Andamento") correspondeAoStatus = true;
+    if (filtroStatus === "concluidos" && chamado.status === "Concluído") correspondeAoStatus = true;
 
-    return matchesSearch && matchesStatus;
+    return correspondeAoBuscar && correspondeAoStatus;
   });
 
-  const statusTabs: { value: StatusFilter; label: string }[] = [
-    { value: "all", label: "Todos" },
-    { value: "open", label: "Abertos" },
-    { value: "in-progress", label: "Em Andamento" },
-    { value: "done", label: "Concluidos" },
+  const abasStatus: { valor: FiltroStatus; rotulo: string }[] = [
+    { valor: "todos", rotulo: "Todos" },
+    { valor: "abertos", rotulo: "Abertos" },
+    { valor: "em-andamento", rotulo: "Em Andamento" },
+    { valor: "concluidos", rotulo: "Concluidos" },
   ];
 
   return (
@@ -63,92 +63,92 @@ export default function TicketList() {
           <input
             type="search"
             placeholder="Pesquisar chamados..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            value={termoBusca}
+            onChange={(e) => setTermoBusca(e.target.value)}
             className="w-full sm:w-[300px] pl-9 pr-4 h-10 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/30 focus:border-orange-400"
           />
         </div>
         <div className="flex items-center gap-3">
           <div className="flex bg-slate-100 p-1 rounded-xl gap-1">
-            {statusTabs.map(({ value, label }) => (
+            {abasStatus.map(({ valor, rotulo }) => (
               <button
-                key={value}
-                onClick={() => setStatusFilter(value)}
+                key={valor}
+                onClick={() => setFiltroStatus(valor)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                  statusFilter === value
+                  filtroStatus === valor
                     ? "bg-orange-500 text-white shadow-sm"
                     : "text-slate-500 hover:text-slate-700"
                 }`}
               >
-                {label}
+                {rotulo}
               </button>
             ))}
           </div>
           <button
-            onClick={fetchTickets}
-            disabled={isLoading}
+            onClick={buscarChamados}
+            disabled={carregando}
             className="p-2 rounded-xl border border-slate-200 text-slate-500 hover:text-orange-500 hover:border-orange-300 transition-colors disabled:opacity-50"
             title="Recarregar"
           >
-            <RefreshCw className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`} />
+            <RefreshCw className={`w-4 h-4 ${carregando ? "animate-spin" : ""}`} />
           </button>
         </div>
       </div>
 
       {/* Conteudo */}
-      {isLoading ? (
+      {carregando ? (
         <div className="flex flex-col items-center justify-center py-16 bg-white rounded-2xl border border-slate-200">
           <Loader2 className="h-8 w-8 animate-spin text-orange-500 mb-3" />
           <p className="text-slate-500 font-medium text-sm">Carregando chamados...</p>
         </div>
-      ) : filteredTickets.length === 0 ? (
+      ) : chamadosFiltrados.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 bg-white rounded-2xl border border-slate-200">
           <Package className="h-10 w-10 text-slate-300 mb-3" />
           <p className="text-slate-500 font-medium">Nenhum chamado encontrado.</p>
-          {searchQuery && (
-            <button onClick={() => setSearchQuery("")} className="mt-2 text-sm text-orange-500 hover:underline">
+          {termoBusca && (
+            <button onClick={() => setTermoBusca("")} className="mt-2 text-sm text-orange-500 hover:underline">
               Limpar busca
             </button>
           )}
         </div>
       ) : (
         <div className="grid gap-3">
-          {filteredTickets.map((ticket) => (
+          {chamadosFiltrados.map((chamado) => (
             <div
-              key={ticket.id}
+              key={chamado.id}
               className="bg-white border border-slate-200 rounded-2xl p-5 hover:border-orange-300 hover:shadow-md transition-all"
             >
               <div className="flex items-start justify-between gap-4">
                 <div className="flex gap-3 items-start min-w-0">
-                  {ticket.type === "incident"
+                  {chamado.tipo === "incident"
                     ? <AlertTriangle className="h-5 w-5 text-red-500 mt-0.5 flex-shrink-0" />
                     : <Package className="h-5 w-5 text-blue-500 mt-0.5 flex-shrink-0" />
                   }
                   <div className="min-w-0">
-                    <h3 className="font-semibold text-slate-900 truncate">{ticket.title}</h3>
+                    <h3 className="font-semibold text-slate-900 truncate">{chamado.titulo}</h3>
                     <p className="text-sm text-slate-500 mt-0.5">
-                      <span className="font-mono font-medium text-slate-700">{ticket.ticket_number}</span>
-                      {" \u2022 "}{ticket.requester}{" \u2022 "}{ticket.category}
-                      {ticket.assigned_to && <span className="text-orange-500"> \u2022 {ticket.assigned_to}</span>}
+                      <span className="font-mono font-medium text-slate-700">{chamado.numero_protocolo}</span>
+                      {" \u2022 "}{chamado.solicitante}{" \u2022 "}{chamado.categoria}
+                      {chamado.atribuido_a && <span className="text-orange-500"> {"\u2022"} {chamado.atribuido_a}</span>}
                     </p>
                   </div>
                 </div>
                 <div className="flex gap-2 flex-shrink-0">
-                  <span className={`${getPriorityColor(ticket.priority)} text-white text-xs font-semibold px-2.5 py-1 rounded-full`}>
-                    {ticket.priority}
+                  <span className={`${obterCorPrioridade(chamado.prioridade)} text-white text-xs font-semibold px-2.5 py-1 rounded-full`}>
+                    {chamado.prioridade}
                   </span>
-                  <span className={`${getStatusColor(ticket.status)} text-white text-xs font-semibold px-2.5 py-1 rounded-full`}>
-                    {ticket.status}
+                  <span className={`${obterCorStatus(chamado.status)} text-white text-xs font-semibold px-2.5 py-1 rounded-full`}>
+                    {chamado.status}
                   </span>
                 </div>
               </div>
               <div className="flex items-center justify-between mt-4 pt-3 border-t border-slate-100">
                 <div className="flex items-center text-xs text-slate-400 gap-1.5">
                   <Clock className="w-3.5 h-3.5" />
-                  {formatDate(ticket.created_at)}
+                  {formatarData(chamado.criado_em)}
                 </div>
                 <button
-                  onClick={() => { setSelectedProtocol(ticket.ticket_number); setIsModalOpen(true); }}
+                  onClick={() => { setProtocoloSelecionado(chamado.numero_protocolo); setModalAberto(true); }}
                   className="text-sm font-semibold text-orange-500 hover:text-orange-600 hover:underline transition-colors"
                 >
                   Ver detalhes
@@ -159,11 +159,11 @@ export default function TicketList() {
         </div>
       )}
 
-      <TicketAgentModal
-        ticketProtocol={selectedProtocol}
-        isOpen={isModalOpen}
-        onClose={() => { setIsModalOpen(false); setSelectedProtocol(null); }}
-        onTicketUpdated={fetchTickets}
+      <ModalAgenteChamado
+        protocoloChamado={protocoloSelecionado}
+        aberto={modalAberto}
+        aoFechar={() => { setModalAberto(false); setProtocoloSelecionado(null); }}
+        aoChamadoAtualizar={buscarChamados}
       />
     </div>
   );

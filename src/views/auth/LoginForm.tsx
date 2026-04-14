@@ -1,5 +1,5 @@
 /**
- * [V] VIEW: LoginForm
+ * [V] VIEW: FormularioLogin
  * ARQUIVO: src/views/auth/LoginForm.tsx
  */
 "use client";
@@ -7,32 +7,32 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff, Loader2, LogIn } from "lucide-react";
-import { loginAction } from "@/controllers/AuthController";
+import { acaoLogin } from "@/controllers/AuthController";
 
-export function LoginForm() {
+export function FormularioLogin() {
   const router = useRouter();
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [senha, setSenha] = useState("");
+  const [mostrarSenha, setMostrarSenha] = useState(false);
+  const [carregando, setCarregando] = useState(false);
+  const [erro, setErro] = useState<string | null>(null);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const enviarFormulario = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
-    setIsLoading(true);
+    setErro(null);
+    setCarregando(true);
     try {
-      const result = await loginAction(email, password);
-      if (result.success) {
-        const dest = result.role === "tecnico" ? "/agente" : "/solicitante";
-        router.push(dest);
+      const resultado = await acaoLogin(email, senha);
+      if (resultado.sucesso) {
+        const destino = resultado.papel === "tecnico" ? "/agente" : "/solicitante";
+        router.push(destino);
       } else {
-        setError(result.error ?? "Credenciais invalidas.");
+        setErro(resultado.erro ?? "Credenciais invalidas.");
       }
     } catch {
-      setError("Falha na comunicacao com o servidor.");
+      setErro("Falha na comunicacao com o servidor.");
     } finally {
-      setIsLoading(false);
+      setCarregando(false);
     }
   };
 
@@ -43,14 +43,14 @@ export function LoginForm() {
         <p className="text-slate-400 text-sm mt-1">Use as credenciais fornecidas pela TI</p>
       </div>
 
-      {error && (
+      {erro && (
         <div className="mb-4 px-4 py-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-sm flex items-center gap-2">
           <span className="w-1.5 h-1.5 rounded-full bg-red-400 flex-shrink-0" />
-          {error}
+          {erro}
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={enviarFormulario} className="space-y-4">
         <div className="space-y-1.5">
           <label className="text-sm font-medium text-slate-300">E-mail corporativo</label>
           <input
@@ -59,7 +59,7 @@ export function LoginForm() {
             onChange={(e) => setEmail(e.target.value)}
             placeholder="usuario@empresa.com"
             required
-            disabled={isLoading}
+            disabled={carregando}
             className="w-full h-12 px-4 rounded-xl bg-slate-900/60 border border-slate-700 text-white placeholder:text-slate-600 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/40 focus:border-orange-500/60 transition-all disabled:opacity-50"
           />
         </div>
@@ -68,31 +68,31 @@ export function LoginForm() {
           <label className="text-sm font-medium text-slate-300">Senha</label>
           <div className="relative">
             <input
-              type={showPassword ? "text" : "password"}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              type={mostrarSenha ? "text" : "password"}
+              value={senha}
+              onChange={(e) => setSenha(e.target.value)}
               placeholder="********"
               required
-              disabled={isLoading}
+              disabled={carregando}
               className="w-full h-12 px-4 pr-12 rounded-xl bg-slate-900/60 border border-slate-700 text-white placeholder:text-slate-600 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/40 focus:border-orange-500/60 transition-all disabled:opacity-50"
             />
             <button
               type="button"
-              onClick={() => setShowPassword((p) => !p)}
+              onClick={() => setMostrarSenha((p) => !p)}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 transition-colors"
               tabIndex={-1}
             >
-              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              {mostrarSenha ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
           </div>
         </div>
 
         <button
           type="submit"
-          disabled={isLoading || !email.trim() || !password.trim()}
+          disabled={carregando || !email.trim() || !senha.trim()}
           className="w-full h-12 mt-2 rounded-xl bg-orange-500 hover:bg-orange-400 text-white font-semibold text-sm flex items-center justify-center gap-2 transition-all hover:-translate-y-0.5 hover:shadow-lg hover:shadow-orange-500/25 disabled:opacity-50 disabled:cursor-not-allowed disabled:translate-y-0"
         >
-          {isLoading ? (
+          {carregando ? (
             <><Loader2 className="w-4 h-4 animate-spin" /> Autenticando...</>
           ) : (
             <><LogIn className="w-4 h-4" /> Acessar</>

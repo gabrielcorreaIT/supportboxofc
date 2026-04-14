@@ -2,34 +2,34 @@
  * [M] TYPES: Dominio da aplicacao
  * ARQUIVO: src/models/types.ts
  */
-export type TicketPriority = "Baixa" | "Média" | "Alta" | "Urgente";
+export type PrioridadeChamado = "Baixa" | "Média" | "Alta" | "Urgente";
 
-export type TicketStatus = "Aberto" | "Em Andamento" | "Concluído";
+export type StatusChamado = "Aberto" | "Em Andamento" | "Concluído";
 
-export const VALID_CATEGORIES = ["Hardware", "Software", "Acesso", "Rede"] as const;
-export type TicketCategory = (typeof VALID_CATEGORIES)[number];
+export const CATEGORIAS_VALIDAS = ["Hardware", "Software", "Acesso", "Rede"] as const;
+export type CategoriaChamado = (typeof CATEGORIAS_VALIDAS)[number];
 
-export const VALID_STATUSES: TicketStatus[] = ["Aberto", "Em Andamento", "Concluído"];
+export const STATUS_VALIDOS: StatusChamado[] = ["Aberto", "Em Andamento", "Concluído"];
 
-export interface Ticket {
+export interface Chamado {
   id: string;
-  ticket_number: string;
-  requester: string;
-  assigned_to?: string;
-  title: string;
-  description: string;
-  status: TicketStatus;
-  priority: TicketPriority;
-  category: string;
-  type: "incident" | "service_request";
-  created_at: string;
-  updated_at?: string;
+  numero_protocolo: string;
+  solicitante: string;
+  atribuido_a?: string;
+  titulo: string;
+  descricao: string;
+  status: StatusChamado;
+  prioridade: PrioridadeChamado;
+  categoria: string;
+  tipo: "incident" | "service_request";
+  criado_em: string;
+  atualizado_em?: string;
 }
 
-export interface Comment {
+export interface Comentario {
   id?: string;
-  ticket_id: string;
-  author: string;
-  text: string;
-  created_at?: string;
+  chamado_id: string;
+  autor: string;
+  texto: string;
+  criado_em?: string;
 }

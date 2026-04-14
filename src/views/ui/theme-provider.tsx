@@ -1,6 +1,6 @@
 /**
  * ============================================================================
- * [V] VIEW: ThemeProvider
+ * [V] VIEW: ProvedorTema
  * ARQUIVO: src/views/ui/theme-provider.tsx
  * ============================================================================
  */
@@ -9,6 +9,6 @@
 import * as React from "react";
 import { ThemeProvider as NextThemesProvider, type ThemeProviderProps } from "next-themes";
 
-export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
+export function ProvedorTema({ children, ...props }: ThemeProviderProps) {
   return <NextThemesProvider {...props}>{children}</NextThemesProvider>;
 }

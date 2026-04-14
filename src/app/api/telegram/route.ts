@@ -1,5 +1,5 @@
 /**
- * [C] API ROUTE: Telegram Webhook
+ * [C] API ROUTE: Webhook do Telegram
  * ARQUIVO: src/app/api/telegram/route.ts
  *
  * Recebe atualizacoes do bot Telegram (texto e audio dos tecnicos em campo).
@@ -9,135 +9,135 @@ import { NextRequest, NextResponse } from "next/server";
 import type { Part } from "@google/generative-ai";
 import { IAModel } from "@/models/IAModel";
 import {
-  getTicketDetailsAction,
-  addTicketCommentAction,
-  updateTicketStatusAction,
+  acaoObterDetalhesChamado,
+  acaoAdicionarComentario,
+  acaoAtualizarStatus,
 } from "@/controllers/TicketController";
 
-const TELEGRAM_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
-const TELEGRAM_API = `https://api.telegram.org/bot${TELEGRAM_TOKEN}`;
-const TELEGRAM_WEBHOOK_SECRET = process.env.TELEGRAM_WEBHOOK_SECRET;
-const MAX_AUDIO_BYTES = 10 * 1024 * 1024;
+const TOKEN_TELEGRAM = process.env.TELEGRAM_BOT_TOKEN;
+const API_TELEGRAM = `https://api.telegram.org/bot${TOKEN_TELEGRAM}`;
+const SEGREDO_WEBHOOK = process.env.TELEGRAM_WEBHOOK_SECRET;
+const MAX_BYTES_AUDIO = 10 * 1024 * 1024;
 
-async function sendMessage(chatId: number, text: string): Promise<void> {
-  await fetch(`${TELEGRAM_API}/sendMessage`, {
+async function enviarMensagem(chatId: number, texto: string): Promise<void> {
+  await fetch(`${API_TELEGRAM}/sendMessage`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ chat_id: chatId, text, parse_mode: "Markdown" }),
+    body: JSON.stringify({ chat_id: chatId, text: texto, parse_mode: "Markdown" }),
   });
 }
 
-async function downloadFileAsBase64(fileId: string): Promise<string> {
-  const res = await fetch(`${TELEGRAM_API}/getFile?file_id=${fileId}`);
-  const data = (await res.json()) as {
+async function baixarArquivoBase64(fileId: string): Promise<string> {
+  const res = await fetch(`${API_TELEGRAM}/getFile?file_id=${fileId}`);
+  const dados = (await res.json()) as {
     result: { file_path: string; file_size?: number };
   };
 
-  if (data.result.file_size && data.result.file_size > MAX_AUDIO_BYTES) {
+  if (dados.result.file_size && dados.result.file_size > MAX_BYTES_AUDIO) {
     throw new Error("Arquivo de audio excede 10 MB.");
   }
 
-  const audioRes = await fetch(
-    `https://api.telegram.org/file/bot${TELEGRAM_TOKEN}/${data.result.file_path}`,
+  const resAudio = await fetch(
+    `https://api.telegram.org/file/bot${TOKEN_TELEGRAM}/${dados.result.file_path}`,
   );
-  const arrayBuffer = await audioRes.arrayBuffer();
+  const arrayBuffer = await resAudio.arrayBuffer();
 
-  if (arrayBuffer.byteLength > MAX_AUDIO_BYTES) {
+  if (arrayBuffer.byteLength > MAX_BYTES_AUDIO) {
     throw new Error("Arquivo de audio excede 10 MB.");
   }
 
   return Buffer.from(arrayBuffer).toString("base64");
 }
 
-export async function POST(request: NextRequest): Promise<NextResponse> {
-  if (!TELEGRAM_TOKEN) {
+export async function POST(requisicao: NextRequest): Promise<NextResponse> {
+  if (!TOKEN_TELEGRAM) {
     console.error("TELEGRAM_BOT_TOKEN nao configurado.");
     return NextResponse.json({ ok: false }, { status: 500 });
   }
 
   // Validacao do secret token do webhook
-  if (TELEGRAM_WEBHOOK_SECRET) {
-    const incomingSecret = request.headers.get("x-telegram-bot-api-secret-token");
-    if (!incomingSecret || incomingSecret !== TELEGRAM_WEBHOOK_SECRET) {
+  if (SEGREDO_WEBHOOK) {
+    const segredoRecebido = requisicao.headers.get("x-telegram-bot-api-secret-token");
+    if (!segredoRecebido || segredoRecebido !== SEGREDO_WEBHOOK) {
       return NextResponse.json({ ok: false }, { status: 403 });
     }
   }
 
-  let update: TelegramUpdate;
+  let atualizacao: AtualizacaoTelegram;
   try {
-    update = (await request.json()) as TelegramUpdate;
+    atualizacao = (await requisicao.json()) as AtualizacaoTelegram;
   } catch {
     return NextResponse.json({ ok: false, error: "Payload invalido" }, { status: 400 });
   }
 
-  const message = update.message;
-  if (!message) return NextResponse.json({ ok: true });
+  const mensagem = atualizacao.message;
+  if (!mensagem) return NextResponse.json({ ok: true });
 
-  const chatId = message.chat.id;
+  const chatId = mensagem.chat.id;
 
   try {
-    const promptParts: Part[] = [];
+    const partesEntrada: Part[] = [];
 
-    if (message.text) {
-      promptParts.push({ text: message.text });
-    } else if (message.voice) {
-      const audioBase64 = await downloadFileAsBase64(message.voice.file_id);
-      promptParts.push({ inlineData: { mimeType: "audio/ogg", data: audioBase64 } });
-      promptParts.push({
+    if (mensagem.text) {
+      partesEntrada.push({ text: mensagem.text });
+    } else if (mensagem.voice) {
+      const audioBase64 = await baixarArquivoBase64(mensagem.voice.file_id);
+      partesEntrada.push({ inlineData: { mimeType: "audio/ogg", data: audioBase64 } });
+      partesEntrada.push({
         text: "Interprete o audio acima como um comando de um tecnico de TI sobre chamados do SupportBox.",
       });
     } else {
-      await sendMessage(chatId, "Por enquanto so processo *texto* ou *mensagens de voz*.");
+      await enviarMensagem(chatId, "Por enquanto so processo *texto* ou *mensagens de voz*.");
       return NextResponse.json({ ok: true });
     }
 
-    const command = await IAModel.processTelegramCommand(promptParts);
+    const comando = await IAModel.processarComandoTelegram(partesEntrada);
 
-    if (command.action === "ATUALIZAR_STATUS" && command.ticket_id && command.status_alvo) {
-      const ticketResult = await getTicketDetailsAction(command.ticket_id);
-      if (!ticketResult.success || !ticketResult.data) {
-        await sendMessage(chatId, `Chamado *${command.ticket_id}* nao encontrado.`);
+    if (comando.acao === "ATUALIZAR_STATUS" && comando.id_chamado && comando.status_alvo) {
+      const resultadoChamado = await acaoObterDetalhesChamado(comando.id_chamado);
+      if (!resultadoChamado.sucesso || !resultadoChamado.dados) {
+        await enviarMensagem(chatId, `Chamado *${comando.id_chamado}* nao encontrado.`);
         return NextResponse.json({ ok: true });
       }
-      await updateTicketStatusAction(ticketResult.data.id, command.status_alvo);
-      if (command.comment) {
-        await addTicketCommentAction(
-          ticketResult.data.id,
-          message.from?.first_name ?? "Tecnico via Telegram",
-          command.comment,
+      await acaoAtualizarStatus(resultadoChamado.dados.id, comando.status_alvo);
+      if (comando.comentario) {
+        await acaoAdicionarComentario(
+          resultadoChamado.dados.id,
+          mensagem.from?.first_name ?? "Tecnico via Telegram",
+          comando.comentario,
         );
       }
-      await sendMessage(chatId, command.resposta_assistente);
-    } else if (command.action === "COMENTAR" && command.ticket_id && command.comment) {
-      const ticketResult = await getTicketDetailsAction(command.ticket_id);
-      if (!ticketResult.success || !ticketResult.data) {
-        await sendMessage(chatId, `Chamado *${command.ticket_id}* nao encontrado.`);
+      await enviarMensagem(chatId, comando.resposta_assistente);
+    } else if (comando.acao === "COMENTAR" && comando.id_chamado && comando.comentario) {
+      const resultadoChamado = await acaoObterDetalhesChamado(comando.id_chamado);
+      if (!resultadoChamado.sucesso || !resultadoChamado.dados) {
+        await enviarMensagem(chatId, `Chamado *${comando.id_chamado}* nao encontrado.`);
         return NextResponse.json({ ok: true });
       }
-      await addTicketCommentAction(
-        ticketResult.data.id,
-        message.from?.first_name ?? "Tecnico via Telegram",
-        command.comment,
+      await acaoAdicionarComentario(
+        resultadoChamado.dados.id,
+        mensagem.from?.first_name ?? "Tecnico via Telegram",
+        comando.comentario,
       );
-      await sendMessage(chatId, command.resposta_assistente);
+      await enviarMensagem(chatId, comando.resposta_assistente);
     } else {
-      await sendMessage(chatId, command.resposta_assistente);
+      await enviarMensagem(chatId, comando.resposta_assistente);
     }
   } catch (error) {
     console.error("Erro no webhook Telegram:", error);
-    await sendMessage(chatId, "Erro interno ao processar seu comando. Tente novamente.");
+    await enviarMensagem(chatId, "Erro interno ao processar seu comando. Tente novamente.");
   }
 
   return NextResponse.json({ ok: true });
 }
 
 // Tipos locais do Telegram
-interface TelegramUpdate {
+interface AtualizacaoTelegram {
   update_id: number;
-  message?: TelegramMessage;
+  message?: MensagemTelegram;
 }
 
-interface TelegramMessage {
+interface MensagemTelegram {
   message_id: number;
   from?: { id: number; first_name: string; username?: string };
   chat: { id: number; type: string };

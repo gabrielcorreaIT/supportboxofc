@@ -8,11 +8,11 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-function isJwtExpired(token: string): boolean {
+function jwtExpirado(token: string): boolean {
   try {
-    const parts = token.split(".");
-    if (parts.length !== 3) return true;
-    const base64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
+    const partes = token.split(".");
+    if (partes.length !== 3) return true;
+    const base64 = partes[1].replace(/-/g, "+").replace(/_/g, "/");
     const payload = JSON.parse(atob(base64)) as { exp?: number };
     return !payload.exp || payload.exp * 1000 < Date.now();
   } catch {
@@ -20,12 +20,12 @@ function isJwtExpired(token: string): boolean {
   }
 }
 
-export function middleware(request: NextRequest): NextResponse {
-  const accessToken = request.cookies.get("sb-access-token")?.value;
+export function middleware(requisicao: NextRequest): NextResponse {
+  const tokenAcesso = requisicao.cookies.get("sb-access-token")?.value;
 
-  if (!accessToken || isJwtExpired(accessToken)) {
-    const loginUrl = new URL("/login", request.url);
-    return NextResponse.redirect(loginUrl);
+  if (!tokenAcesso || jwtExpirado(tokenAcesso)) {
+    const urlLogin = new URL("/login", requisicao.url);
+    return NextResponse.redirect(urlLogin);
   }
 
   return NextResponse.next();

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { ThemeProvider } from "@/views/ui/theme-provider";
+import { ProvedorTema } from "@/views/ui/theme-provider";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   description: "Sistema de Help Desk Corporativo",
 };
 
-export default function RootLayout({
+export default function LayoutRaiz({
   children,
 }: {
   children: React.ReactNode;
@@ -15,9 +15,9 @@ export default function RootLayout({
   return (
     <html lang="pt-BR" suppressHydrationWarning>
       <body>
-        <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
+        <ProvedorTema attribute="class" defaultTheme="light" enableSystem>
           {children}
-        </ThemeProvider>
+        </ProvedorTema>
       </body>
     </html>
   );
