@@ -1,9 +1,19 @@
 /**
- * [V] VIEW: AgenteIA (Chatbot Flutuante de Triagem)
+ * CAMADA: View — Chatbot Flutuante de Triagem IA
  * ARQUIVO: src/views/ticket/AIAgent.tsx
  *
- * Toda comunicacao com a IA passa pelo Controller (Server Action).
- * A chave da API nunca e exposta ao navegador.
+ * DESCRICAO:
+ *   Widget de chat flutuante (canto inferior direito) que permite ao
+ *   solicitante conversar com a IA de triagem sem sair da tela atual.
+ *   Funciona como um "assistente virtual" que tenta resolver problemas
+ *   simples automaticamente.
+ *
+ *   Toda comunicacao com a IA passa pelo Controller (Server Action),
+ *   garantindo que a chave da API nunca seja exposta ao navegador.
+ *
+ * CONEXOES:
+ *   - Depende de: TicketController.acaoAnalisarProblema (triagem via IA)
+ *   - Usado por:  SolicitanteDashboard (aparece flutuando na tela)
  */
 "use client";
 
@@ -11,8 +21,10 @@ import { useState, useRef, useEffect } from "react";
 import { MessageSquare, X, Send, Bot, User } from "lucide-react";
 import { acaoAnalisarProblema } from "@/controllers/TicketController";
 
+/** Estrutura de uma mensagem no chat. */
 type Mensagem = { id: number; papel: "usuario" | "assistente"; texto: string };
 
+/** Mensagem de boas-vindas exibida quando o chat abre. */
 const MENSAGEM_INICIAL: Mensagem = {
   id: 1,
   papel: "assistente",
@@ -26,18 +38,23 @@ export function AgenteIA() {
   const [mensagens, setMensagens] = useState<Mensagem[]>([MENSAGEM_INICIAL]);
   const fimRef = useRef<HTMLDivElement>(null);
 
+  // Rola automaticamente para a ultima mensagem
   useEffect(() => {
     fimRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [mensagens, digitando]);
 
+  /** Envia a mensagem do usuario para a IA e exibe a resposta. */
   const enviar = async () => {
     if (!entrada.trim()) return;
+
     const msgUsuario: Mensagem = { id: Date.now(), papel: "usuario", texto: entrada };
     setMensagens((prev) => [...prev, msgUsuario]);
     setEntrada("");
     setDigitando(true);
+
     try {
       const resposta = await acaoAnalisarProblema(entrada);
+
       let textoResposta: string;
       if (!resposta.sucesso) {
         textoResposta = "Nao consegui analisar seu problema. Tente abrir um chamado diretamente.";
@@ -46,6 +63,7 @@ export function AgenteIA() {
       } else {
         textoResposta = resposta.sugestao || "Sem solucao automatica. Recomendo abrir um chamado.";
       }
+
       setMensagens((prev) => [...prev, { id: Date.now() + 1, papel: "assistente", texto: textoResposta }]);
     } catch {
       setMensagens((prev) => [
@@ -59,6 +77,7 @@ export function AgenteIA() {
 
   return (
     <>
+      {/* Botao flutuante para abrir o chat */}
       {!aberto && (
         <button
           onClick={() => setAberto(true)}
@@ -69,6 +88,7 @@ export function AgenteIA() {
         </button>
       )}
 
+      {/* Janela do chat */}
       {aberto && (
         <div className="fixed bottom-6 right-6 w-80 sm:w-96 h-[500px] max-h-[80vh] bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-2xl flex flex-col overflow-hidden z-50">
           {/* Cabecalho */}
@@ -88,13 +108,15 @@ export function AgenteIA() {
             </button>
           </div>
 
-          {/* Mensagens */}
+          {/* Area de mensagens */}
           <div className="flex-1 p-4 overflow-y-auto bg-slate-50 dark:bg-slate-900 flex flex-col gap-3">
             {mensagens.map((msg) => (
               <div key={msg.id} className={`flex gap-2 ${msg.papel === "usuario" ? "flex-row-reverse" : "flex-row"}`}>
+                {/* Avatar */}
                 <div className={`p-2 rounded-full h-8 w-8 flex-shrink-0 flex items-center justify-center text-white ${msg.papel === "usuario" ? "bg-slate-700" : "bg-blue-600"}`}>
                   {msg.papel === "usuario" ? <User size={16} /> : <Bot size={16} />}
                 </div>
+                {/* Balao da mensagem */}
                 <div className={`max-w-[75%] p-3 rounded-2xl text-sm whitespace-pre-wrap leading-relaxed ${
                   msg.papel === "usuario"
                     ? "bg-slate-700 text-white rounded-tr-none"
@@ -104,6 +126,8 @@ export function AgenteIA() {
                 </div>
               </div>
             ))}
+
+            {/* Indicador de "digitando..." */}
             {digitando && (
               <div className="flex gap-2">
                 <div className="p-2 rounded-full h-8 w-8 flex-shrink-0 flex items-center justify-center text-white bg-blue-600">
@@ -119,7 +143,7 @@ export function AgenteIA() {
             <div ref={fimRef} />
           </div>
 
-          {/* Entrada */}
+          {/* Campo de entrada */}
           <div className="p-3 bg-white dark:bg-slate-800 border-t border-slate-100 dark:border-slate-700 flex gap-2 flex-shrink-0">
             <input
               type="text"

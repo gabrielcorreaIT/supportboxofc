@@ -1,8 +1,33 @@
 /**
- * [C] CONTROLLER: TicketController (Server Actions)
+ * CAMADA: Controller — Gerenciamento de Chamados
  * ARQUIVO: src/controllers/TicketController.ts
  *
- * Orquestra triagem IA, regras de negocio e metricas do dashboard.
+ * DESCRICAO:
+ *   Contem toda a logica de negocio relacionada a chamados (tickets).
+ *   Atua como intermediario entre as Views (telas) e o Model (banco de dados),
+ *   aplicando validacoes, regras de negocio e calculos antes de salvar ou
+ *   retornar dados.
+ *
+ *   Usa "Server Actions" do Next.js — todas as funcoes rodam no servidor,
+ *   mesmo sendo chamadas diretamente pelos componentes React no navegador.
+ *
+ * CONEXOES:
+ *   - Depende de: ChamadoModel (persistencia), IAModel (triagem IA), types.ts
+ *   - Usado por:  SolicitanteDashboard, TicketForm, ticket-list,
+ *                 ticket-agent-modal, AIAgent, TelegramController
+ *
+ * FUNCOES EXPORTADAS (agrupadas por fluxo):
+ *   Solicitante:
+ *     - acaoAnalisarProblema    -> triagem IA antes de abrir chamado
+ *     - acaoCriarChamado        -> cria um novo chamado no banco
+ *     - acaoObterMeusChamados   -> lista chamados do solicitante
+ *
+ *   Agente de TI:
+ *     - acaoObterDadosPainel    -> lista de chamados + metricas do dashboard
+ *     - acaoObterDetalhesChamado -> dados completos de um chamado + comentarios
+ *     - acaoAdicionarComentario -> adiciona mensagem ao historico
+ *     - acaoAtualizarStatus     -> muda o status (Aberto -> Em Andamento -> Concluido)
+ *     - acaoAtribuirChamado     -> tecnico assume responsabilidade pelo chamado
  */
 "use server";
 
@@ -12,10 +37,17 @@ import { randomUUID } from "crypto";
 import type { Chamado, Comentario, StatusChamado, CategoriaChamado } from "@/models/types";
 import { CATEGORIAS_VALIDAS, STATUS_VALIDOS } from "@/models/types";
 
-// -- Auxiliares --
+// ---------------------------------------------------------------------------
+// Funcao auxiliar de validacao
+// ---------------------------------------------------------------------------
 
+/** Formato de UUID v4 (usado para validar IDs de chamados). */
 const REGEX_UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
+/**
+ * Valida um campo de texto: verifica se nao esta vazio e se respeita
+ * os limites de tamanho. Retorna mensagem de erro ou null se estiver OK.
+ */
 function validar(valor: string, campo: string, min: number, max: number): string | null {
   const limpo = (valor ?? "").trim();
   if (!limpo) return `Campo "${campo}" e obrigatorio.`;
@@ -24,8 +56,15 @@ function validar(valor: string, campo: string, min: number, max: number): string
   return null;
 }
 
-// -- 1. FLUXO DO SOLICITANTE --
+// ===========================================================================
+// 1. FLUXO DO SOLICITANTE
+// ===========================================================================
 
+/**
+ * Triagem inteligente: envia a descricao do problema para a IA analisar.
+ * A IA decide se o problema pode ser resolvido automaticamente ou se
+ * precisa ser escalado para um tecnico humano.
+ */
 export async function acaoAnalisarProblema(descricao: string): Promise<{
   sucesso: boolean;
   escalado?: boolean;
@@ -44,6 +83,11 @@ export async function acaoAnalisarProblema(descricao: string): Promise<{
   }
 }
 
+/**
+ * Cria um novo chamado no sistema.
+ * Gera automaticamente o numero de protocolo e detecta urgencia
+ * por palavras-chave na descricao.
+ */
 export async function acaoCriarChamado(
   titulo: string,
   descricao: string,
@@ -51,6 +95,7 @@ export async function acaoCriarChamado(
   tipo: "incident" | "service_request",
   solicitante: string,
 ): Promise<{ sucesso: boolean; numeroProtocolo?: string; erro?: string }> {
+  // Valida todos os campos obrigatorios
   const erroTitulo = validar(titulo, "Titulo", 5, 200);
   if (erroTitulo) return { sucesso: false, erro: erroTitulo };
 
@@ -69,11 +114,12 @@ export async function acaoCriarChamado(
   if (erroSolicitante) return { sucesso: false, erro: erroSolicitante };
 
   try {
-    // Deteccao simples de urgencia por palavras-chave
+    // Detecta urgencia por palavras-chave na descricao
     const descMinuscula = descricao.toLowerCase();
     const ehUrgente = ["servidor", "urgente", "parou", "caiu", "fora do ar"]
       .some((palavra) => descMinuscula.includes(palavra));
 
+    // Gera um protocolo unico legivel (ex: "CH-A1B2C3D4")
     const numeroProtocolo = `CH-${randomUUID().replace(/-/g, "").slice(0, 8).toUpperCase()}`;
 
     const novoChamado: Chamado = {
@@ -89,6 +135,7 @@ export async function acaoCriarChamado(
       criado_em: new Date().toISOString(),
     };
 
+    // Persiste no banco via Model
     const salvo = await ChamadoModel.inserirChamado(novoChamado);
     if (!salvo) throw new Error("Falha ao persistir no Model.");
 
@@ -99,8 +146,11 @@ export async function acaoCriarChamado(
   }
 }
 
-// -- 2. CHAMADOS DO SOLICITANTE --
+// ===========================================================================
+// 2. CHAMADOS DO SOLICITANTE
+// ===========================================================================
 
+/** Retorna a lista de chamados abertos por um solicitante especifico. */
 export async function acaoObterMeusChamados(solicitante: string): Promise<{
   sucesso: boolean;
   chamados?: Chamado[];
@@ -116,8 +166,14 @@ export async function acaoObterMeusChamados(solicitante: string): Promise<{
   }
 }
 
-// -- 3. FLUXO DO AGENTE DE TI --
+// ===========================================================================
+// 3. FLUXO DO AGENTE DE TI
+// ===========================================================================
 
+/**
+ * Retorna todos os chamados + metricas resumidas para o painel do agente.
+ * As metricas incluem totais por status e taxa de resolucao percentual.
+ */
 export async function acaoObterDadosPainel(): Promise<{
   sucesso: boolean;
   dados?: {
@@ -135,6 +191,7 @@ export async function acaoObterDadosPainel(): Promise<{
   try {
     const chamados = await ChamadoModel.buscarTodosChamadosAtivos();
 
+    // Calcula metricas a partir da lista de chamados
     const total = chamados.length;
     const abertos = chamados.filter((c) => c.status === "Aberto").length;
     const emAndamento = chamados.filter((c) => c.status === "Em Andamento").length;
@@ -151,6 +208,10 @@ export async function acaoObterDadosPainel(): Promise<{
   }
 }
 
+/**
+ * Retorna os dados completos de um chamado (incluindo historico de comentarios).
+ * Busca pelo numero de protocolo (ex: "CH-A1B2C3D4").
+ */
 export async function acaoObterDetalhesChamado(protocolo: string): Promise<{
   sucesso: boolean;
   dados?: Chamado & { interacoes: Comentario[] };
@@ -162,6 +223,7 @@ export async function acaoObterDetalhesChamado(protocolo: string): Promise<{
   try {
     const chamado = await ChamadoModel.buscarPorProtocolo(protocolo.trim());
     if (!chamado) return { sucesso: false, erro: "Chamado nao encontrado." };
+
     const comentarios = await ChamadoModel.buscarComentariosPorChamadoId(chamado.id);
     return { sucesso: true, dados: { ...chamado, interacoes: comentarios } };
   } catch {
@@ -169,6 +231,7 @@ export async function acaoObterDetalhesChamado(protocolo: string): Promise<{
   }
 }
 
+/** Adiciona um comentario ao historico de um chamado. */
 export async function acaoAdicionarComentario(
   chamadoId: string,
   autor: string,
@@ -192,6 +255,7 @@ export async function acaoAdicionarComentario(
   }
 }
 
+/** Altera o status de um chamado (ex: "Aberto" -> "Em Andamento"). */
 export async function acaoAtualizarStatus(
   id: string,
   status: string,
@@ -206,6 +270,7 @@ export async function acaoAtualizarStatus(
   }
 }
 
+/** Atribui um tecnico como responsavel pelo chamado. */
 export async function acaoAtribuirChamado(
   chamadoId: string,
   nomeTecnico: string,

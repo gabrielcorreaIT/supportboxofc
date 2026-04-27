@@ -1,22 +1,50 @@
 /**
- * [V] VIEW: FormularioChamado (Formulario do Solicitante com Triagem IA)
+ * CAMADA: View — Formulario de Abertura de Chamado (com Triagem IA)
  * ARQUIVO: src/views/ticket/TicketForm.tsx
+ *
+ * DESCRICAO:
+ *   Formulario em 4 etapas que guia o solicitante desde a descricao
+ *   do problema ate a abertura formal do chamado:
+ *
+ *     ETAPA 1: Solicitante descreve o problema em texto livre
+ *     ETAPA 2: IA sugere uma solucao automatica (passo-a-passo)
+ *     ETAPA 3: Se a IA nao resolver, abre o formulario completo
+ *     ETAPA 4: Confirmacao de que o problema foi resolvido pela IA
+ *
+ *   Esse fluxo implementa a "Deflexao de Nivel 0" — a ideia de que
+ *   problemas simples podem ser resolvidos automaticamente, reduzindo
+ *   a carga de trabalho da equipe de TI.
+ *
+ * CONEXOES:
+ *   - Depende de: TicketController (triagem IA e criacao de chamados)
+ *   - Usado por:  SolicitanteDashboard (embutido na tela do solicitante)
  */
 "use client";
 
 import { useState } from "react";
 import ReactMarkdown from "react-markdown";
-import { acaoAnalisarProblema, acaoCriarChamado } from "@/controllers/TicketController";
 import {
-  Bot, AlertTriangle, Send, Sparkles, CheckCircle2,
-  ClipboardCheck, ArrowRight, Cpu,
+  acaoAnalisarProblema,
+  acaoCriarChamado,
+} from "@/controllers/TicketController";
+import {
+  Bot,
+  AlertTriangle,
+  Send,
+  Sparkles,
+  CheckCircle2,
+  ClipboardCheck,
+  ArrowRight,
+  Cpu,
 } from "lucide-react";
 
 interface PropsFormularioChamado {
+  /** Nome do solicitante logado (vem da sessao). */
   nomeSolicitante: string;
 }
 
 export function FormularioChamado({ nomeSolicitante }: PropsFormularioChamado) {
+  // Controle de etapas e dados do formulario
   const [etapa, setEtapa] = useState<1 | 2 | 3 | 4>(1);
   const [descricaoProblema, setDescricaoProblema] = useState("");
   const [sugestaoIA, setSugestaoIA] = useState("");
@@ -24,10 +52,13 @@ export function FormularioChamado({ nomeSolicitante }: PropsFormularioChamado) {
   const [categoria, setCategoria] = useState("");
   const [tipo, setTipo] = useState<"incident" | "service_request">("incident");
   const [numeroProtocolo, setNumeroProtocolo] = useState("");
+
+  // Estados de carregamento
   const [analisando, setAnalisando] = useState(false);
   const [enviando, setEnviando] = useState(false);
   const [chamadoCriado, setChamadoCriado] = useState(false);
 
+  /** Limpa todos os campos e volta para a etapa 1. */
   const reiniciarFluxo = () => {
     setEtapa(1);
     setChamadoCriado(false);
@@ -39,14 +70,19 @@ export function FormularioChamado({ nomeSolicitante }: PropsFormularioChamado) {
     setNumeroProtocolo("");
   };
 
+  /** Envia a descricao para a IA analisar (Etapa 1 -> 2 ou 3). */
   const analisarProblema = async () => {
     if (!descricaoProblema.trim()) return;
     setAnalisando(true);
+
     try {
       const resposta = await acaoAnalisarProblema(descricaoProblema);
+
       if (!resposta.sucesso || resposta.escalado) {
+        // Problema critico ou falha na IA -> vai direto para o formulario
         setEtapa(3);
       } else {
+        // IA conseguiu sugerir uma solucao -> mostra a sugestao
         setSugestaoIA(resposta.sugestao ?? "");
         setEtapa(2);
       }
@@ -57,6 +93,7 @@ export function FormularioChamado({ nomeSolicitante }: PropsFormularioChamado) {
     }
   };
 
+  /** Permite enviar com Enter (sem Shift) no campo de descricao. */
   const tratarTecla = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
@@ -64,13 +101,20 @@ export function FormularioChamado({ nomeSolicitante }: PropsFormularioChamado) {
     }
   };
 
+  /** Cria o chamado formal no sistema (Etapa 3). */
   const enviarChamado = async (e: React.FormEvent) => {
     e.preventDefault();
     setEnviando(true);
+
     try {
       const resposta = await acaoCriarChamado(
-        titulo, descricaoProblema, categoria, tipo, nomeSolicitante,
+        titulo,
+        descricaoProblema,
+        categoria,
+        tipo,
+        nomeSolicitante,
       );
+
       if (resposta.sucesso) {
         setNumeroProtocolo(resposta.numeroProtocolo ?? "");
         setChamadoCriado(true);
@@ -86,8 +130,9 @@ export function FormularioChamado({ nomeSolicitante }: PropsFormularioChamado) {
 
   return (
     <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 p-6 sm:p-8">
-
-      {/* ETAPA 1: Descricao do problema */}
+      {/* ============================================================ */}
+      {/* ETAPA 1: Descricao do problema (entrada de texto livre)      */}
+      {/* ============================================================ */}
       {etapa === 1 && (
         <div>
           <div className="text-center mb-6">
@@ -98,7 +143,7 @@ export function FormularioChamado({ nomeSolicitante }: PropsFormularioChamado) {
               Como a TI pode te ajudar?
             </h2>
             <p className="text-slate-500 dark:text-slate-400">
-              Descreva seu problema. Nossa IA tentara resolver automaticamente.
+              Descreva seu problema. Nossa IA irá lhe auxiliar.
             </p>
           </div>
           <div className="space-y-4 max-w-2xl mx-auto">
@@ -115,16 +160,22 @@ export function FormularioChamado({ nomeSolicitante }: PropsFormularioChamado) {
               className="w-full h-12 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {analisando ? (
-                <><Bot className="w-5 h-5 animate-pulse" /> Analisando...</>
+                <>
+                  <Bot className="w-5 h-5 animate-pulse" /> Analisando...
+                </>
               ) : (
-                <><Sparkles className="w-5 h-5" /> Buscar Solucao Automatica</>
+                <>
+                  <Sparkles className="w-5 h-5" /> Buscar Solução Automatica
+                </>
               )}
             </button>
           </div>
         </div>
       )}
 
-      {/* ETAPA 2: Sugestao da IA */}
+      {/* ============================================================ */}
+      {/* ETAPA 2: Sugestao da IA (solucao automatica)                 */}
+      {/* ============================================================ */}
       {etapa === 2 && (
         <div className="space-y-6 max-w-2xl mx-auto">
           <div className="bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-xl overflow-hidden">
@@ -132,16 +183,23 @@ export function FormularioChamado({ nomeSolicitante }: PropsFormularioChamado) {
               <Sparkles className="w-5 h-5" />
               <div>
                 <h3 className="font-bold">Solucao Sugerida pela IA</h3>
-                <p className="text-sm opacity-80">Tente os passos abaixo antes de abrir um chamado:</p>
+                <p className="text-sm opacity-80">
+                  Tente os passos abaixo antes de abrir um chamado:
+                </p>
               </div>
             </div>
             <div className="p-6 prose prose-emerald dark:prose-invert max-w-none text-slate-700 dark:text-slate-300">
               <ReactMarkdown>{sugestaoIA}</ReactMarkdown>
             </div>
           </div>
+
+          {/* Botoes: resolveu ou precisa de ajuda humana */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <button
-              onClick={() => { reiniciarFluxo(); setEtapa(4); }}
+              onClick={() => {
+                reiniciarFluxo();
+                setEtapa(4);
+              }}
               className="h-12 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold transition-all flex items-center justify-center gap-2"
             >
               <CheckCircle2 className="w-5 h-5" /> Resolveu meu problema!
@@ -156,19 +214,28 @@ export function FormularioChamado({ nomeSolicitante }: PropsFormularioChamado) {
         </div>
       )}
 
-      {/* ETAPA 3: Formulario de abertura */}
+      {/* ============================================================ */}
+      {/* ETAPA 3: Formulario completo de abertura de chamado          */}
+      {/* ============================================================ */}
       {etapa === 3 && !chamadoCriado && (
         <div className="max-w-2xl mx-auto">
           <div className="text-center mb-6">
             <div className="w-14 h-14 bg-slate-100 dark:bg-slate-700 rounded-xl flex items-center justify-center mx-auto mb-3">
               <Cpu className="w-7 h-7 text-slate-600 dark:text-slate-300" />
             </div>
-            <h2 className="text-xl font-bold text-slate-900 dark:text-white">Abertura de Chamado</h2>
-            <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Preencha os dados para registrar formalmente.</p>
+            <h2 className="text-xl font-bold text-slate-900 dark:text-white">
+              Abertura de Chamado
+            </h2>
+            <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">
+              Preencha os dados para registrar formalmente.
+            </p>
           </div>
+
           <form onSubmit={enviarChamado} className="space-y-4">
             <div>
-              <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Titulo</label>
+              <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                Titulo
+              </label>
               <input
                 type="text"
                 value={titulo}
@@ -178,8 +245,11 @@ export function FormularioChamado({ nomeSolicitante }: PropsFormularioChamado) {
                 className="mt-1 w-full h-11 px-4 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-sm focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 focus:outline-none dark:text-white"
               />
             </div>
+
             <div>
-              <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Descricao</label>
+              <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                Descricao
+              </label>
               <textarea
                 value={descricaoProblema}
                 onChange={(e) => setDescricaoProblema(e.target.value)}
@@ -188,9 +258,12 @@ export function FormularioChamado({ nomeSolicitante }: PropsFormularioChamado) {
                 className="mt-1 w-full resize-none rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 p-4 text-sm focus:ring-2 focus:ring-blue-500/30 focus:outline-none dark:text-white"
               />
             </div>
+
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Categoria</label>
+                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                  Categoria
+                </label>
                 <select
                   value={categoria}
                   onChange={(e) => setCategoria(e.target.value)}
@@ -205,17 +278,24 @@ export function FormularioChamado({ nomeSolicitante }: PropsFormularioChamado) {
                 </select>
               </div>
               <div>
-                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Tipo</label>
+                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                  Tipo
+                </label>
                 <select
                   value={tipo}
-                  onChange={(e) => setTipo(e.target.value as "incident" | "service_request")}
+                  onChange={(e) =>
+                    setTipo(e.target.value as "incident" | "service_request")
+                  }
                   className="mt-1 w-full h-11 px-4 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-sm focus:ring-2 focus:ring-blue-500/30 focus:outline-none appearance-none cursor-pointer dark:text-white"
                 >
                   <option value="incident">Incidente</option>
-                  <option value="service_request">Solicitacao de Servico</option>
+                  <option value="service_request">
+                    Solicitacao de Servico
+                  </option>
                 </select>
               </div>
             </div>
+
             <div className="flex gap-3 pt-2">
               <button
                 type="button"
@@ -229,25 +309,41 @@ export function FormularioChamado({ nomeSolicitante }: PropsFormularioChamado) {
                 disabled={enviando}
                 className="w-2/3 h-11 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold transition-all disabled:opacity-50 flex items-center justify-center gap-2 text-sm"
               >
-                {enviando ? "Salvando..." : <><Send className="w-4 h-4" /> Enviar Chamado</>}
+                {enviando ? (
+                  "Salvando..."
+                ) : (
+                  <>
+                    <Send className="w-4 h-4" /> Enviar Chamado
+                  </>
+                )}
               </button>
             </div>
           </form>
         </div>
       )}
 
-      {/* ETAPA 3: Confirmacao de criacao */}
+      {/* ============================================================ */}
+      {/* ETAPA 3 (pos-criacao): Confirmacao com numero de protocolo   */}
+      {/* ============================================================ */}
       {etapa === 3 && chamadoCriado && (
         <div className="py-8 flex flex-col items-center text-center space-y-6">
           <div className="w-20 h-20 bg-blue-50 dark:bg-blue-900/30 border-2 border-blue-200 dark:border-blue-800 rounded-full flex items-center justify-center">
             <ClipboardCheck className="w-10 h-10 text-blue-600 dark:text-blue-400" />
           </div>
           <div>
-            <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Chamado registrado!</h2>
-            <p className="text-slate-500 dark:text-slate-400 mt-2">Acompanhe o andamento na sua lista de chamados.</p>
+            <h2 className="text-2xl font-bold text-slate-900 dark:text-white">
+              Chamado registrado!
+            </h2>
+            <p className="text-slate-500 dark:text-slate-400 mt-2">
+              Acompanhe o andamento na sua lista de chamados.
+            </p>
             <div className="inline-block bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl px-5 py-3 mt-4">
-              <p className="text-xs text-slate-400 uppercase font-semibold mb-1">Protocolo</p>
-              <p className="text-xl font-mono font-bold text-blue-600 dark:text-blue-400">{numeroProtocolo}</p>
+              <p className="text-xs text-slate-400 uppercase font-semibold mb-1">
+                Protocolo
+              </p>
+              <p className="text-xl font-mono font-bold text-blue-600 dark:text-blue-400">
+                {numeroProtocolo}
+              </p>
             </div>
           </div>
           <button
@@ -259,15 +355,21 @@ export function FormularioChamado({ nomeSolicitante }: PropsFormularioChamado) {
         </div>
       )}
 
-      {/* ETAPA 4: Problema resolvido pela IA */}
+      {/* ============================================================ */}
+      {/* ETAPA 4: Problema resolvido pela IA (sem abrir chamado)      */}
+      {/* ============================================================ */}
       {etapa === 4 && (
         <div className="py-8 flex flex-col items-center text-center space-y-6">
           <div className="w-20 h-20 bg-emerald-50 dark:bg-emerald-900/30 border-2 border-emerald-200 dark:border-emerald-800 rounded-full flex items-center justify-center">
             <CheckCircle2 className="w-10 h-10 text-emerald-600 dark:text-emerald-400" />
           </div>
           <div>
-            <h2 className="text-2xl font-bold text-emerald-700 dark:text-emerald-400">Problema Resolvido!</h2>
-            <p className="text-slate-500 dark:text-slate-400 mt-2">A equipe de TI agradece e segue a disposicao.</p>
+            <h2 className="text-2xl font-bold text-emerald-700 dark:text-emerald-400">
+              Problema Resolvido!
+            </h2>
+            <p className="text-slate-500 dark:text-slate-400 mt-2">
+              A equipe de TI agradece e segue a disposicao.
+            </p>
           </div>
           <button
             onClick={reiniciarFluxo}

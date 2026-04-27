@@ -1,15 +1,28 @@
 /**
- * [V] VIEW: PainelSolicitante
+ * CAMADA: View — Painel do Solicitante
  * ARQUIVO: src/views/ticket/SolicitanteDashboard.tsx
  *
- * Tela principal do solicitante: header, formulario de abertura,
- * lista dos seus chamados e chatbot flutuante.
+ * DESCRICAO:
+ *   Tela principal para o usuario solicitante. Combina tres areas:
+ *
+ *     1. HEADER: logo, nome do usuario e botao de logout
+ *     2. FORMULARIO: abertura de chamado com triagem IA (TicketForm)
+ *     3. LISTA: chamados abertos pelo solicitante (com modal de detalhes)
+ *     4. CHATBOT: assistente flutuante de triagem IA (AIAgent)
+ *
+ *   Este componente e o "orquestrador" da tela — ele carrega os dados
+ *   do usuario, busca seus chamados e conecta os sub-componentes.
+ *
+ * CONEXOES:
+ *   - Depende de: AuthController (sessao), TicketController (chamados),
+ *                 TicketForm, ticket-agent-modal, AIAgent, ticket-utils
+ *   - Usado por:  src/app/(dashboard)/solicitante/page.tsx
  */
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { Headphones, LogOut, RefreshCw, Clock, Loader2, Package, AlertTriangle } from "lucide-react";
+import { PackageCheck, LogOut, RefreshCw, Clock, Loader2, Package, AlertTriangle } from "lucide-react";
 import { acaoObterUsuarioAtual, acaoLogout } from "@/controllers/AuthController";
 import { acaoObterMeusChamados } from "@/controllers/TicketController";
 import { FormularioChamado } from "@/views/ticket/TicketForm";
@@ -20,13 +33,19 @@ import type { Chamado } from "@/models/types";
 
 export function PainelSolicitante() {
   const router = useRouter();
+
+  // Estado do usuario e dos chamados
   const [nomeUsuario, setNomeUsuario] = useState("");
   const [carregando, setCarregando] = useState(true);
   const [chamados, setChamados] = useState<Chamado[]>([]);
+
+  // Estado do modal de detalhes
   const [protocoloSelecionado, setProtocoloSelecionado] = useState<string | null>(null);
   const [modalAberto, setModalAberto] = useState(false);
+
   const [saindo, setSaindo] = useState(false);
 
+  /** Carrega os dados do usuario logado. Redireciona para login se nao autenticado. */
   const buscarUsuario = useCallback(async () => {
     const usuario = await acaoObterUsuarioAtual();
     if (!usuario) {
@@ -37,9 +56,11 @@ export function PainelSolicitante() {
     return usuario.nome;
   }, [router]);
 
+  /** Busca os chamados do solicitante no banco via Controller. */
   const buscarChamados = useCallback(async (nome?: string) => {
     const solicitante = nome || nomeUsuario;
     if (!solicitante) return;
+
     setCarregando(true);
     try {
       const resultado = await acaoObterMeusChamados(solicitante);
@@ -51,12 +72,14 @@ export function PainelSolicitante() {
     }
   }, [nomeUsuario]);
 
+  // Carrega usuario e chamados ao montar o componente
   useEffect(() => {
     buscarUsuario().then((nome) => {
       if (nome) buscarChamados(nome);
     });
   }, [buscarUsuario, buscarChamados]);
 
+  /** Encerra a sessao e redireciona para o login. */
   const realizarLogout = async () => {
     setSaindo(true);
     await acaoLogout();
@@ -65,12 +88,14 @@ export function PainelSolicitante() {
 
   return (
     <>
-      {/* Header */}
+      {/* ============================================================ */}
+      {/* HEADER: logo, nome do usuario e logout                       */}
+      {/* ============================================================ */}
       <header className="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 px-6 py-4">
         <div className="max-w-5xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="bg-orange-500/20 p-2 rounded-xl text-orange-500">
-              <Headphones className="w-5 h-5" />
+              <PackageCheck className="w-5 h-5" />
             </div>
             <div>
               <h1 className="text-lg font-bold text-slate-900 dark:text-white">SupportBox</h1>
@@ -93,15 +118,17 @@ export function PainelSolicitante() {
         </div>
       </header>
 
-      {/* Conteudo */}
+      {/* ============================================================ */}
+      {/* CONTEUDO PRINCIPAL                                            */}
+      {/* ============================================================ */}
       <main className="max-w-5xl mx-auto p-6 space-y-8">
-        {/* Formulario de abertura */}
+        {/* Secao: Formulario de abertura de chamado */}
         <section>
           <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-4">Abrir Chamado</h2>
           <FormularioChamado nomeSolicitante={nomeUsuario} />
         </section>
 
-        {/* Lista de chamados */}
+        {/* Secao: Lista de chamados do solicitante */}
         <section>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-bold text-slate-900 dark:text-white">Meus Chamados</h2>
@@ -115,16 +142,21 @@ export function PainelSolicitante() {
             </button>
           </div>
 
+          {/* Estado: carregando */}
           {carregando ? (
             <div className="flex flex-col items-center py-12 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700">
               <Loader2 className="h-8 w-8 animate-spin text-orange-500 mb-3" />
               <p className="text-slate-500 text-sm">Carregando seus chamados...</p>
             </div>
+
+          /* Estado: lista vazia */
           ) : chamados.length === 0 ? (
             <div className="flex flex-col items-center py-12 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700">
               <Package className="h-10 w-10 text-slate-300 dark:text-slate-600 mb-3" />
               <p className="text-slate-500">Voce ainda nao possui chamados.</p>
             </div>
+
+          /* Estado: lista com chamados */
           ) : (
             <div className="grid gap-3">
               {chamados.map((chamado) => (
@@ -162,7 +194,9 @@ export function PainelSolicitante() {
         </section>
       </main>
 
-      {/* Modal de detalhes (somente leitura + comentarios) */}
+      {/* ============================================================ */}
+      {/* MODAL: detalhes do chamado (somente leitura + comentarios)    */}
+      {/* ============================================================ */}
       <ModalAgenteChamado
         protocoloChamado={protocoloSelecionado}
         aberto={modalAberto}
@@ -172,7 +206,9 @@ export function PainelSolicitante() {
         apenasLeitura
       />
 
-      {/* Chatbot flutuante */}
+      {/* ============================================================ */}
+      {/* CHATBOT: assistente flutuante de triagem IA                   */}
+      {/* ============================================================ */}
       <AgenteIA />
     </>
   );

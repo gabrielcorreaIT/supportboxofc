@@ -1,6 +1,21 @@
 /**
- * [V] VIEW: ModalAgenteChamado (Detalhes do chamado)
+ * CAMADA: View — Modal de Detalhes do Chamado
  * ARQUIVO: src/views/ticket/ticket-agent-modal.tsx
+ *
+ * DESCRICAO:
+ *   Modal (janela sobreposta) que exibe todos os detalhes de um chamado:
+ *   informacoes gerais, descricao completa, historico de comentarios e
+ *   acoes disponiveis.
+ *
+ *   Funciona em dois modos:
+ *     - AGENTE (padrao):       pode assumir chamado, concluir e comentar
+ *     - SOMENTE LEITURA:       pode apenas visualizar e comentar
+ *       (prop apenasLeitura)   (usado pelo solicitante)
+ *
+ * CONEXOES:
+ *   - Depende de: TicketController (detalhes, comentarios, status, atribuicao),
+ *                 ticket-utils (cores e formatacao), types.ts
+ *   - Usado por:  ticket-list (painel do agente), SolicitanteDashboard
  */
 "use client";
 
@@ -16,16 +31,15 @@ import type { Chamado, Comentario } from "@/models/types";
 import { obterCorStatus, obterInsigniaPrioridade, formatarData } from "@/lib/ticket-utils";
 
 interface PropsModalAgente {
-  protocoloChamado: string | null;
-  aberto: boolean;
-  aoFechar: () => void;
-  aoChamadoAtualizar?: () => void;
-  /** Nome do usuario logado (para comentarios) */
-  nomeUsuario?: string;
-  /** Se true, esconde botoes de acao do agente (assumir, concluir) */
-  apenasLeitura?: boolean;
+  protocoloChamado: string | null; // Protocolo do chamado a exibir (null = nenhum)
+  aberto: boolean;                 // Controla visibilidade do modal
+  aoFechar: () => void;            // Callback quando o usuario fecha o modal
+  aoChamadoAtualizar?: () => void; // Callback para a tela pai recarregar a lista
+  nomeUsuario?: string;            // Nome do usuario logado (para autoria de comentarios)
+  apenasLeitura?: boolean;         // Se true, esconde botoes de acao do agente
 }
 
+/** Chamado com seu historico de comentarios anexado. */
 type ChamadoComInteracoes = Chamado & { interacoes: Comentario[] };
 
 export function ModalAgenteChamado({
@@ -43,6 +57,7 @@ export function ModalAgenteChamado({
   const [resolvendo, setResolvendo] = useState(false);
   const [atribuindo, setAtribuindo] = useState(false);
 
+  // Carrega os detalhes do chamado quando o modal abre
   useEffect(() => {
     if (!protocoloChamado || !aberto) return;
     setCarregando(true);
@@ -53,6 +68,7 @@ export function ModalAgenteChamado({
     });
   }, [protocoloChamado, aberto]);
 
+  /** Recarrega os dados do chamado e notifica a tela pai. */
   const atualizar = async () => {
     if (!protocoloChamado) return;
     const resultado = await acaoObterDetalhesChamado(protocoloChamado);
@@ -60,6 +76,7 @@ export function ModalAgenteChamado({
     aoChamadoAtualizar?.();
   };
 
+  /** Envia um novo comentario ao historico do chamado. */
   const enviarComentario = async () => {
     if (!novoComentario.trim() || !chamado) return;
     setEnviando(true);
@@ -68,6 +85,7 @@ export function ModalAgenteChamado({
     setEnviando(false);
   };
 
+  /** Agente assume a responsabilidade pelo chamado. */
   const assumirChamado = async () => {
     if (!chamado) return;
     setAtribuindo(true);
@@ -77,6 +95,7 @@ export function ModalAgenteChamado({
     setAtribuindo(false);
   };
 
+  /** Agente marca o chamado como concluido. */
   const resolverChamado = async () => {
     if (!chamado) return;
     setResolvendo(true);
@@ -96,6 +115,7 @@ export function ModalAgenteChamado({
       onClick={(e) => e.target === e.currentTarget && aoFechar()}
     >
       <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-white dark:bg-slate-800 rounded-2xl shadow-2xl flex flex-col">
+        {/* Estado de carregamento */}
         {carregando || !chamado ? (
           <div className="flex flex-col items-center justify-center p-16">
             <Loader2 className="h-8 w-8 animate-spin text-orange-500 mb-4" />
@@ -103,7 +123,9 @@ export function ModalAgenteChamado({
           </div>
         ) : (
           <>
-            {/* Cabecalho */}
+            {/* ====================================================== */}
+            {/* CABECALHO: protocolo, titulo, status e dados gerais     */}
+            {/* ====================================================== */}
             <div className="p-6 border-b border-slate-100 dark:border-slate-700">
               <div className="flex items-start justify-between mb-4">
                 <div className="min-w-0 mr-4">
@@ -121,6 +143,8 @@ export function ModalAgenteChamado({
                   </button>
                 </div>
               </div>
+
+              {/* Grade de informacoes do chamado */}
               <div className="grid grid-cols-2 gap-4 bg-slate-50 dark:bg-slate-700/50 p-4 rounded-xl border border-slate-100 dark:border-slate-600">
                 <div>
                   <p className="text-xs text-slate-400 font-semibold uppercase mb-1">Solicitante</p>
@@ -155,15 +179,21 @@ export function ModalAgenteChamado({
               </div>
             </div>
 
-            {/* Corpo */}
+            {/* ====================================================== */}
+            {/* CORPO: descricao e historico de comentarios             */}
+            {/* ====================================================== */}
             <div className="p-6 space-y-6 flex-1">
+              {/* Descricao completa do problema */}
               <div>
                 <h3 className="text-sm font-bold text-slate-900 dark:text-white mb-2">Descricao</h3>
                 <div className="bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl p-4 text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
                   {chamado.descricao}
                 </div>
               </div>
+
               <hr className="border-slate-100 dark:border-slate-700" />
+
+              {/* Historico de comentarios */}
               <div>
                 <h3 className="text-sm font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
                   <MessageSquare className="w-4 h-4 text-orange-500" />
@@ -172,6 +202,7 @@ export function ModalAgenteChamado({
                     <span className="ml-auto text-xs text-slate-400">{chamado.interacoes.length} mensagem(s)</span>
                   )}
                 </h3>
+
                 {chamado.interacoes.length === 0 ? (
                   <div className="text-center p-6 border border-dashed border-slate-200 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-700/30">
                     <p className="text-sm text-slate-400 italic">Nenhum comentario ainda.</p>
@@ -199,7 +230,9 @@ export function ModalAgenteChamado({
               </div>
             </div>
 
-            {/* Acoes */}
+            {/* ====================================================== */}
+            {/* RODAPE: area de acoes (comentar, assumir, concluir)     */}
+            {/* ====================================================== */}
             <div className="p-6 bg-slate-50 dark:bg-slate-700/30 border-t border-slate-100 dark:border-slate-700 rounded-b-2xl">
               {estaConcluido ? (
                 <div className="flex flex-col items-center gap-2 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl text-green-700 dark:text-green-400">
@@ -208,6 +241,7 @@ export function ModalAgenteChamado({
                 </div>
               ) : (
                 <div className="space-y-3">
+                  {/* Campo de comentario */}
                   <textarea
                     placeholder="Escreva um comentario..."
                     value={novoComentario}
@@ -217,6 +251,7 @@ export function ModalAgenteChamado({
                     className="w-full resize-none rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 p-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/30 focus:border-orange-400 transition-all disabled:opacity-50 dark:text-white"
                   />
                   <div className="flex justify-between items-center gap-3">
+                    {/* Botoes de acao do agente (escondidos no modo somente leitura) */}
                     {!apenasLeitura && (
                       <div className="flex gap-2">
                         {!chamado.atribuido_a && (
@@ -239,6 +274,7 @@ export function ModalAgenteChamado({
                         </button>
                       </div>
                     )}
+                    {/* Botao de enviar comentario */}
                     <div className="flex gap-2 ml-auto">
                       <button
                         onClick={enviarComentario}

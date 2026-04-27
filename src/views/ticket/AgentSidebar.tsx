@@ -1,13 +1,22 @@
 /**
- * [V] VIEW: BarraLateralAgente
+ * CAMADA: View — Barra Lateral do Agente de TI
  * ARQUIVO: src/views/ticket/AgentSidebar.tsx
+ *
+ * DESCRICAO:
+ *   Menu lateral fixo exibido em todas as paginas do painel do agente.
+ *   Contem o logo do sistema, links de navegacao, informacoes do
+ *   usuario logado e botao de logout.
+ *
+ * CONEXOES:
+ *   - Depende de: AuthController (obter usuario e fazer logout)
+ *   - Usado por:  src/app/(dashboard)/agente/layout.tsx (layout do agente)
  */
 "use client";
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
-import { LayoutDashboard, Headphones, LogOut } from "lucide-react";
+import { LayoutDashboard, PackageCheck, LogOut } from "lucide-react";
 import { acaoLogout, acaoObterUsuarioAtual } from "@/controllers/AuthController";
 
 export function BarraLateralAgente() {
@@ -16,12 +25,14 @@ export function BarraLateralAgente() {
   const [saindo, setSaindo] = useState(false);
   const [nomeUsuario, setNomeUsuario] = useState("Tecnico");
 
+  // Carrega o nome do usuario logado ao montar o componente
   useEffect(() => {
     acaoObterUsuarioAtual().then((usuario) => {
       if (usuario) setNomeUsuario(usuario.nome);
     });
   }, []);
 
+  /** Encerra a sessao e redireciona para o login. */
   const realizarLogout = async () => {
     setSaindo(true);
     await acaoLogout();
@@ -32,10 +43,10 @@ export function BarraLateralAgente() {
 
   return (
     <aside className="w-64 min-h-screen bg-[#0f172a] text-slate-300 flex flex-col border-r border-slate-800">
-      {/* Logo */}
+      {/* Logo do sistema */}
       <div className="p-6 flex items-center gap-3 border-b border-slate-800/50">
         <div className="bg-orange-500/20 p-2 rounded-xl text-orange-500">
-          <Headphones className="w-6 h-6" />
+          <PackageCheck className="w-6 h-6" />
         </div>
         <div>
           <h1 className="text-white font-bold text-lg leading-tight">SupportBox</h1>
@@ -43,7 +54,7 @@ export function BarraLateralAgente() {
         </div>
       </div>
 
-      {/* Nav */}
+      {/* Links de navegacao */}
       <nav className="flex-1 px-4 py-6">
         <Link
           href="/agente"
@@ -58,7 +69,7 @@ export function BarraLateralAgente() {
         </Link>
       </nav>
 
-      {/* Rodape */}
+      {/* Rodape: info do usuario + logout */}
       <div className="p-4 border-t border-slate-800 space-y-2">
         <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-slate-800/30 border border-slate-700/50">
           <div className="w-8 h-8 rounded-full bg-orange-500 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">

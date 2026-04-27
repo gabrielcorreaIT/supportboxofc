@@ -1,6 +1,14 @@
 /**
- * [V] LAYOUT: Dashboard do Solicitante
+ * CAMADA: View (Layout) — Dashboard do Solicitante
  * ARQUIVO: src/app/(dashboard)/solicitante/layout.tsx
+ *
+ * DESCRICAO:
+ *   Layout simples que envolve as paginas do solicitante.
+ *   Aplica apenas o fundo (bg) padrao. O header e a navegacao
+ *   ficam dentro do PainelSolicitante.
+ *
+ * CONEXOES:
+ *   - Envolve: src/app/(dashboard)/solicitante/page.tsx
  */
 import type { Metadata } from "next";
 

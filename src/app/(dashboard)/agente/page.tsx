@@ -1,6 +1,14 @@
 /**
- * [V] PAGE: Painel do Agente
+ * CAMADA: View (Page) — Painel de Controle do Agente
  * ARQUIVO: src/app/(dashboard)/agente/page.tsx
+ *
+ * DESCRICAO:
+ *   Pagina principal do agente de TI. Exibe o titulo do painel e
+ *   a lista de todos os chamados do sistema (ListaChamados).
+ *
+ * CONEXOES:
+ *   - Depende de: ListaChamados (componente da lista com filtros)
+ *   - Protegida pelo middleware (requer autenticacao)
  */
 import ListaChamados from "@/views/ticket/ticket-list";
 

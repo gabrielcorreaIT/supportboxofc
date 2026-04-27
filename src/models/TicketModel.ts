@@ -1,69 +1,86 @@
 /**
- * [M] MODEL: ChamadoModel
+ * CAMADA: Model — Persistencia de Chamados
  * ARQUIVO: src/models/TicketModel.ts
  *
- * Responsavel exclusivo pela persistencia de chamados e comentarios.
- * Sem regras de negocio — isso e papel do Controller.
+ * DESCRICAO:
+ *   Responsavel por toda comunicacao com o banco de dados (Supabase)
+ *   relacionada a chamados e comentarios. Este arquivo apenas salva
+ *   e busca dados — ele NAO contem regras de negocio (isso e papel
+ *   dos Controllers).
  *
- * Os nomes das colunas no banco (Supabase) permanecem em ingles.
- * As funcoes de mapeamento convertem entre o esquema do banco
- * e as interfaces do dominio em portugues.
+ * CONEXOES:
+ *   - Depende de: supabase.ts (cliente do banco), types.ts (interfaces)
+ *   - Usado por:  TicketController (que orquestra as regras de negocio)
+ *
+ * NOTA SOBRE MAPEAMENTO:
+ *   As colunas do banco estao em ingles (ex: "ticket_number", "requester"),
+ *   mas o codigo do projeto usa interfaces em portugues (ex: "numero_protocolo",
+ *   "solicitante"). As funcoes "mapear..." fazem essa traducao em ambas as direcoes.
  */
 import { supabase } from "@/lib/supabase";
 import type { Chamado, Comentario } from "./types";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-/** Mapeia uma linha do banco (colunas em ingles) para a interface Chamado. */
-function mapearChamadoDoBanco(d: any): Chamado {
+// ---------------------------------------------------------------------------
+// Funcoes de mapeamento: banco (ingles) <-> dominio (portugues)
+// ---------------------------------------------------------------------------
+
+/** Converte uma linha do banco de dados para a interface Chamado. */
+function mapearChamadoDoBanco(linha: any): Chamado {
   return {
-    id: d.id,
-    numero_protocolo: d.ticket_number,
-    solicitante: d.requester,
-    atribuido_a: d.assigned_to,
-    titulo: d.title,
-    descricao: d.description,
-    status: d.status,
-    prioridade: d.priority,
-    categoria: d.category,
-    tipo: d.type,
-    criado_em: d.created_at,
-    atualizado_em: d.updated_at,
+    id: linha.id,
+    numero_protocolo: linha.ticket_number,
+    solicitante: linha.requester,
+    atribuido_a: linha.assigned_to,
+    titulo: linha.title,
+    descricao: linha.description,
+    status: linha.status,
+    prioridade: linha.priority,
+    categoria: linha.category,
+    tipo: linha.type,
+    criado_em: linha.created_at,
+    atualizado_em: linha.updated_at,
   };
 }
 
-/** Mapeia a interface Chamado para as colunas do banco (ingles). */
-function mapearChamadoParaBanco(c: Chamado): Record<string, unknown> {
+/** Converte a interface Chamado para o formato de colunas do banco. */
+function mapearChamadoParaBanco(chamado: Chamado): Record<string, unknown> {
   return {
-    id: c.id,
-    ticket_number: c.numero_protocolo,
-    requester: c.solicitante,
-    assigned_to: c.atribuido_a,
-    title: c.titulo,
-    description: c.descricao,
-    status: c.status,
-    priority: c.prioridade,
-    category: c.categoria,
-    type: c.tipo,
-    created_at: c.criado_em,
-    updated_at: c.atualizado_em,
+    id: chamado.id,
+    ticket_number: chamado.numero_protocolo,
+    requester: chamado.solicitante,
+    assigned_to: chamado.atribuido_a,
+    title: chamado.titulo,
+    description: chamado.descricao,
+    status: chamado.status,
+    priority: chamado.prioridade,
+    category: chamado.categoria,
+    type: chamado.tipo,
+    created_at: chamado.criado_em,
+    updated_at: chamado.atualizado_em,
   };
 }
 
-/** Mapeia uma linha do banco para a interface Comentario. */
-function mapearComentarioDoBanco(d: any): Comentario {
+/** Converte uma linha do banco de dados para a interface Comentario. */
+function mapearComentarioDoBanco(linha: any): Comentario {
   return {
-    id: d.id,
-    chamado_id: d.ticket_id,
-    autor: d.author,
-    texto: d.text,
-    criado_em: d.created_at,
+    id: linha.id,
+    chamado_id: linha.ticket_id,
+    autor: linha.author,
+    texto: linha.text,
+    criado_em: linha.created_at,
   };
 }
+
+// ---------------------------------------------------------------------------
+// ChamadoModel — funcoes de acesso ao banco
+// ---------------------------------------------------------------------------
 
 export const ChamadoModel = {
-  // -- CHAMADOS --
+  // === CHAMADOS ===
 
+  /** Busca um chamado pelo numero de protocolo (ex: "CH-A1B2C3D4"). */
   async buscarPorProtocolo(numeroProtocolo: string): Promise<Chamado | null> {
     const { data, error } = await supabase
       .from("tickets")
@@ -75,6 +92,7 @@ export const ChamadoModel = {
     return mapearChamadoDoBanco(data);
   },
 
+  /** Retorna todos os chamados ordenados do mais recente ao mais antigo. */
   async buscarTodosChamadosAtivos(): Promise<Chamado[]> {
     const { data, error } = await supabase
       .from("tickets")
@@ -85,6 +103,7 @@ export const ChamadoModel = {
     return (data as any[]).map(mapearChamadoDoBanco);
   },
 
+  /** Retorna apenas os chamados abertos por um solicitante especifico. */
   async buscarChamadosPorSolicitante(solicitante: string): Promise<Chamado[]> {
     const { data, error } = await supabase
       .from("tickets")
@@ -96,6 +115,7 @@ export const ChamadoModel = {
     return (data as any[]).map(mapearChamadoDoBanco);
   },
 
+  /** Busca um chamado pelo seu ID interno (UUID). */
   async buscarChamadoPorId(id: string): Promise<Chamado | null> {
     const { data, error } = await supabase
       .from("tickets")
@@ -107,10 +127,12 @@ export const ChamadoModel = {
     return mapearChamadoDoBanco(data);
   },
 
+  /** Insere um novo chamado no banco. Retorna true se deu certo. */
   async inserirChamado(chamado: Chamado): Promise<boolean> {
     const { error } = await supabase
       .from("tickets")
       .insert([mapearChamadoParaBanco(chamado)]);
+
     if (error) {
       console.error("Falha ao inserir chamado:", error.message);
       return false;
@@ -118,6 +140,7 @@ export const ChamadoModel = {
     return true;
   },
 
+  /** Atualiza o status de um chamado existente. */
   async atualizarStatusChamado(id: string, status: string): Promise<boolean> {
     const { error } = await supabase
       .from("tickets")
@@ -128,6 +151,7 @@ export const ChamadoModel = {
     return true;
   },
 
+  /** Atribui um tecnico ao chamado e muda o status para "Em Andamento". */
   async atribuirChamado(id: string, nomeTecnico: string): Promise<boolean> {
     const { error } = await supabase
       .from("tickets")
@@ -142,8 +166,9 @@ export const ChamadoModel = {
     return true;
   },
 
-  // -- COMENTARIOS --
+  // === COMENTARIOS ===
 
+  /** Retorna todos os comentarios de um chamado, do mais antigo ao mais novo. */
   async buscarComentariosPorChamadoId(chamadoId: string): Promise<Comentario[]> {
     const { data, error } = await supabase
       .from("comments")
@@ -155,6 +180,7 @@ export const ChamadoModel = {
     return (data as any[]).map(mapearComentarioDoBanco);
   },
 
+  /** Insere um novo comentario no historico de um chamado. */
   async inserirComentario(comentario: Comentario): Promise<boolean> {
     const { error } = await supabase.from("comments").insert([
       {

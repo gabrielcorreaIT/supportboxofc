@@ -1,6 +1,18 @@
 /**
- * [V] VIEW: ListaChamados (Lista de chamados do Agente)
+ * CAMADA: View — Lista de Chamados (Painel do Agente)
  * ARQUIVO: src/views/ticket/ticket-list.tsx
+ *
+ * DESCRICAO:
+ *   Exibe a lista de todos os chamados do sistema com filtros por
+ *   status e busca por texto. Cada chamado pode ser clicado para
+ *   abrir o modal de detalhes (ticket-agent-modal).
+ *
+ *   Esta e a view principal do dashboard do agente de TI.
+ *
+ * CONEXOES:
+ *   - Depende de: TicketController.acaoObterDadosPainel (lista + metricas),
+ *                 ticket-agent-modal (detalhes), ticket-utils (cores/datas)
+ *   - Usado por:  src/app/(dashboard)/agente/page.tsx
  */
 "use client";
 
@@ -11,6 +23,7 @@ import type { Chamado } from "@/models/types";
 import { obterCorStatus, obterCorPrioridade, formatarData } from "@/lib/ticket-utils";
 import { Clock, Package, Search, AlertTriangle, Loader2, RefreshCw } from "lucide-react";
 
+/** Opcoes de filtro por status. */
 type FiltroStatus = "todos" | "abertos" | "em-andamento" | "concluidos";
 
 export default function ListaChamados() {
@@ -18,9 +31,12 @@ export default function ListaChamados() {
   const [carregando, setCarregando] = useState(true);
   const [termoBusca, setTermoBusca] = useState("");
   const [filtroStatus, setFiltroStatus] = useState<FiltroStatus>("todos");
+
+  // Estado do modal de detalhes
   const [protocoloSelecionado, setProtocoloSelecionado] = useState<string | null>(null);
   const [modalAberto, setModalAberto] = useState(false);
 
+  /** Busca todos os chamados via Controller. */
   const buscarChamados = useCallback(async () => {
     setCarregando(true);
     try {
@@ -35,6 +51,7 @@ export default function ListaChamados() {
 
   useEffect(() => { buscarChamados(); }, [buscarChamados]);
 
+  // Aplica filtros de busca e status sobre a lista de chamados
   const chamadosFiltrados = chamados.filter((chamado) => {
     const texto = `${chamado.titulo} ${chamado.numero_protocolo} ${chamado.solicitante}`.toLowerCase();
     const correspondeAoBuscar = texto.includes(termoBusca.toLowerCase());
@@ -47,6 +64,7 @@ export default function ListaChamados() {
     return correspondeAoBuscar && correspondeAoStatus;
   });
 
+  /** Configuracao das abas de filtro por status. */
   const abasStatus: { valor: FiltroStatus; rotulo: string }[] = [
     { valor: "todos", rotulo: "Todos" },
     { valor: "abertos", rotulo: "Abertos" },
@@ -56,7 +74,9 @@ export default function ListaChamados() {
 
   return (
     <div className="space-y-6">
-      {/* Filtros */}
+      {/* ============================================================ */}
+      {/* FILTROS: busca por texto e abas de status                    */}
+      {/* ============================================================ */}
       <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
         <div className="relative w-full sm:w-auto">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
@@ -95,7 +115,9 @@ export default function ListaChamados() {
         </div>
       </div>
 
-      {/* Conteudo */}
+      {/* ============================================================ */}
+      {/* LISTA DE CHAMADOS (ou estados de carregamento/vazio)         */}
+      {/* ============================================================ */}
       {carregando ? (
         <div className="flex flex-col items-center justify-center py-16 bg-white rounded-2xl border border-slate-200">
           <Loader2 className="h-8 w-8 animate-spin text-orange-500 mb-3" />
@@ -120,6 +142,7 @@ export default function ListaChamados() {
             >
               <div className="flex items-start justify-between gap-4">
                 <div className="flex gap-3 items-start min-w-0">
+                  {/* Icone: triangulo para incidente, caixa para solicitacao */}
                   {chamado.tipo === "incident"
                     ? <AlertTriangle className="h-5 w-5 text-red-500 mt-0.5 flex-shrink-0" />
                     : <Package className="h-5 w-5 text-blue-500 mt-0.5 flex-shrink-0" />
@@ -133,6 +156,7 @@ export default function ListaChamados() {
                     </p>
                   </div>
                 </div>
+                {/* Badges de prioridade e status */}
                 <div className="flex gap-2 flex-shrink-0">
                   <span className={`${obterCorPrioridade(chamado.prioridade)} text-white text-xs font-semibold px-2.5 py-1 rounded-full`}>
                     {chamado.prioridade}
@@ -159,6 +183,7 @@ export default function ListaChamados() {
         </div>
       )}
 
+      {/* Modal de detalhes do chamado */}
       <ModalAgenteChamado
         protocoloChamado={protocoloSelecionado}
         aberto={modalAberto}

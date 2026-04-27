@@ -1,6 +1,16 @@
 /**
- * [V] VIEW: FormularioLogin
+ * CAMADA: View — Formulario de Login
  * ARQUIVO: src/views/auth/LoginForm.tsx
+ *
+ * DESCRICAO:
+ *   Formulario onde o usuario digita e-mail e senha para entrar no sistema.
+ *   Apos o login bem-sucedido, redireciona automaticamente:
+ *     - Tecnicos    -> /agente     (painel de gerenciamento)
+ *     - Solicitantes -> /solicitante (portal de chamados)
+ *
+ * CONEXOES:
+ *   - Depende de: AuthController.acaoLogin (autentica no servidor)
+ *   - Usado por:  src/app/(auth)/login/page.tsx (pagina de login)
  */
 "use client";
 
@@ -11,18 +21,23 @@ import { acaoLogin } from "@/controllers/AuthController";
 
 export function FormularioLogin() {
   const router = useRouter();
+
+  // Estado do formulario
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [mostrarSenha, setMostrarSenha] = useState(false);
   const [carregando, setCarregando] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
 
+  /** Envia credenciais ao Controller e redireciona conforme o papel. */
   const enviarFormulario = async (e: React.FormEvent) => {
     e.preventDefault();
     setErro(null);
     setCarregando(true);
+
     try {
       const resultado = await acaoLogin(email, senha);
+
       if (resultado.sucesso) {
         const destino = resultado.papel === "tecnico" ? "/agente" : "/solicitante";
         router.push(destino);
@@ -38,11 +53,13 @@ export function FormularioLogin() {
 
   return (
     <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-8 shadow-2xl">
+      {/* Cabecalho */}
       <div className="mb-6">
         <h2 className="text-xl font-bold text-white">Entrar no sistema</h2>
         <p className="text-slate-400 text-sm mt-1">Use as credenciais fornecidas pela TI</p>
       </div>
 
+      {/* Mensagem de erro (aparece quando o login falha) */}
       {erro && (
         <div className="mb-4 px-4 py-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-sm flex items-center gap-2">
           <span className="w-1.5 h-1.5 rounded-full bg-red-400 flex-shrink-0" />
@@ -51,6 +68,7 @@ export function FormularioLogin() {
       )}
 
       <form onSubmit={enviarFormulario} className="space-y-4">
+        {/* Campo de e-mail */}
         <div className="space-y-1.5">
           <label className="text-sm font-medium text-slate-300">E-mail corporativo</label>
           <input
@@ -64,6 +82,7 @@ export function FormularioLogin() {
           />
         </div>
 
+        {/* Campo de senha (com botao para mostrar/esconder) */}
         <div className="space-y-1.5">
           <label className="text-sm font-medium text-slate-300">Senha</label>
           <div className="relative">
@@ -87,6 +106,7 @@ export function FormularioLogin() {
           </div>
         </div>
 
+        {/* Botao de envio */}
         <button
           type="submit"
           disabled={carregando || !email.trim() || !senha.trim()}
