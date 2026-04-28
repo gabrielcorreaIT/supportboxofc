@@ -8,7 +8,7 @@
  *
  * CONEXOES:
  *   - Depende de: ListaChamados (componente da lista com filtros)
- *   - Protegida pelo middleware (requer autenticacao)
+ *   - Protegida pelo layout (requer autenticacao)
  */
 import ListaChamados from "@/views/ticket/ticket-list";
 

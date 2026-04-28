@@ -4,35 +4,22 @@
  *
  * DESCRICAO:
  *   Webhook que recebe mensagens do bot Telegram. Este arquivo cuida
- *   apenas da camada HTTP: valida a requisicao, extrai o conteudo
- *   da mensagem (texto ou audio) e delega toda a logica de negocio
- *   ao TelegramController.
+ *   apenas da camada HTTP: extrai o conteudo da mensagem (texto ou audio)
+ *   e delega toda a logica de negocio ao TelegramController.
  *
  * CONEXOES:
  *   - Depende de: TelegramController (processa a mensagem e executa acoes)
  *   - Chamado por: Telegram Bot API (via webhook configurado)
- *
- * FLUXO:
- *   Telegram envia POST -> valida seguranca -> extrai conteudo -> TelegramController
  */
 import { NextRequest, NextResponse } from "next/server";
 import type { Part } from "@google/generative-ai";
 import { acaoProcessarMensagemTelegram } from "@/controllers/TelegramController";
 
-/* ------------------------------------------------------------------ */
-/*  Configuracao do Telegram (variaveis de ambiente)                  */
-/* ------------------------------------------------------------------ */
-
 const TOKEN_TELEGRAM = process.env.TELEGRAM_BOT_TOKEN;
 const API_TELEGRAM = `https://api.telegram.org/bot${TOKEN_TELEGRAM}`;
-const SEGREDO_WEBHOOK = process.env.TELEGRAM_WEBHOOK_SECRET;
 
-/** Limite de 10 MB para arquivos de audio recebidos */
+/** Limite de 10 MB para arquivos de audio recebidos. */
 const MAX_BYTES_AUDIO = 10 * 1024 * 1024;
-
-/* ------------------------------------------------------------------ */
-/*  Funcoes auxiliares de comunicacao com a API do Telegram            */
-/* ------------------------------------------------------------------ */
 
 /** Envia uma mensagem de texto para um chat do Telegram. */
 async function enviarMensagem(chatId: number, texto: string): Promise<void> {
@@ -46,13 +33,7 @@ async function enviarMensagem(chatId: number, texto: string): Promise<void> {
 /** Baixa um arquivo do Telegram e retorna seu conteudo em base64. */
 async function baixarArquivoBase64(fileId: string): Promise<string> {
   const res = await fetch(`${API_TELEGRAM}/getFile?file_id=${fileId}`);
-  const dados = (await res.json()) as {
-    result: { file_path: string; file_size?: number };
-  };
-
-  if (dados.result.file_size && dados.result.file_size > MAX_BYTES_AUDIO) {
-    throw new Error("Arquivo de audio excede 10 MB.");
-  }
+  const dados = (await res.json()) as { result: { file_path: string } };
 
   const resAudio = await fetch(
     `https://api.telegram.org/file/bot${TOKEN_TELEGRAM}/${dados.result.file_path}`,
@@ -66,39 +47,19 @@ async function baixarArquivoBase64(fileId: string): Promise<string> {
   return Buffer.from(arrayBuffer).toString("base64");
 }
 
-/* ------------------------------------------------------------------ */
-/*  Handler principal do webhook (POST)                               */
-/* ------------------------------------------------------------------ */
-
 export async function POST(requisicao: NextRequest): Promise<NextResponse> {
   if (!TOKEN_TELEGRAM) {
     console.error("TELEGRAM_BOT_TOKEN nao configurado.");
     return NextResponse.json({ ok: false }, { status: 500 });
   }
 
-  // Valida o secret token enviado pelo Telegram para garantir autenticidade
-  if (SEGREDO_WEBHOOK) {
-    const segredoRecebido = requisicao.headers.get("x-telegram-bot-api-secret-token");
-    if (!segredoRecebido || segredoRecebido !== SEGREDO_WEBHOOK) {
-      return NextResponse.json({ ok: false }, { status: 403 });
-    }
-  }
-
-  // Faz o parse do corpo da requisicao
-  let atualizacao: AtualizacaoTelegram;
-  try {
-    atualizacao = (await requisicao.json()) as AtualizacaoTelegram;
-  } catch {
-    return NextResponse.json({ ok: false, error: "Payload invalido" }, { status: 400 });
-  }
-
+  const atualizacao = (await requisicao.json()) as AtualizacaoTelegram;
   const mensagem = atualizacao.message;
   if (!mensagem) return NextResponse.json({ ok: true });
 
   const chatId = mensagem.chat.id;
 
   try {
-    // Extrai o conteudo da mensagem no formato que a IA espera
     const partesEntrada: Part[] = [];
 
     if (mensagem.text) {
@@ -114,7 +75,6 @@ export async function POST(requisicao: NextRequest): Promise<NextResponse> {
       return NextResponse.json({ ok: true });
     }
 
-    // Delega toda a logica de negocio ao Controller
     const nomeTecnico = mensagem.from?.first_name ?? "Tecnico via Telegram";
     const resultado = await acaoProcessarMensagemTelegram(partesEntrada, nomeTecnico);
 
@@ -126,10 +86,6 @@ export async function POST(requisicao: NextRequest): Promise<NextResponse> {
 
   return NextResponse.json({ ok: true });
 }
-
-/* ------------------------------------------------------------------ */
-/*  Tipos da API do Telegram (usados apenas neste arquivo)            */
-/* ------------------------------------------------------------------ */
 
 interface AtualizacaoTelegram {
   update_id: number;

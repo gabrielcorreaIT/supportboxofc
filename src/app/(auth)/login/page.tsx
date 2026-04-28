@@ -4,12 +4,11 @@
  *
  * DESCRICAO:
  *   Pagina publica de autenticacao. Exibe o logo do SupportBox e
- *   o formulario de login (LoginForm). Nao requer autenticacao —
- *   o middleware nao protege esta rota.
+ *   o formulario de login (LoginForm). Nao requer autenticacao.
  *
  * CONEXOES:
  *   - Depende de: FormularioLogin (componente do formulario)
- *   - Acessada por: usuarios nao autenticados, redirecionamento do middleware
+ *   - Acessada por: usuarios nao autenticados
  */
 import { FormularioLogin } from "@/views/auth/LoginForm";
 import { PackageCheck } from "lucide-react";

@@ -4,7 +4,8 @@
       "Bash(npx tsc:*)",
       "mcp__claude_ai_Supabase__execute_sql",
       "mcp__claude_ai_Supabase__list_tables",
-      "Bash(node -e ':*)"
+      "Bash(node -e ':*)",
+      "Bash(npm run *)"
     ]
   }
 }

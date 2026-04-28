@@ -8,7 +8,7 @@
  *
  * CONEXOES:
  *   - Depende de: PainelSolicitante (componente orquestrador)
- *   - Protegida pelo middleware (requer autenticacao)
+ *   - Protegida pelo layout (requer autenticacao)
  */
 import { PainelSolicitante } from "@/views/ticket/SolicitanteDashboard";
 
