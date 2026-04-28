@@ -112,37 +112,18 @@ export async function acaoObterMeusChamados(solicitante: string): Promise<{
 // 2. FLUXO DO AGENTE DE TI
 // ===========================================================================
 
-/** Retorna todos os chamados + metricas resumidas do painel do agente. */
-export async function acaoObterDadosPainel(): Promise<{
+/** Retorna todos os chamados ordenados do mais recente ao mais antigo. */
+export async function acaoListarChamados(): Promise<{
   sucesso: boolean;
-  dados?: {
-    chamados: Chamado[];
-    metricas: {
-      total: number;
-      abertos: number;
-      emAndamento: number;
-      concluidos: number;
-      taxaResolucao: number;
-    };
-  };
+  chamados?: Chamado[];
   erro?: string;
 }> {
   try {
     const chamados = await ChamadoModel.buscarTodosChamadosAtivos();
-
-    const total = chamados.length;
-    const abertos = chamados.filter((c) => c.status === "Aberto").length;
-    const emAndamento = chamados.filter((c) => c.status === "Em Andamento").length;
-    const concluidos = chamados.filter((c) => c.status === "Concluído").length;
-    const taxaResolucao = total === 0 ? 0 : Math.round((concluidos / total) * 100);
-
-    return {
-      sucesso: true,
-      dados: { chamados, metricas: { total, abertos, emAndamento, concluidos, taxaResolucao } },
-    };
+    return { sucesso: true, chamados };
   } catch (error) {
-    console.error("Erro ao carregar Dashboard:", error);
-    return { sucesso: false, erro: "Falha ao carregar metricas." };
+    console.error("Erro ao listar chamados:", error);
+    return { sucesso: false, erro: "Falha ao carregar chamados." };
   }
 }
 

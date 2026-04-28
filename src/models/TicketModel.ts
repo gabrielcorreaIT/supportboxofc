@@ -115,18 +115,6 @@ export const ChamadoModel = {
     return (data as any[]).map(mapearChamadoDoBanco);
   },
 
-  /** Busca um chamado pelo seu ID interno (UUID). */
-  async buscarChamadoPorId(id: string): Promise<Chamado | null> {
-    const { data, error } = await supabase
-      .from("tickets")
-      .select("*")
-      .eq("id", id)
-      .single();
-
-    if (error || !data) return null;
-    return mapearChamadoDoBanco(data);
-  },
-
   /** Insere um novo chamado no banco. Retorna true se deu certo. */
   async inserirChamado(chamado: Chamado): Promise<boolean> {
     const { error } = await supabase

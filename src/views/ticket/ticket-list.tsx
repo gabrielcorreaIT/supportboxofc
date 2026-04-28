@@ -10,14 +10,14 @@
  *   Esta e a view principal do dashboard do agente de TI.
  *
  * CONEXOES:
- *   - Depende de: TicketController.acaoObterDadosPainel (lista + metricas),
+ *   - Depende de: TicketController.acaoListarChamados (lista),
  *                 ticket-agent-modal (detalhes), ticket-utils (cores/datas)
  *   - Usado por:  src/app/(dashboard)/agente/page.tsx
  */
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { acaoObterDadosPainel } from "@/controllers/TicketController";
+import { acaoListarChamados } from "@/controllers/TicketController";
 import { ModalAgenteChamado } from "@/views/ticket/ticket-agent-modal";
 import type { Chamado } from "@/models/types";
 import { obterCorStatus, obterCorPrioridade, formatarData } from "@/lib/ticket-utils";
@@ -40,8 +40,8 @@ export default function ListaChamados() {
   const buscarChamados = useCallback(async () => {
     setCarregando(true);
     try {
-      const resultado = await acaoObterDadosPainel();
-      if (resultado.sucesso && resultado.dados) setChamados(resultado.dados.chamados);
+      const resultado = await acaoListarChamados();
+      if (resultado.sucesso && resultado.chamados) setChamados(resultado.chamados);
     } catch (error) {
       console.error("Erro ao carregar chamados:", error);
     } finally {

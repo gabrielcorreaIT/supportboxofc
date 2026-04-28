@@ -107,7 +107,7 @@ export const IAModel = {
         },
         status_alvo: {
           type: SchemaType.STRING,
-          description: "'Aberto', 'Em Andamento' ou 'Concluido'. Null se nao for atualizacao.",
+          description: "Use exatamente 'Aberto', 'Em Andamento' ou 'Concluído' (com acento). Null se nao for atualizacao.",
           nullable: true,
         },
         comment: {
@@ -126,7 +126,7 @@ export const IAModel = {
     const parteSistema: Part = {
       text: `Voce e o assistente de campo do SupportBox para tecnicos de TI no Telegram.
       Interprete o comando de voz ou texto do tecnico e extraia as informacoes estruturadas.
-      Os status possiveis sao: Aberto, Em Andamento, Concluido.
+      Os unicos status validos sao exatamente: "Aberto", "Em Andamento" e "Concluído" (com acento).
       Sempre responda em portugues brasileiro.`,
     };
 
@@ -144,10 +144,21 @@ export const IAModel = {
     });
 
     const resposta = JSON.parse(resultado.response.text());
+
+    // Normaliza o status para o formato exato esperado pelo sistema
+    // (a IA as vezes devolve "Concluido" sem acento)
+    const statusNormalizado = (() => {
+      const s = (resposta.status_alvo as string | null)?.toLowerCase();
+      if (s === "aberto") return "Aberto";
+      if (s === "em andamento") return "Em Andamento";
+      if (s === "concluido" || s === "concluído") return "Concluído";
+      return null;
+    })();
+
     return {
       id_chamado: resposta.ticket_id,
       acao: resposta.action,
-      status_alvo: resposta.status_alvo,
+      status_alvo: statusNormalizado,
       comentario: resposta.comment,
       resposta_assistente: resposta.resposta_assistente,
     };
