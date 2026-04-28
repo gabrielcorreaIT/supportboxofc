@@ -1,10 +1,10 @@
 /**
- * CAMADA: Infraestrutura — Layout Raiz da Aplicacao
+ * CAMADA: Infraestrutura — Layout "Raiz" da Aplicacao
  * ARQUIVO: src/app/layout.tsx
  *
  * DESCRICAO:
  *   Layout raiz que envolve TODAS as paginas do SupportBox.
- *   Configura o idioma (pt-BR), metadados globais e o provedor de tema.
+ *   Configura o idioma (pt-BR) e o tema.
  *   Nenhum conteudo visual e renderizado aqui — apenas a estrutura base.
  *
  * CONEXOES:
