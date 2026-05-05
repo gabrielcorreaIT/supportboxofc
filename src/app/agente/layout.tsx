@@ -1,44 +1,36 @@
 /**
- * ============================================================================
- * 📦 COMPONENTE: AgenteLayout (Layout Exclusivo do Setor de TI)
- * 💻 PROJETO: SupportBox
- * 👨‍💻 DESENVOLVEDOR: Gabriel
- * ============================================================================
- * 📝 DESCRIÇÃO:
- * Este é o "esqueleto" mestre de todas as páginas do Agente.
- * Ele carrega a nossa AgentSidebar fixa na esquerda e injeta o conteúdo
- * da página atual (children) no lado direito. Isso garante que a barra
- * lateral nunca pisque ou recarregue ao navegar entre as abas!
- * ============================================================================
+ * CAMADA: View (rota Next.js — Layout do Agente)
+ * ARQUIVO: src/app/agente/layout.tsx
+ *
+ * RESPONSABILIDADE
+ *   Layout aplicado a todas as páginas dentro de "/agente".
+ *   Renderiza a barra lateral fixa à esquerda e abre espaço, à
+ *   direita, para o conteúdo das rotas filhas.
+ *
+ *   Como o painel do agente é a única página "logada" desta etapa,
+ *   o callback de "Sair" também leva ao /login. Quando houver
+ *   AuthController, a chamada `acaoLogout()` virá para cá.
  */
+"use client";
 
-import type { Metadata } from "next";
-// Importamos o componente inteligente da barra lateral
-import { AgentSidebar } from "@/components/AgentSidebar";
+import { useRouter } from "next/navigation";
+import { MenuLateralAgente } from "@/views/agente/MenuLateralAgente";
+import { usuarioAgenteFake } from "@/views/compartilhado/dados-mock";
 
-export const metadata: Metadata = {
-  title: "SupportBox - Agentes",
-  description: "Painel de controle e fila de atendimento para a equipe de TI",
-};
-
-export default function AgenteLayout({
+export default function LayoutAgente({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const router = useRouter();
+
   return (
-    <div className="flex h-screen overflow-hidden bg-slate-50 relative">
-      {/* Fundo com textura pontilhada elegante */}
-      <div className="absolute inset-0 z-0 opacity-[0.03] pointer-events-none bg-[linear-gradient(to_right,#808080_1px,transparent_1px),linear-gradient(to_bottom,#808080_1px,transparent_1px)] bg-[size:24px_24px]"></div>
-
-      {/* 1. A NOSSA BARRA LATERAL INTELIGENTE FIXA AQUI */}
-      {/* ⚠️ CORREÇÃO: O wrapper z-20 e flex-shrink-0 garante que a barra fique sempre na frente e seja clicável! */}
-      <div className="relative z-20 h-full flex-shrink-0 shadow-xl border-r border-slate-800">
-        <AgentSidebar />
-      </div>
-
-      {/* 2. O CONTEÚDO DINÂMICO (As suas páginas) VAI AQUI DENTRO */}
-      <div className="flex-1 overflow-y-auto relative z-10">{children}</div>
+    <div className="flex h-screen overflow-hidden bg-fundo">
+      <MenuLateralAgente
+        nomeUsuario={usuarioAgenteFake.nome}
+        aoSairClicado={() => router.push("/login")}
+      />
+      <main className="flex-1 overflow-y-auto">{children}</main>
     </div>
   );
 }

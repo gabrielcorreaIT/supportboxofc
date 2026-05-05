@@ -1,90 +1,77 @@
+/**
+ * CAMADA: Configuração / Build (Tailwind CSS)
+ * ARQUIVO: tailwind.config.ts
+ *
+ * RESPONSABILIDADE
+ *   Centraliza a paleta de cores e os caminhos onde o Tailwind
+ *   deve procurar classes. Como esta etapa do projeto entrega
+ *   apenas a camada de View, mantemos o tema simples e direto:
+ *   poucos tokens semânticos, paleta neutra com um único acento
+ *   (azul institucional) e um destaque (âmbar) para chamar
+ *   atenção a estados específicos (ex.: prioridade alta).
+ *
+ * ENCAIXE NO MVC FUTURO
+ *   Esta configuração é puramente visual. Não muda quando os
+ *   Controllers ou Models forem adicionados — Views consomem
+ *   estas classes; Controllers/Models não enxergam Tailwind.
+ */
 import type { Config } from "tailwindcss";
 
-const config = {
-  darkMode: ["class"],
+const config: Config = {
+  // Caminhos analisados em busca de classes Tailwind. A View vive
+  // em src/app (rotas) e src/views (componentes).
   content: [
-    // 🎯 O ajuste principal está aqui:
-    // Agora o Tailwind olha para tudo dentro de "src" (app, components, lib, features)
-    "./src/**/*.{ts,tsx,js,jsx,mdx}",
-
-    // (Opcional) Mantemos estes comentados por segurança caso você ainda tenha algo na raiz durante a migração.
-    // Depois pode apagar:
-    // "./app/**/*.{ts,tsx}",
-    // "./components/**/*.{ts,tsx}",
+    "./src/app/**/*.{ts,tsx}",
+    "./src/views/**/*.{ts,tsx}",
   ],
-  prefix: "",
   theme: {
-    container: {
-      center: true,
-      padding: "2rem",
-      screens: {
-        "2xl": "1400px",
-      },
-    },
     extend: {
+      // Paleta semântica — nomes de papel, não de cor.
+      // Permite trocar a cor depois sem renomear classes.
       colors: {
-        border: "hsl(var(--border))",
-        input: "hsl(var(--input))",
-        ring: "hsl(var(--ring))",
-        background: "hsl(var(--background))",
-        foreground: "hsl(var(--foreground))",
-        supportbox: {
-          DEFAULT: "#d4924b",
-          dark: "#c27f33",
-          light: "#e6a968",
-          foreground: "#ffffff",
+        // Acento institucional (botões primários, links).
+        marca: {
+          DEFAULT: "#1d4ed8", // blue-700
+          forte: "#1e3a8a",   // blue-900 (hover/ênfase)
+          fraca: "#dbeafe",   // blue-100 (fundos suaves)
         },
-        primary: {
-          DEFAULT: "#d4924b",
-          foreground: "#ffffff",
+        // Destaque pontual (avisos, prioridade alta).
+        destaque: {
+          DEFAULT: "#d97706", // amber-600
+          fraca: "#fef3c7",   // amber-100
         },
-        secondary: {
-          DEFAULT: "#222222",
-          foreground: "#ffffff",
-        },
-        destructive: {
-          DEFAULT: "hsl(var(--destructive))",
-          foreground: "hsl(var(--destructive-foreground))",
-        },
-        muted: {
-          DEFAULT: "hsl(var(--muted))",
-          foreground: "hsl(var(--muted-foreground))",
-        },
-        accent: {
-          DEFAULT: "#f0d0b0",
-          foreground: "#222222",
-        },
-        popover: {
-          DEFAULT: "hsl(var(--popover))",
-          foreground: "hsl(var(--popover-foreground))",
-        },
-        card: {
-          DEFAULT: "hsl(var(--card))",
-          foreground: "hsl(var(--card-foreground))",
-        },
+        // Texto e bordas neutros.
+        tinta: "#0f172a",      // slate-900
+        tintaFraca: "#475569", // slate-600
+        linha: "#e2e8f0",      // slate-200
+        // Fundos de página e cartões.
+        papel: "#ffffff",
+        fundo: "#f8fafc",      // slate-50
       },
+      // Cantos discretos. O projeto evita cantos muito redondos
+      // para reforçar a estética sóbria/acadêmica.
       borderRadius: {
-        lg: "var(--radius)",
-        md: "calc(var(--radius) - 2px)",
-        sm: "calc(var(--radius) - 4px)",
+        sm: "2px",
+        DEFAULT: "4px",
+        md: "6px",
+        lg: "8px",
       },
-      keyframes: {
-        "accordion-down": {
-          from: { height: "0" },
-          to: { height: "var(--radix-accordion-content-height)" },
-        },
-        "accordion-up": {
-          from: { height: "var(--radix-accordion-content-height)" },
-          to: { height: "0" },
-        },
-      },
-      animation: {
-        "accordion-down": "accordion-down 0.2s ease-out",
-        "accordion-up": "accordion-up 0.2s ease-out",
+      // Tipografia: a fonte do sistema é suficiente para o estilo
+      // "trabalho universitário" — sem importar fontes externas.
+      fontFamily: {
+        sans: [
+          "ui-sans-serif",
+          "system-ui",
+          "Segoe UI",
+          "Roboto",
+          "Helvetica",
+          "Arial",
+          "sans-serif",
+        ],
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
-} satisfies Config;
+  plugins: [],
+};
 
 export default config;
