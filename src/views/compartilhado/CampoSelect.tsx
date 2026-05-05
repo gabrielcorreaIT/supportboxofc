@@ -3,26 +3,41 @@
  * ARQUIVO: src/views/compartilhado/CampoSelect.tsx
  *
  * RESPONSABILIDADE
- *   Versão padronizada de um <select> com rótulo. Recebe a lista
- *   de opções como prop, mantendo o componente "burro" (sem regras
- *   de negócio sobre o que é uma opção válida).
+ *   Versão padronizada de um <select> com rótulo. Recebe a lista de
+ *   opções como prop, mantendo o componente "burro" (sem regras de
+ *   negócio sobre o que é uma opção válida).
+ *
+ *   Aceita dois formatos de opção:
+ *     - string puro -> o mesmo texto é usado como `value` e como
+ *                      rótulo visível (uso comum: prioridades, status).
+ *     - { valor, rotulo } -> usado quando o valor técnico difere do
+ *                            texto a ser mostrado ao usuário (ex.:
+ *                            valor "incidente" exibido como "Incidente").
  *
  * PRINCÍPIOS SOLID APLICADOS
  *   - SRP: só renderiza o conjunto rótulo + select.
- *   - DIP: as opções vêm de fora (a View chamadora decide o domínio
- *          — categorias, prioridades, etc.). O componente não sabe
- *          qual lista está exibindo.
+ *   - DIP: as opções vêm de fora; a View pai decide o domínio.
+ *   - OCP: o tipo `OpcaoSelect` permite estender a forma das opções
+ *          sem alterar quem já passa strings.
  */
 "use client";
 
 import type { SelectHTMLAttributes } from "react";
 
+/** Opção do select: string simples OU par valor/rótulo. */
+export type OpcaoSelect = string | { valor: string; rotulo: string };
+
 interface PropsCampoSelect
   extends SelectHTMLAttributes<HTMLSelectElement> {
   rotulo: string;
-  opcoes: readonly string[];
-  /** Texto da opção neutra (ex.: "Selecione..."). Opcional. */
+  opcoes: readonly OpcaoSelect[];
+  /** Texto da opção neutra inicial (ex.: "Selecione..."). Opcional. */
   textoPadrao?: string;
+}
+
+/** Normaliza qualquer formato de opção para `{ valor, rotulo }`. */
+function normalizarOpcao(op: OpcaoSelect): { valor: string; rotulo: string } {
+  return typeof op === "string" ? { valor: op, rotulo: op } : op;
 }
 
 export function CampoSelect({
@@ -33,6 +48,7 @@ export function CampoSelect({
   className = "",
   ...resto
 }: PropsCampoSelect) {
+  // Garante associação acessível entre <label> e <select>.
   const idCampo = id ?? `select-${rotulo.toLowerCase().replace(/\s+/g, "-")}`;
 
   return (
@@ -51,11 +67,14 @@ export function CampoSelect({
         {...resto}
       >
         {textoPadrao && <option value="">{textoPadrao}</option>}
-        {opcoes.map((op) => (
-          <option key={op} value={op}>
-            {op}
-          </option>
-        ))}
+        {opcoes.map((op) => {
+          const { valor, rotulo: textoOpcao } = normalizarOpcao(op);
+          return (
+            <option key={valor} value={valor}>
+              {textoOpcao}
+            </option>
+          );
+        })}
       </select>
     </div>
   );

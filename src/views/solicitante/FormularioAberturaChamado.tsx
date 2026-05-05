@@ -113,7 +113,10 @@ export function FormularioAberturaChamado({
         />
         <CampoSelect
           rotulo="Tipo"
-          opcoes={["incidente", "solicitacao"]}
+          opcoes={[
+            { valor: "incidente", rotulo: "Incidente" },
+            { valor: "solicitacao", rotulo: "Solicitação" },
+          ]}
           value={tipo}
           onChange={(e) => setTipo(e.target.value as TipoChamado)}
         />
