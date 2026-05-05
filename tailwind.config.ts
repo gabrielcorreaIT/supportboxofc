@@ -1,63 +1,58 @@
 /**
- * CAMADA: Configuração / Build (Tailwind CSS)
- * ARQUIVO: tailwind.config.ts
+ * Configuração do Tailwind CSS.
  *
- * RESPONSABILIDADE
- *   Centraliza a paleta de cores e os caminhos onde o Tailwind
- *   deve procurar classes. Como esta etapa do projeto entrega
- *   apenas a camada de View, mantemos o tema simples e direto:
- *   poucos tokens semânticos, paleta neutra com um único acento
- *   (azul institucional) e um destaque (âmbar) para chamar
- *   atenção a estados específicos (ex.: prioridade alta).
+ * Reúne a paleta de cores e os caminhos onde o Tailwind procura por
+ * classes. Como esta etapa entrega só a parte visual, o tema é
+ * simples: poucas cores, base neutra com um azul institucional e um
+ * âmbar para chamar atenção em situações específicas, como prioridade
+ * alta.
  *
- * ENCAIXE NO MVC FUTURO
- *   Esta configuração é puramente visual. Não muda quando os
- *   Controllers ou Models forem adicionados — Views consomem
- *   estas classes; Controllers/Models não enxergam Tailwind.
+ * Quando o restante do sistema for adicionado, nada aqui muda. Esta
+ * configuração diz respeito apenas à aparência.
  */
 import type { Config } from "tailwindcss";
 
 const config: Config = {
-  // Caminhos analisados em busca de classes Tailwind. A View vive
-  // em src/app (rotas) e src/views (componentes).
+  // Pastas onde o Tailwind deve procurar pelas classes utilizadas.
+  // Os componentes ficam em src/views e as rotas em src/app.
   content: [
     "./src/app/**/*.{ts,tsx}",
     "./src/views/**/*.{ts,tsx}",
   ],
   theme: {
     extend: {
-      // Paleta semântica — nomes de papel, não de cor.
-      // Permite trocar a cor depois sem renomear classes.
+      // Os nomes descrevem o papel da cor, não a cor em si. Assim a
+      // troca de paleta no futuro não exige renomear classes.
       colors: {
-        // Acento institucional (botões primários, links).
+        // Cor principal usada em botões e links de destaque.
         marca: {
-          DEFAULT: "#1d4ed8", // blue-700
-          forte: "#1e3a8a",   // blue-900 (hover/ênfase)
-          fraca: "#dbeafe",   // blue-100 (fundos suaves)
+          DEFAULT: "#1d4ed8",
+          forte: "#1e3a8a",
+          fraca: "#dbeafe",
         },
-        // Destaque pontual (avisos, prioridade alta).
+        // Tom usado para chamar atenção em avisos e prioridade alta.
         destaque: {
-          DEFAULT: "#d97706", // amber-600
-          fraca: "#fef3c7",   // amber-100
+          DEFAULT: "#d97706",
+          fraca: "#fef3c7",
         },
-        // Texto e bordas neutros.
-        tinta: "#0f172a",      // slate-900
-        tintaFraca: "#475569", // slate-600
-        linha: "#e2e8f0",      // slate-200
-        // Fundos de página e cartões.
+        // Tons neutros para texto e bordas.
+        tinta: "#0f172a",
+        tintaFraca: "#475569",
+        linha: "#e2e8f0",
+        // Fundos de página e de cartões.
         papel: "#ffffff",
-        fundo: "#f8fafc",      // slate-50
+        fundo: "#f8fafc",
       },
-      // Cantos discretos. O projeto evita cantos muito redondos
-      // para reforçar a estética sóbria/acadêmica.
+      // Cantos discretos. Evitamos bordas muito arredondadas para
+      // manter a aparência sóbria e formal.
       borderRadius: {
         sm: "2px",
         DEFAULT: "4px",
         md: "6px",
         lg: "8px",
       },
-      // Tipografia: a fonte do sistema é suficiente para o estilo
-      // "trabalho universitário" — sem importar fontes externas.
+      // Usamos a tipografia padrão do sistema operacional. Não
+      // carregamos fontes de fora.
       fontFamily: {
         sans: [
           "ui-sans-serif",

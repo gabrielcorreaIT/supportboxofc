@@ -1,12 +1,10 @@
 /**
- * CAMADA: View (rota Next.js — Layout do Solicitante)
- * ARQUIVO: src/app/solicitante/layout.tsx
+ * Estrutura usada por todas as páginas do solicitante.
  *
- * RESPONSABILIDADE
- *   Layout aplicado a todas as páginas dentro de "/solicitante".
- *   Por enquanto, apenas define o pano de fundo. No futuro, este é
- *   o ponto natural para adicionar a verificação de sessão (chamando
- *   o AuthController) e redirecionar para o login se necessário.
+ * Por enquanto define apenas a cor de fundo. Mais para a frente este
+ * é o lugar natural para verificar se o usuário está realmente
+ * autenticado e mandar de volta para a tela de entrada quando não
+ * estiver.
  */
 export default function LayoutSolicitante({
   children,

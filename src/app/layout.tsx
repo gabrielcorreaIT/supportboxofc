@@ -1,23 +1,20 @@
 /**
- * CAMADA: View (rota Next.js — Layout Raiz)
- * ARQUIVO: src/app/layout.tsx
+ * Estrutura raiz do site.
  *
- * RESPONSABILIDADE
- *   Layout raiz do App Router. Envolve TODAS as páginas com a tag
- *   <html>/<body>, importa o CSS global e define os metadados.
- *   Não renderiza nada de produto — só estrutura.
+ * Envolve todas as páginas com as tags html e body, carrega o estilo
+ * global e define o título exibido na aba do navegador. Aqui não
+ * temos nada do sistema em si, apenas a moldura.
  *
- * ENCAIXE NO MVC FUTURO
- *   Este arquivo permanece estável. Se um dia precisarmos de um
- *   provedor global (tema, sessão), ele entra aqui — mas continua
- *   sendo apenas estrutura, sem lógica de negócio.
+ * Quando os controladores e modelos forem adicionados nas próximas
+ * etapas, esse arquivo continua igual. Se um dia precisar de algo
+ * global, como tema ou sessão de usuário, é aqui que entra.
  */
 import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
   title: "SupportBox",
-  description: "Sistema de Help Desk — etapa de apresentação (View only).",
+  description: "Sistema interno de atendimento de TI. Etapa visual.",
 };
 
 export default function LayoutRaiz({

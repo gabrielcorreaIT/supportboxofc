@@ -1,19 +1,12 @@
 /**
- * CAMADA: View (componente compartilhado)
- * ARQUIVO: src/views/compartilhado/Cabecalho.tsx
+ * Faixa superior usada nas páginas do solicitante.
  *
- * RESPONSABILIDADE
- *   Faixa superior (header) usada pelas páginas do solicitante.
- *   Mostra o nome do sistema, o nome do usuário logado e um botão
- *   "Sair". O painel do agente usa um menu lateral (MenuLateralAgente)
- *   em vez deste cabeçalho.
- *
- * PRINCÍPIOS SOLID APLICADOS
- *   - SRP: cuida apenas da faixa superior. Não busca dados; recebe
- *          tudo via props.
- *   - DIP: o callback `aoSairClicado` é fornecido por quem usa o
- *          componente. Hoje é um no-op; quando o AuthController
- *          existir, a página passará `acaoLogout()` aqui.
+ * Mostra o nome do sistema, o nome do usuário entrado e o botão
+ * para sair. O painel do agente usa uma barra lateral em vez deste
+ * cabeçalho. O componente apenas desenha a faixa, sem buscar dados
+ * por conta própria. O que acontece ao clicar em sair é
+ * responsabilidade de quem usa, passando a função em
+ * aoSairClicado.
  */
 "use client";
 
@@ -21,11 +14,11 @@ import { LogOut } from "lucide-react";
 import { Botao } from "./Botao";
 
 interface PropsCabecalho {
-  /** Nome do usuário logado, exibido à direita. */
+  /** Nome do usuário entrado, exibido à direita. */
   nomeUsuario: string;
-  /** Linha de identificação do papel (ex.: "Portal do Solicitante"). */
+  /** Texto curto que identifica o papel, como Portal do Solicitante. */
   subtitulo?: string;
-  /** Disparado ao clicar em "Sair". A página decide o que fazer. */
+  /** Função chamada quando o usuário clica em Sair. */
   aoSairClicado?: () => void;
 }
 
@@ -37,7 +30,6 @@ export function Cabecalho({
   return (
     <header className="bg-papel border-b border-linha">
       <div className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
-        {/* Logotipo textual — sem ícone colorido para reforçar a estética sóbria. */}
         <div>
           <h1 className="text-base font-semibold text-tinta tracking-tight">
             SupportBox
@@ -47,7 +39,6 @@ export function Cabecalho({
           )}
         </div>
 
-        {/* Identificação do usuário + botão de logout. */}
         <div className="flex items-center gap-4">
           <span className="text-sm text-tintaFraca hidden sm:inline">
             {nomeUsuario}

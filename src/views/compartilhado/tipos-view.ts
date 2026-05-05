@@ -1,30 +1,17 @@
 /**
- * CAMADA: View (tipos auxiliares)
- * ARQUIVO: src/views/compartilhado/tipos-view.ts
+ * Formatos de dado usados pelas telas do sistema.
  *
- * RESPONSABILIDADE
- *   Definir os formatos de dado que as Views precisam para renderizar.
- *   ATENÇÃO: estes tipos NÃO são os Models do sistema — são apenas
- *   contratos visuais. A View pede "me dê algo com este formato",
- *   sem se importar de onde os dados vêm.
- *
- * POR QUE FICAR AQUI E NÃO EM src/models/
- *   Nesta etapa, a camada Model ainda não existe. Manter os tipos
- *   exclusivamente da View permite trabalhar sem acoplar a estrutura
- *   final do banco. Quando os Models forem criados, este arquivo
- *   poderá ser substituído por imports de `src/models/types.ts`,
- *   ou os tipos podem virar "ViewModels" derivados dos Models.
- *
- * PRINCÍPIOS SOLID APLICADOS
- *   - SRP: cada tipo descreve uma única entidade visual.
- *   - ISP: as Views recebem apenas os campos de que precisam,
- *          via interfaces pequenas em cada componente.
+ * Os tipos aqui descrevem o formato que as telas esperam receber
+ * para conseguir mostrar as informações. Eles não correspondem ao
+ * formato final guardado no banco. Quando a parte de modelos chegar,
+ * é possível trocar este arquivo por imports vindos dali, ou manter
+ * estes tipos como uma versão preparada para a tela.
  */
 
 /** Papéis possíveis de um usuário no sistema. */
 export type PapelUsuario = "solicitante" | "agente";
 
-/** Status pelos quais um chamado passa. */
+/** Situações pelas quais um chamado passa. */
 export type StatusChamado = "Aberto" | "Em Andamento" | "Concluído";
 
 /** Níveis de urgência atribuíveis a um chamado. */
@@ -33,10 +20,11 @@ export type PrioridadeChamado = "Baixa" | "Média" | "Alta";
 /** Áreas de classificação de um chamado. */
 export type CategoriaChamado = "Hardware" | "Software" | "Acesso" | "Rede";
 
-/** Distinção entre incidente (algo quebrou) e solicitação (algo novo). */
+/** Distinção entre incidente, quando algo quebrou, e solicitação,
+ *  quando alguém pede algo novo. */
 export type TipoChamado = "incidente" | "solicitacao";
 
-/** Listas auxiliares — usadas para popular `<select>` no formulário. */
+/** Listas auxiliares usadas para popular os campos de seleção. */
 export const STATUS_DISPONIVEIS: StatusChamado[] = [
   "Aberto",
   "Em Andamento",
@@ -57,8 +45,8 @@ export const CATEGORIAS_DISPONIVEIS: CategoriaChamado[] = [
 ];
 
 /**
- * Forma reduzida de um usuário, usada apenas para exibir nome/papel
- * no cabeçalho ou na barra lateral.
+ * Forma curta de um usuário, usada para mostrar nome e papel no
+ * cabeçalho ou na barra lateral.
  */
 export interface UsuarioVisivel {
   nome: string;
@@ -66,37 +54,37 @@ export interface UsuarioVisivel {
 }
 
 /**
- * Comentário/interação dentro do histórico de um chamado.
- * Apresentado em ordem cronológica no modal de detalhes.
+ * Comentário do histórico de um chamado, mostrado em ordem
+ * cronológica dentro da janela de detalhes.
  */
 export interface ComentarioVisivel {
-  id: string;        // chave estável para o React
-  autor: string;     // quem escreveu
-  texto: string;     // conteúdo da mensagem
-  criadoEm: string;  // já formatado para humano (ex.: "22/03 10:30")
+  id: string;
+  autor: string;
+  texto: string;
+  criadoEm: string;
 }
 
 /**
- * Chamado resumido, exibido em listas e cartões.
- * Não traz histórico nem descrição longa para manter
- * a renderização das listas leve.
+ * Versão resumida de um chamado, exibida em listas e tabelas. Não
+ * traz a descrição completa nem o histórico para deixar a lista
+ * leve de carregar.
  */
 export interface ChamadoResumo {
   id: string;
-  protocolo: string;          // código curto e legível, ex.: "CH-2025-001"
+  protocolo: string;
   titulo: string;
   solicitante: string;
   categoria: CategoriaChamado;
   prioridade: PrioridadeChamado;
   status: StatusChamado;
   tipo: TipoChamado;
-  atribuidoA?: string;        // nome do agente responsável (se houver)
-  criadoEmFormatado: string;  // já em formato amigável
+  atribuidoA?: string;
+  criadoEmFormatado: string;
 }
 
 /**
- * Versão completa do chamado, usada no modal de detalhes.
- * Inclui descrição longa e histórico de comentários.
+ * Versão completa de um chamado, usada na janela de detalhes. Inclui
+ * a descrição longa e o histórico de comentários.
  */
 export interface ChamadoDetalhado extends ChamadoResumo {
   descricao: string;

@@ -1,15 +1,13 @@
 /**
- * CAMADA: View (rota Next.js — Página Raiz)
- * ARQUIVO: src/app/page.tsx
+ * Página raiz do site.
  *
- * RESPONSABILIDADE
- *   Quando o usuário acessa "/", redireciona para "/login". Não há
- *   "landing page" — o SupportBox é um sistema interno.
+ * Quando o usuário acessa a barra inicial do endereço, mandamos
+ * direto para a tela de entrada. Não existe página inicial pública,
+ * o sistema é interno.
  *
- * ENCAIXE NO MVC FUTURO
- *   Este redirecionamento permanece. O destino pode mudar quando
- *   a sessão real for implementada (ex.: ir para /agente se já
- *   logado), mas isso será uma decisão do AuthController.
+ * No futuro, com a parte de autenticação ligada, esse desvio pode
+ * passar a olhar a sessão e levar o usuário direto para o painel
+ * dele caso já esteja entrado.
  */
 import { redirect } from "next/navigation";
 

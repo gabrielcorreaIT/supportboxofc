@@ -1,21 +1,14 @@
 /**
- * CAMADA: View (rota Next.js — Página de Login)
- * ARQUIVO: src/app/login/page.tsx
+ * Tela de entrada do sistema.
  *
- * RESPONSABILIDADE
- *   Página acessada em "/login". Centraliza o formulário de login
- *   numa caixa simples sobre fundo neutro.
+ * Centraliza o formulário em uma caixa simples sobre o fundo neutro.
+ * Como ainda não temos a parte que valida usuário e senha, o envio
+ * apenas leva a pessoa para um dos dois painéis com base no e-mail
+ * digitado. Se o e-mail tiver a palavra agente, vai para o painel
+ * do agente. Caso contrário, vai para o portal do solicitante.
  *
- *   Como NÃO há AuthController nesta etapa, o handler `aoEnviar`
- *   apenas redireciona o usuário para um dos dois painéis com base
- *   no e-mail digitado:
- *     - se o e-mail contém "agente"  -> /agente
- *     - caso contrário               -> /solicitante
- *
- *   Esse roteamento é PURAMENTE de demonstração. Quando o
- *   AuthController existir, o callback será trocado por uma chamada
- *   ao Controller, e o componente FormularioLogin não precisará
- *   mudar (ver princípio DIP do SOLID).
+ * Esse desvio é só para a apresentação. Quando a autenticação for
+ * adicionada, o formulário em si não precisa mudar.
  */
 "use client";
 
@@ -25,7 +18,7 @@ import { FormularioLogin } from "@/views/auth/FormularioLogin";
 export default function PaginaLogin() {
   const router = useRouter();
 
-  // Handler de demonstração — sem autenticação real.
+  // Sem autenticação real ainda. Só direciona com base no e-mail.
   const aoEnviar = (email: string) => {
     const destino = email.toLowerCase().includes("agente")
       ? "/agente"
@@ -35,20 +28,20 @@ export default function PaginaLogin() {
 
   return (
     <main className="min-h-screen flex flex-col items-center justify-center px-4 bg-fundo">
-      {/* Identidade da aplicação. */}
       <div className="mb-6 text-center">
         <h1 className="text-2xl font-semibold text-tinta">SupportBox</h1>
         <p className="text-sm text-tintaFraca">
-          Sistema interno de Help Desk
+          Sistema interno de atendimento de TI
         </p>
       </div>
 
       <FormularioLogin aoEnviar={aoEnviar} />
 
       <p className="text-xs text-tintaFraca mt-6 text-center max-w-sm">
-        Etapa de apresentação: o login não autentica de fato. Use um e-mail
-        contendo &quot;agente&quot; para entrar como técnico, ou qualquer
-        outro endereço para entrar como solicitante.
+        Esta é a etapa de apresentação. O acesso ainda não é validado de
+        verdade. Use um e-mail com a palavra &quot;agente&quot; para entrar
+        como técnico, ou qualquer outro endereço para entrar como
+        solicitante.
       </p>
     </main>
   );

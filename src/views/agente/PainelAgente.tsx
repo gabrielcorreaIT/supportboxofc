@@ -1,19 +1,13 @@
 /**
- * CAMADA: View — Painel Orquestrador do Agente
- * ARQUIVO: src/views/agente/PainelAgente.tsx
+ * Painel do agente.
  *
- * RESPONSABILIDADE
- *   Compor a tela do agente: barra de filtros, tabela e modal de
- *   detalhes (em modo agente). Aplica em memória os filtros locais
- *   (busca + aba de status) sobre a lista recebida via prop.
+ * Reúne na mesma tela a barra de filtros, a tabela de chamados e a
+ * janela de detalhes em modo agente. Aplica em memória os filtros
+ * locais (busca por palavra e aba de situação) sobre a lista
+ * recebida.
  *
- *   A FILTRAGEM é puramente visual (não muda os dados), então mantê-la
- *   na View é aceitável e não viola SRP — não há regra de negócio aqui.
- *
- * PRINCÍPIOS SOLID APLICADOS
- *   - SRP: orquestra os filhos. Não autentica, não persiste.
- *   - DIP: dados e callbacks vêm de fora; o componente é
- *          testável isoladamente passando mocks.
+ * A filtragem aqui é só visual, ela não muda os dados, então faz
+ * sentido ficar dentro do componente.
  */
 "use client";
 
@@ -30,11 +24,11 @@ interface PropsPainelAgente {
   chamados: ChamadoResumo[];
   obterDetalhes: (idChamado: string) => ChamadoDetalhado | null;
 
-  /** Disparado quando o agente clica em "Assumir" no modal. */
+  /** Função chamada quando o agente clica em assumir. */
   aoAssumir?: (idChamado: string) => void;
-  /** Disparado quando o agente clica em "Concluir" no modal. */
+  /** Função chamada quando o agente clica em concluir. */
   aoConcluir?: (idChamado: string) => void;
-  /** Disparado quando o agente envia um comentário. */
+  /** Função chamada quando o agente envia um comentário. */
   aoComentar?: (idChamado: string, texto: string) => void;
 }
 
@@ -45,14 +39,13 @@ export function PainelAgente({
   aoConcluir,
   aoComentar,
 }: PropsPainelAgente) {
-  // Estado de UI: filtros + qual chamado está aberto.
+  // Filtros e qual chamado está aberto na janela de detalhes.
   const [termoBusca, setTermoBusca] = useState("");
   const [abaStatus, setAbaStatus] = useState<AbaStatus>("todos");
   const [idSelecionado, setIdSelecionado] = useState<string | null>(null);
 
-  // useMemo evita recalcular a lista a cada render se nada mudou.
-  // Filtragem composta (status + termo) — pertence à View porque é
-  // apenas exibição; nenhum dado é alterado.
+  // useMemo evita refazer o cálculo a cada redesenho quando nada
+  // mudou. A filtragem combina situação e palavra digitada.
   const chamadosFiltrados = useMemo(() => {
     const termo = termoBusca.trim().toLowerCase();
     return chamados.filter((c) => {

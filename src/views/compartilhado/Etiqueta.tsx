@@ -1,17 +1,12 @@
 /**
- * CAMADA: View (componente compartilhado)
- * ARQUIVO: src/views/compartilhado/Etiqueta.tsx
+ * Marcação colorida usada para indicar situação, prioridade ou
+ * tipo de chamado.
  *
- * RESPONSABILIDADE
- *   "Pílula" colorida usada para indicar status, prioridade ou
- *   tipo de chamado. Centraliza a relação entre valor textual e
- *   cor, evitando que listas e modais reinventem essa decisão.
- *
- * PRINCÍPIOS SOLID APLICADOS
- *   - SRP: traduz um valor para uma representação visual.
- *   - OCP: novas paletas (status, prioridade, etc.) viram novas
- *          funções `corDe...` neste arquivo, sem alterar quem
- *          já usa o componente.
+ * Centraliza a relação entre o valor mostrado e a cor, evitando que
+ * cada lista ou janela invente sua própria combinação. Para
+ * adicionar uma nova paleta basta criar uma nova função do tipo
+ * corPorAlgo neste arquivo, sem precisar mexer em quem já usa o
+ * componente.
  */
 "use client";
 
@@ -20,11 +15,10 @@ import type { PrioridadeChamado, StatusChamado } from "./tipos-view";
 
 interface PropsEtiqueta {
   children: ReactNode;
-  /** Classes Tailwind para fundo + texto. Use os helpers abaixo. */
+  /** Conjunto de classes do Tailwind para fundo e texto. */
   classeCor: string;
 }
 
-/** Renderiza a etiqueta visual. */
 export function Etiqueta({ children, classeCor }: PropsEtiqueta) {
   return (
     <span
@@ -39,12 +33,10 @@ export function Etiqueta({ children, classeCor }: PropsEtiqueta) {
   );
 }
 
-// ---------------------------------------------------------------------------
-// Helpers de cor — traduzem valor de domínio para classes Tailwind.
-// Mantidos aqui (em vez de inline) para que a paleta seja consistente.
-// ---------------------------------------------------------------------------
+// Funções auxiliares de cor. Traduzem o valor de cada situação ou
+// prioridade no conjunto de classes correspondente.
 
-/** Cor por status (Aberto/Em Andamento/Concluído). */
+/** Cor por situação do chamado. */
 export function corPorStatus(status: StatusChamado): string {
   switch (status) {
     case "Aberto":
@@ -56,7 +48,7 @@ export function corPorStatus(status: StatusChamado): string {
   }
 }
 
-/** Cor por prioridade (Baixa/Média/Alta). */
+/** Cor por nível de prioridade. */
 export function corPorPrioridade(p: PrioridadeChamado): string {
   switch (p) {
     case "Baixa":

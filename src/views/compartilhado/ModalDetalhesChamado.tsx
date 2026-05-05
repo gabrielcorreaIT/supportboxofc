@@ -1,27 +1,18 @@
 /**
- * CAMADA: View (componente compartilhado)
- * ARQUIVO: src/views/compartilhado/ModalDetalhesChamado.tsx
+ * Janela sobreposta com os detalhes de um chamado.
  *
- * RESPONSABILIDADE
- *   Janela sobreposta que exibe TODOS os dados de um chamado:
- *   metadados (protocolo, solicitante, datas), descrição completa
- *   e histórico de comentários. Quando o modo "agente" está ativo,
- *   também mostra os botões "Assumir" e "Concluir".
+ * Mostra todas as informações do chamado: dados gerais como
+ * protocolo, solicitante e datas, descrição completa e histórico de
+ * comentários. Quando está em modo agente, também mostra os botões
+ * de assumir e concluir.
  *
- *   É o mesmo modal usado pelo solicitante (modo leitura) e pelo
- *   agente (modo edição) — a diferença está apenas em quais botões
- *   aparecem. Isso evita duplicar tela.
+ * É a mesma janela usada pelo solicitante, em modo apenas leitura,
+ * e pelo agente, em modo de edição. A única diferença é quais
+ * botões aparecem. Isso evita ter duas telas iguais.
  *
- * PRINCÍPIOS SOLID APLICADOS
- *   - SRP: APENAS exibe dados e dispara callbacks. Não busca
- *          chamados nem grava comentários.
- *   - OCP: o modo "leitura" vs "agente" é controlado por uma flag,
- *          permitindo crescer (ex.: modo "supervisor") sem refazer
- *          o componente.
- *   - DIP: ao adicionar comentário, o componente chama
- *          `aoEnviarComentario(texto)`. Quem fornece o callback
- *          (a página) decide o que fazer com o texto. Hoje é um
- *          no-op; amanhã, será uma chamada ao Controller.
+ * O componente apenas mostra os dados e dispara as funções
+ * recebidas. Quem cuida de gravar comentários ou mudar a situação
+ * é a página que usa o componente.
  */
 "use client";
 
@@ -32,21 +23,21 @@ import { Botao } from "./Botao";
 import { Etiqueta, corPorPrioridade, corPorStatus } from "./Etiqueta";
 
 interface PropsModalDetalhesChamado {
-  /** Chamado a exibir. Se `null`, o modal renderiza vazio (não aparece). */
+  /** Chamado a exibir. Quando vazio, a janela não aparece. */
   chamado: ChamadoDetalhado | null;
-  /** Controla se o modal está aberto. */
+  /** Controla se a janela está aberta. */
   aberto: boolean;
-  /** Disparado ao clicar fora ou no X. */
+  /** Função chamada quando o usuário clica fora ou no x. */
   aoFechar: () => void;
 
-  /** Em modo "agente", mostra os botões "Assumir" e "Concluir". */
+  /** Quando verdadeiro, mostra os botões assumir e concluir. */
   modoAgente?: boolean;
 
-  /** Callbacks opcionais — só fazem sentido em modo agente. */
+  /** Funções opcionais. Só fazem sentido em modo agente. */
   aoAssumir?: () => void;
   aoConcluir?: () => void;
 
-  /** Dispara quando o usuário envia um comentário novo. */
+  /** Função chamada quando o usuário envia um comentário novo. */
   aoEnviarComentario?: (texto: string) => void;
 }
 
@@ -59,14 +50,14 @@ export function ModalDetalhesChamado({
   aoConcluir,
   aoEnviarComentario,
 }: PropsModalDetalhesChamado) {
-  // O texto do novo comentário é estado local da View — não precisa
-  // ser elevado, pois nenhuma outra parte da tela depende dele.
+  // O texto do comentário em digitação fica neste arquivo mesmo,
+  // já que nada fora da janela depende dele.
   const [textoComentario, setTextoComentario] = useState("");
 
-  // Sai cedo se o modal está fechado: nada a renderizar.
+  // Se a janela está fechada, não há nada para desenhar.
   if (!aberto || !chamado) return null;
 
-  /** Dispara o callback e limpa o campo (apenas se houver texto). */
+  /** Envia o comentário e limpa o campo, somente se houver texto. */
   const enviar = () => {
     const texto = textoComentario.trim();
     if (!texto) return;
@@ -77,16 +68,15 @@ export function ModalDetalhesChamado({
   const concluido = chamado.status === "Concluído";
 
   return (
-    // Camada escurecida que cobre a tela. Clicar nela fecha o modal.
+    // Camada escurecida que cobre a tela. Clicar nela fecha a janela.
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40"
       onClick={(e) => e.target === e.currentTarget && aoFechar()}
       role="dialog"
       aria-modal="true"
     >
-      {/* Caixa do modal. */}
       <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-papel border border-linha rounded-md shadow">
-        {/* CABEÇALHO — protocolo, título e botão fechar. */}
+        {/* Topo. Protocolo, título e botão de fechar. */}
         <div className="p-5 border-b border-linha flex items-start justify-between gap-4">
           <div className="min-w-0">
             <span className="inline-flex items-center gap-1.5 text-xs font-mono text-marca-forte mb-2">
@@ -106,7 +96,7 @@ export function ModalDetalhesChamado({
           </button>
         </div>
 
-        {/* METADADOS — quadro com solicitante, data, categoria, prioridade, status. */}
+        {/* Bloco com solicitante, data, categoria, prioridade e situação. */}
         <div className="p-5 border-b border-linha grid grid-cols-2 gap-4 bg-fundo/60">
           <Metadado titulo="Solicitante" icone={<User className="w-4 h-4" />}>
             {chamado.solicitante}
@@ -120,7 +110,7 @@ export function ModalDetalhesChamado({
               {chamado.prioridade}
             </Etiqueta>
           </Metadado>
-          <Metadado titulo="Status">
+          <Metadado titulo="Situação">
             <Etiqueta classeCor={corPorStatus(chamado.status)}>
               {chamado.status}
             </Etiqueta>
@@ -135,7 +125,7 @@ export function ModalDetalhesChamado({
           )}
         </div>
 
-        {/* DESCRIÇÃO + HISTÓRICO. */}
+        {/* Descrição e histórico. */}
         <div className="p-5 space-y-5">
           <section>
             <h3 className="text-sm font-semibold text-tinta mb-2">Descrição</h3>
@@ -159,7 +149,7 @@ export function ModalDetalhesChamado({
                   >
                     <div className="text-xs text-tintaFraca mb-1">
                       <span className="font-medium text-tinta">{c.autor}</span>
-                      {" • "}
+                      {" · "}
                       {c.criadoEm}
                     </div>
                     <p className="text-sm text-tinta">{c.texto}</p>
@@ -170,7 +160,7 @@ export function ModalDetalhesChamado({
           </section>
         </div>
 
-        {/* RODAPÉ — campo de comentário e ações do agente. */}
+        {/* Rodapé. Campo de comentário e ações do agente. */}
         <div className="p-5 border-t border-linha bg-fundo/60">
           {concluido ? (
             <p className="text-sm text-emerald-700 flex items-center gap-2">
@@ -187,7 +177,6 @@ export function ModalDetalhesChamado({
                 className="w-full px-3 py-2 border border-linha rounded-md text-sm bg-papel focus:outline-none focus:ring-2 focus:ring-marca/30 focus:border-marca resize-y"
               />
               <div className="flex flex-wrap gap-2 justify-between">
-                {/* Ações exclusivas do agente (assumir/concluir). */}
                 <div className="flex gap-2">
                   {modoAgente && !chamado.atribuidoA && (
                     <Botao variante="secundario" onClick={aoAssumir}>
@@ -201,7 +190,6 @@ export function ModalDetalhesChamado({
                   )}
                 </div>
 
-                {/* Enviar comentário — disponível em ambos os modos. */}
                 <Botao
                   variante="primario"
                   onClick={enviar}
@@ -218,11 +206,8 @@ export function ModalDetalhesChamado({
   );
 }
 
-// ---------------------------------------------------------------------------
-// Subcomponente local (privado). Mantém o JSX do bloco de metadados
-// repetitivo enxuto sem virar um arquivo separado.
-// ---------------------------------------------------------------------------
-
+// Componente auxiliar usado dentro deste arquivo. Padroniza o jeito
+// de mostrar cada par de título e valor no bloco de dados gerais.
 function Metadado({
   titulo,
   icone,

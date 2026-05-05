@@ -1,21 +1,12 @@
 /**
- * CAMADA: View (dados de demonstração)
- * ARQUIVO: src/views/compartilhado/dados-mock.ts
+ * Dados de exemplo para as telas funcionarem nesta etapa.
  *
- * RESPONSABILIDADE
- *   Fornecer dados *fake* para que as Views possam ser visualizadas
- *   sem nenhum Controller ou Model em funcionamento. Cada lista aqui
- *   simula uma resposta que, na versão final, virá de um Controller.
- *
- * ENCAIXE NO MVC FUTURO
- *   Os componentes desta etapa importam estes mocks via PROPS — nunca
- *   diretamente de dentro de si mesmos. Quando os Controllers chegarem,
- *   este arquivo é simplesmente removido: as páginas passarão a chamar
- *   `acaoListarChamados()` em vez de importar `chamadosFake`. Nenhuma
- *   View precisará mudar.
- *
- *   Em outras palavras: as Views dependem de uma INTERFACE de dados
- *   (vide tipos-view.ts), não da origem deles. É o princípio DIP do SOLID.
+ * Cada lista aqui simula uma resposta que mais para a frente vai vir
+ * de um controlador. As telas recebem essas listas pelas suas
+ * informações de entrada e não importam diretamente nada deste
+ * arquivo. Quando os controladores existirem, basta apagar este
+ * arquivo e trocar a origem das listas, sem mudar nada na parte
+ * visual.
  */
 import type {
   ChamadoDetalhado,
@@ -24,25 +15,21 @@ import type {
   UsuarioVisivel,
 } from "./tipos-view";
 
-// ---------------------------------------------------------------------------
-// Usuários de demonstração
-// ---------------------------------------------------------------------------
+// Usuários de exemplo
 
-/** Usuário "logado" como solicitante (visualização do portal). */
-export const usuarioSolicitanteFake: UsuarioVisivel = {
+/** Usuário entrado como solicitante. */
+export const usuarioSolicitanteExemplo: UsuarioVisivel = {
   nome: "Joana Pereira",
   papel: "solicitante",
 };
 
-/** Usuário "logado" como agente (visualização do painel de TI). */
-export const usuarioAgenteFake: UsuarioVisivel = {
+/** Usuário entrado como agente. */
+export const usuarioAgenteExemplo: UsuarioVisivel = {
   nome: "Marcos Silva",
   papel: "agente",
 };
 
-// ---------------------------------------------------------------------------
-// Comentários de demonstração — usados dentro do modal de detalhes
-// ---------------------------------------------------------------------------
+// Comentários de exemplo usados dentro da janela de detalhes
 
 const comentariosChamadoUm: ComentarioVisivel[] = [
   {
@@ -68,16 +55,15 @@ const comentariosChamadoDois: ComentarioVisivel[] = [
   },
 ];
 
-// ---------------------------------------------------------------------------
-// Lista de chamados (resumo) — alimenta as listas/tabelas
-// ---------------------------------------------------------------------------
+// Lista de chamados em formato resumido para alimentar listas e
+// tabelas
 
 /**
- * Lista usada pelo painel do AGENTE — vê chamados de todos.
- * Mistura solicitantes, prioridades, status e categorias para
- * mostrar a UI em vários estados.
+ * Lista usada pelo painel do agente. Contém chamados de várias
+ * pessoas, com prioridades, situações e categorias diferentes para
+ * mostrar a tela em vários estados.
  */
-export const chamadosFakeAgente: ChamadoResumo[] = [
+export const chamadosExemploAgente: ChamadoResumo[] = [
   {
     id: "1",
     protocolo: "CH-2025-001",
@@ -139,45 +125,45 @@ export const chamadosFakeAgente: ChamadoResumo[] = [
 ];
 
 /**
- * Lista usada pelo painel do SOLICITANTE — apenas os chamados dele.
- * Filtra a lista geral pelo nome do solicitante de demonstração.
+ * Lista usada pelo portal do solicitante. Mostra apenas os chamados
+ * abertos pelo usuário de exemplo.
  */
-export const chamadosFakeSolicitante: ChamadoResumo[] = chamadosFakeAgente.filter(
-  (c) => c.solicitante === usuarioSolicitanteFake.nome,
+export const chamadosExemploSolicitante: ChamadoResumo[] = chamadosExemploAgente.filter(
+  (c) => c.solicitante === usuarioSolicitanteExemplo.nome,
 );
 
-// ---------------------------------------------------------------------------
-// Detalhes — usados quando o usuário abre o modal de um chamado
-// ---------------------------------------------------------------------------
+// Versões completas dos chamados, usadas quando a janela de detalhes
+// é aberta
 
 /**
- * Tabela "id do chamado" -> versão detalhada (com descrição e
- * histórico). O modal consulta este mapa por id.
+ * Tabela que liga o id do chamado à sua versão completa, com
+ * descrição e histórico. A janela de detalhes consulta este mapa
+ * quando precisa carregar um chamado.
  */
-export const detalhesFakePorId: Record<string, ChamadoDetalhado> = {
+export const detalhesExemploPorId: Record<string, ChamadoDetalhado> = {
   "1": {
-    ...chamadosFakeAgente[0],
+    ...chamadosExemploAgente[0],
     descricao:
       "Tentei imprimir um relatório no setor de RH e a impressora não responde. " +
       "A luz vermelha está piscando e o painel mostra 'erro 0x80'.",
     comentarios: comentariosChamadoUm,
   },
   "2": {
-    ...chamadosFakeAgente[1],
+    ...chamadosExemploAgente[1],
     descricao:
       "Preciso de acesso aos módulos de Compras e Estoque do SAP para conseguir " +
       "lançar as notas fiscais do trimestre.",
     comentarios: comentariosChamadoDois,
   },
   "3": {
-    ...chamadosFakeAgente[2],
+    ...chamadosExemploAgente[2],
     descricao:
       "Ao abrir a tela de fechamento de folha, o sistema fica branco por alguns " +
       "segundos e depois exibe 'sem resposta'. Já reiniciei a máquina.",
     comentarios: [],
   },
   "4": {
-    ...chamadosFakeAgente[3],
+    ...chamadosExemploAgente[3],
     descricao:
       "Esqueci minha senha do e-mail corporativo após o feriado.",
     comentarios: [
@@ -190,7 +176,7 @@ export const detalhesFakePorId: Record<string, ChamadoDetalhado> = {
     ],
   },
   "5": {
-    ...chamadosFakeAgente[4],
+    ...chamadosExemploAgente[4],
     descricao:
       "O Wi-Fi do 3º andar cai a cada 10 minutos, atrapalhando reuniões " +
       "remotas. Já testamos com vários dispositivos.",

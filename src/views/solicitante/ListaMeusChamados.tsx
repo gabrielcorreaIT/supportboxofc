@@ -1,17 +1,10 @@
 /**
- * CAMADA: View — Lista "Meus Chamados" (solicitante)
- * ARQUIVO: src/views/solicitante/ListaMeusChamados.tsx
+ * Lista dos chamados do solicitante.
  *
- * RESPONSABILIDADE
- *   Exibir os chamados do solicitante logado num formato de cartão.
- *   Cada item, ao ser clicado, dispara `aoSelecionar(idChamado)`.
- *   Quem responde a esse clique (a página, hoje; o Controller, amanhã)
- *   é responsável por carregar os detalhes e abrir o modal.
- *
- * PRINCÍPIOS SOLID APLICADOS
- *   - SRP: só renderiza a lista.
- *   - ISP: a interface PropsListaMeusChamados expõe apenas o que
- *          essa lista realmente precisa.
+ * Mostra os chamados do usuário entrado em formato de cartão. Cada
+ * cartão, quando clicado, dispara aoSelecionar com o id do chamado.
+ * Quem responde a esse clique cuida de carregar os detalhes e abrir
+ * a janela.
  */
 "use client";
 
@@ -21,7 +14,7 @@ import { Etiqueta, corPorStatus } from "@/views/compartilhado/Etiqueta";
 
 interface PropsListaMeusChamados {
   chamados: ChamadoResumo[];
-  /** Chamado pelo id quando o usuário clica em um item da lista. */
+  /** Função chamada quando o usuário clica em um item da lista. */
   aoSelecionar?: (idChamado: string) => void;
 }
 
@@ -29,7 +22,6 @@ export function ListaMeusChamados({
   chamados,
   aoSelecionar,
 }: PropsListaMeusChamados) {
-  // Estado vazio — mostrado quando o solicitante não abriu nada.
   if (chamados.length === 0) {
     return (
       <div className="bg-papel border border-linha rounded-md p-8 text-center text-sm text-tintaFraca">

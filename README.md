@@ -1,229 +1,209 @@
 # SupportBox
 
-Sistema interno de Help Desk — versão acadêmica/MVP.
+Sistema interno de atendimento de TI. Versão acadêmica em construção.
 
-> **Estado atual: Etapa 1 do MVC — apenas a camada de _View_.**
-> Os _Controllers_ (regras de uso) e _Models_ (acesso a dados) serão
-> adicionados nas etapas seguintes, sem alterar o que já está pronto
-> nesta camada.
+> Estado atual: primeira etapa pronta, com as telas funcionando.
+> As regras de uso e a parte de banco serão adicionadas nas
+> próximas etapas, sem alterar o que já está pronto aqui.
 
----
+## 1. O que faz
 
-## 1. Visão Geral
+O SupportBox permite abrir e acompanhar chamados de TI. Há dois tipos
+de usuário:
 
-O SupportBox é um sistema simples de abertura e atendimento de
-chamados, dividido em dois perfis:
-
-| Perfil          | Pode                                                            |
+| Quem é          | O que pode fazer                                                |
 | --------------- | --------------------------------------------------------------- |
-| **Solicitante** | Abrir chamados, ver os próprios chamados, comentar.             |
-| **Agente**      | Ver todos os chamados, filtrar, assumir, concluir e comentar.   |
+| Solicitante     | Abrir chamados, ver os próprios chamados, comentar.             |
+| Agente          | Ver todos os chamados, filtrar, assumir, concluir, comentar.    |
 
-Esta primeira entrega traz **apenas a interface gráfica** funcionando
-com dados de demonstração. Não há banco, autenticação real ou regra
-de negócio — tudo é alimentado por mocks em `src/views/compartilhado/dados-mock.ts`.
+Esta primeira entrega traz só a parte visual funcionando, com dados
+de exemplo. Não há banco, não há validação real de acesso e não há
+regras de uso ainda. As listas e os detalhes vêm do arquivo
+`src/views/compartilhado/dados-de-exemplo.ts`.
 
----
-
-## 2. Como Rodar
+## 2. Como rodar
 
 ```bash
-# Instalar dependências
+# Instalar as dependências
 npm install
 
-# Subir em modo desenvolvimento (http://localhost:3000)
+# Rodar em modo desenvolvimento (http://localhost:3000)
 npm run dev
 
-# Gerar build de produção
+# Gerar a versão de produção
 npm run build && npm start
 ```
 
-Pré-requisitos: **Node.js 18+** e **npm 9+**.
+Pré-requisitos: Node.js 18 ou mais novo, e npm 9 ou mais novo.
 
-### Roteiro de demonstração
+### Roteiro para a apresentação
 
-1. Acesse `http://localhost:3000` — você é redirecionado para `/login`.
-2. Use **qualquer e-mail e senha**:
-   - E-mail contendo `agente` (ex.: `marcos.agente@empresa.com`) → painel do agente.
-   - Qualquer outro (ex.: `joana@empresa.com`) → portal do solicitante.
-3. Use o botão **Sair** para voltar ao login.
+1. Acesse `http://localhost:3000`. O sistema redireciona para a tela
+   de entrada em `/login`.
+2. Use qualquer e-mail e qualquer senha. O acesso ainda não é
+   validado.
+   - Se o e-mail tiver a palavra "agente" (por exemplo,
+     `marcos.agente@empresa.com`), o usuário entra no painel do
+     agente.
+   - Qualquer outro e-mail (por exemplo, `joana@empresa.com`) leva
+     ao portal do solicitante.
+3. Use o botão Sair para voltar à tela de entrada.
 
-> O login é simulado: nenhum dado é validado de fato. Quando o
-> `AuthController` existir, o redirecionamento será trocado por uma
-> chamada real, **sem alterar a tela de login**.
+Quando a parte de autenticação for adicionada, o redirecionamento da
+tela de entrada vai passar a fazer a validação de verdade. A tela
+em si não muda.
 
----
+## 3. Como o projeto está organizado
 
-## 3. Arquitetura — MVC em camadas
+O sistema segue o padrão de três camadas. A regra é simples:
 
-O projeto segue uma separação rígida entre _View_, _Controller_ e
-_Model_. A regra é simples:
+- A camada de **tela** mostra as informações e dispara as ações.
+- A camada de **regras** orquestra o que precisa ser feito quando
+  uma ação é disparada (por exemplo, ao criar um chamado).
+- A camada de **dados** acessa o banco e devolve os dados prontos
+  para a regra usar.
 
-```
-View         ↑ recebe dados e callbacks via props
-             ↓ não importa de quem vêm — só renderiza
-─────────────────────────────────────────────────────
-Controller   ↑ orquestra ações (acaoLogin, acaoCriarChamado, …)
-             ↓ chama Models, devolve dados prontos para a View
-─────────────────────────────────────────────────────
-Model        ↑ acesso a dados (banco, API, arquivos)
-             ↓ desconhece a tela
-```
+Nesta etapa só a primeira camada está pronta. Nos arquivos da pasta
+`src/views`, os comentários indicam onde a camada de regras vai se
+encaixar mais tarde.
 
-Nesta etapa **só a View existe**. Os pontos onde os Controllers
-"plugarão" depois estão marcados nos comentários de cada arquivo
-(`ENCAIXE NO MVC FUTURO`).
+### Princípios usados
 
-### Princípios SOLID aplicados
+Cada componente segue alguns princípios simples:
 
-Cada componente cita explicitamente, no seu cabeçalho, quais
-princípios do SOLID está aplicando. Em resumo:
+- **Cada parte cuida de uma coisa só.** O botão sabe ser botão. O
+  formulário sabe coletar dados. A tabela sabe mostrar. Nada faz
+  duas coisas ao mesmo tempo.
+- **Aberto para crescer, fechado para mexer.** Para adicionar uma
+  nova aparência de botão, basta incluir uma chave nova. A lógica
+  do botão não muda.
+- **As partes recebem o que precisam de fora.** Os componentes não
+  buscam dados por conta própria. Eles recebem listas e funções pelas
+  configurações de entrada. Isso permite trocar a origem dos dados
+  no futuro sem alterar a parte visual.
 
-- **SRP** — cada View faz uma única coisa (ex.: `Botao` só desenha um
-  botão; `FormularioLogin` só coleta credenciais).
-- **OCP** — variantes/configurações são tabelas no topo do arquivo
-  (ex.: `variantes` em `Botao.tsx`); novas opções entram sem mexer na
-  lógica.
-- **DIP** — Views recebem dados e ações como props. Hoje os callbacks
-  são de demonstração; amanhã passam a ser do Controller, **sem mudar
-  a View**.
-- **ISP** — interfaces de props pequenas e específicas.
-
----
-
-## 4. Estrutura de pastas
+## 4. Pastas e arquivos
 
 ```
 .
-├── README.md                ← este arquivo
-├── next.config.mjs          ← configuração do Next.js
-├── postcss.config.mjs       ← PostCSS (alimenta o Tailwind)
-├── tailwind.config.ts       ← paleta semântica (marca, tinta, …)
-├── tsconfig.json            ← compilador TypeScript
-├── package.json             ← dependências e scripts
+├── README.md                este arquivo
+├── next.config.mjs          ajustes do Next.js
+├── postcss.config.mjs       PostCSS, que alimenta o Tailwind
+├── tailwind.config.ts       paleta de cores e cantos
+├── tsconfig.json            configuração do TypeScript
+├── package.json             dependências e atalhos
 └── src/
-    ├── app/                 ← rotas (Next.js App Router)
-    │   ├── layout.tsx           ← layout raiz (<html>/<body>)
-    │   ├── page.tsx             ← "/" → redireciona para /login
-    │   ├── globals.css          ← estilos globais (Tailwind base)
-    │   ├── login/page.tsx       ← /login
+    ├── app/                 rotas do site
+    │   ├── layout.tsx           moldura raiz com html e body
+    │   ├── page.tsx             rota inicial, redireciona para /login
+    │   ├── globals.css          estilos gerais e diretivas do Tailwind
+    │   ├── login/page.tsx       /login
     │   ├── solicitante/
-    │   │   ├── layout.tsx       ← envoltório das telas do solicitante
-    │   │   └── page.tsx         ← /solicitante
+    │   │   ├── layout.tsx       envolve as telas do solicitante
+    │   │   └── page.tsx         /solicitante
     │   └── agente/
-    │       ├── layout.tsx       ← barra lateral fixa
-    │       └── page.tsx         ← /agente
+    │       ├── layout.tsx       coloca a barra lateral fixa
+    │       └── page.tsx         /agente
     │
-    └── views/               ← componentes de UI (a "Camada View")
-        ├── compartilhado/       ← reusáveis em todo o sistema
-        │   ├── tipos-view.ts          ← tipos de domínio (visuais)
-        │   ├── dados-mock.ts          ← dados fake desta etapa
-        │   ├── Botao.tsx              ← botão com variantes
-        │   ├── Cabecalho.tsx          ← header do solicitante
-        │   ├── CampoTexto.tsx         ← input de uma linha
-        │   ├── CampoTextoArea.tsx     ← textarea
-        │   ├── CampoSelect.tsx        ← <select> padronizado
-        │   ├── Etiqueta.tsx           ← "pílula" colorida (status, …)
-        │   └── ModalDetalhesChamado.tsx ← modal usado pelos dois perfis
+    └── views/               componentes que formam as telas
+        ├── compartilhado/       usados por todas as áreas
+        │   ├── tipos-view.ts          formatos de dados das telas
+        │   ├── dados-de-exemplo.ts          dados de exemplo
+        │   ├── Botao.tsx              botão padrão
+        │   ├── Cabecalho.tsx          faixa superior do solicitante
+        │   ├── CampoTexto.tsx         campo de uma linha
+        │   ├── CampoTextoArea.tsx     campo de várias linhas
+        │   ├── CampoSelect.tsx        campo de seleção
+        │   ├── Etiqueta.tsx           marcação colorida
+        │   └── ModalDetalhesChamado.tsx janela de detalhes do chamado
         │
         ├── auth/
-        │   └── FormularioLogin.tsx    ← coleta e-mail/senha
+        │   └── FormularioLogin.tsx    coleta e-mail e senha
         │
         ├── solicitante/
-        │   ├── PainelSolicitante.tsx     ← orquestra a tela
+        │   ├── PainelSolicitante.tsx     monta a tela do solicitante
         │   ├── FormularioAberturaChamado.tsx
         │   └── ListaMeusChamados.tsx
         │
         └── agente/
-            ├── MenuLateralAgente.tsx     ← barra lateral
-            ├── PainelAgente.tsx          ← orquestra a tela
-            ├── BarraFiltros.tsx          ← busca + abas de status
-            └── TabelaChamados.tsx        ← lista em tabela
+            ├── MenuLateralAgente.tsx     barra lateral do agente
+            ├── PainelAgente.tsx          monta a tela do agente
+            ├── BarraFiltros.tsx          busca e abas de situação
+            └── TabelaChamados.tsx        tabela de chamados
 ```
 
-### Por que duas pastas (`src/app` e `src/views`)?
+### Por que duas pastas, `src/app` e `src/views`?
 
-- **`src/app`** existe por imposição do Next.js — é onde ficam as
-  rotas. Os arquivos aqui são "cascas" mínimas: importam um
-  componente de `src/views`, injetam props e ponto.
-- **`src/views`** é onde a UI de fato vive. É lá que o
-  desenvolvimento acontece, e é a parte que pode ser reaproveitada
-  ou trocada de framework no futuro.
+A pasta `src/app` existe porque o Next.js exige. É lá que ficam as
+rotas do site. Os arquivos dela são bem curtos: cada um importa um
+componente da pasta `src/views`, passa as informações necessárias e
+desenha.
 
----
+A pasta `src/views` é onde a interface visual de fato vive. É a
+parte que pode ser reaproveitada se um dia o time mudar de
+ferramenta.
 
-## 5. Fluxo dos dados (hoje × amanhã)
+## 5. Como os dados fluem
 
-### Hoje — apenas View
-
-```
-┌─────────────────┐   props   ┌──────────────┐
-│ src/app/.../page│──────────▶│ src/views/...│
-│ (lê do mock)    │           │ (renderiza)  │
-└─────────────────┘           └──────────────┘
-```
-
-A página importa diretamente de `dados-mock.ts` e passa as listas e
-callbacks (no-op com `console.info`) para os componentes.
-
-### Amanhã — com Controllers
+### Hoje, só com a camada visual
 
 ```
-┌─────────────────┐   chama    ┌────────────┐    chama    ┌────────┐
-│ src/app/.../page│───────────▶│ Controller │────────────▶│ Model  │
-│                 │   props    │ (regras)   │             │ (banco)│
-└─────────────────┘◀────data───└────────────┘             └────────┘
-        │ props
-        ▼
-┌──────────────┐
-│ src/views/...│  (não muda)
-└──────────────┘
+src/app/.../page.tsx          →   src/views/...
+(lê os dados de exemplo)          (mostra a tela)
 ```
 
-Os componentes de `src/views/...` **permanecem idênticos** — apenas
-quem fornece as props muda. É o princípio DIP em prática.
+A página importa direto do arquivo de dados de exemplo e passa as
+listas e as funções de ação para os componentes. As funções, por
+enquanto, só registram no console.
 
----
+### Mais tarde, com as regras de uso e o banco
+
+```
+src/app/.../page.tsx     →    Regra de uso     →    Banco
+                              (orquestra)            (lê e grava)
+                          ↑
+                      devolve os dados prontos
+                          ↓
+                     src/views/... (não muda)
+```
+
+Os componentes da pasta `src/views` ficam iguais. O que muda é a
+origem dos dados: em vez de importar do arquivo de exemplo, a
+página passa a chamar a regra correspondente.
 
 ## 6. Convenções
 
-- **Idioma**: tudo em português — nomes de arquivo, props, variáveis,
-  comentários. Visa o leitor brasileiro do trabalho acadêmico.
-- **Cabeçalho de arquivo**: cada arquivo começa com um bloco
-  `/** CAMADA / ARQUIVO / RESPONSABILIDADE / ENCAIXE NO MVC FUTURO /
-  PRINCÍPIOS SOLID APLICADOS */`. Mantenha esse padrão ao criar
-  arquivos novos.
-- **Estilo visual**: Tailwind com paleta semântica
-  (`marca`, `tinta`, `linha`, …) definida em `tailwind.config.ts`.
-  Evite hex codes inline; use os tokens.
-- **Estado**: o estado dos componentes é **puramente visual** (ex.:
-  qual modal está aberto, qual aba selecionada). Toda regra que
-  mexe nos dados é responsabilidade do futuro Controller.
-- **Acessibilidade básica**: todo input tem `<label htmlFor>`, o
-  modal tem `role="dialog"` + `aria-modal`, e o foco fica visível
-  via `*:focus-visible` em `globals.css`.
+- Tudo em português: nomes de arquivo, variáveis, comentários e
+  textos da tela. O projeto é apresentado em sala, então o leitor
+  é brasileiro.
+- Cada arquivo começa com um comentário curto explicando o que ele
+  faz. Mantenha esse padrão ao criar arquivos novos.
+- A aparência usa o Tailwind com cores semânticas como `marca`,
+  `tinta` e `linha`, definidas em `tailwind.config.ts`. Evite
+  códigos de cor direto no componente.
+- Os componentes guardam apenas estado de tela, como qual janela
+  está aberta. Tudo que mexe com os dados será responsabilidade da
+  camada de regras.
+- A acessibilidade básica está prevista: cada campo tem um rótulo
+  associado, a janela de detalhes usa `role="dialog"` e o foco fica
+  visível ao navegar pelo teclado.
 
----
+## 7. O que vem pela frente
 
-## 7. Roadmap
+- [x] Primeira etapa: telas, componentes reaproveitáveis e dados
+      de exemplo.
+- [ ] Segunda etapa: regras de uso, como entrar, criar chamado,
+      listar, assumir, concluir e comentar.
+- [ ] Terceira etapa: banco de dados e validação real de acesso.
+- [ ] Quarta etapa: triagem automática do chamado por inteligência
+      artificial logo na abertura, sugerindo categoria e prioridade.
 
-- [x] **Etapa 1 — View**: telas, componentes reutilizáveis, mocks.
-- [ ] **Etapa 2 — Controllers**: `acaoLogin`, `acaoCriarChamado`,
-      `acaoListarChamados`, `acaoAssumirChamado`, `acaoConcluirChamado`,
-      `acaoComentarChamado`.
-- [ ] **Etapa 3 — Models**: persistência (Supabase/Postgres) e
-      autenticação real.
-- [ ] **Etapa 4 — IA**: triagem automática de chamados na abertura
-      (categorização, prioridade sugerida).
+## 8. Ferramentas usadas
 
----
-
-## 8. Stack técnica
-
-| Ferramenta       | Para quê                                            |
-| ---------------- | --------------------------------------------------- |
-| **Next.js 15**   | Framework React com App Router e SSR.               |
-| **React 19**     | Biblioteca de UI.                                   |
-| **TypeScript**   | Tipagem estática — pega erros antes de rodar.       |
-| **Tailwind CSS** | Estilização utilitária com paleta semântica.        |
-| **lucide-react** | Conjunto de ícones SVG leves usados em toda a UI.   |
+| Ferramenta       | Para que serve                                              |
+| ---------------- | ----------------------------------------------------------- |
+| Next.js 15       | Ferramenta de páginas em React, com rotas e renderização.   |
+| React 19         | Biblioteca usada para montar as telas.                      |
+| TypeScript       | Tipagem que ajuda a pegar erros antes de rodar.             |
+| Tailwind CSS     | Estilo aplicado por classes prontas, com paleta semântica.  |
+| lucide-react     | Conjunto de ícones em SVG, leves, usados em toda a tela.    |

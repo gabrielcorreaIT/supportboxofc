@@ -1,25 +1,19 @@
 /**
- * CAMADA: View (componente compartilhado)
- * ARQUIVO: src/views/compartilhado/CampoTexto.tsx
+ * Campo de texto de uma linha, com rótulo.
  *
- * RESPONSABILIDADE
- *   Padroniza um campo de entrada com rótulo. Centraliza o estilo
- *   de label + input para evitar repetição em vários formulários.
- *
- * PRINCÍPIOS SOLID APLICADOS
- *   - SRP: cuida só do par "label + input de uma linha".
- *   - OCP: aceita qualquer prop nativa de <input> via `...resto`,
- *          permitindo extensão (placeholder, type="email", etc.)
- *          sem alterar este arquivo.
+ * Padroniza a aparência de label e input para evitar repetição em
+ * cada formulário. Aceita qualquer atributo nativo de um input
+ * comum, como placeholder ou type, repassando tudo direto para o
+ * elemento.
  */
 "use client";
 
 import type { InputHTMLAttributes } from "react";
 
 interface PropsCampoTexto extends InputHTMLAttributes<HTMLInputElement> {
-  /** Rótulo visível acima do campo. */
+  /** Texto que aparece acima do campo. */
   rotulo: string;
-  /** Mensagem de ajuda/erro mostrada abaixo do campo (opcional). */
+  /** Mensagem curta de ajuda mostrada abaixo do campo. */
   ajuda?: string;
 }
 
@@ -30,7 +24,7 @@ export function CampoTexto({
   className = "",
   ...resto
 }: PropsCampoTexto) {
-  // Garante associação acessível entre <label> e <input>.
+  // Garante que label e input fiquem associados de forma acessível.
   const idCampo = id ?? `campo-${rotulo.toLowerCase().replace(/\s+/g, "-")}`;
 
   return (

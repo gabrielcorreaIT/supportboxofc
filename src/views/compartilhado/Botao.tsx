@@ -1,41 +1,31 @@
 /**
- * CAMADA: View (componente compartilhado)
- * ARQUIVO: src/views/compartilhado/Botao.tsx
+ * Botão padrão do sistema.
  *
- * RESPONSABILIDADE
- *   Botão padrão do sistema. Centraliza a aparência (variantes,
- *   estados de hover/disabled) para que todas as Views fiquem
- *   visualmente coerentes sem repetir classes Tailwind.
- *
- * PRINCÍPIOS SOLID APLICADOS
- *   - SRP: o componente cuida apenas de RENDERIZAR um botão.
- *          Ele NÃO sabe nem se importa com o que acontece quando
- *          é clicado — quem clica define isso via prop `onClick`.
- *   - OCP: novas variantes podem ser adicionadas no objeto
- *          `variantes` sem alterar a lógica do componente.
- *   - ISP: a interface PropsBotao expõe apenas o necessário,
- *          herdando o resto direto de `<button>`.
+ * Reúne em um só lugar a aparência dos botões para que todas as
+ * telas fiquem visualmente parecidas sem precisar repetir as classes
+ * em cada lugar. O componente cuida apenas de desenhar o botão. O
+ * que acontece quando o usuário clica fica a cargo de quem usa o
+ * componente, passando uma função em onClick.
  */
 "use client";
 
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 
-/** Variantes visuais do botão. Cada uma transmite uma intenção. */
+/** Aparências disponíveis para o botão. */
 type VarianteBotao = "primario" | "secundario" | "perigo" | "fantasma";
 
 interface PropsBotao extends ButtonHTMLAttributes<HTMLButtonElement> {
-  /** Conteúdo do botão (texto, ícone, ou os dois). */
+  /** Conteúdo do botão. Pode ser texto, ícone ou os dois. */
   children: ReactNode;
-  /** Aparência. Padrão: "primario". */
+  /** Aparência. Quando não informada, vale "primario". */
   variante?: VarianteBotao;
-  /** Faz o botão ocupar 100% da largura disponível. */
+  /** Quando verdadeiro, o botão ocupa toda a largura disponível. */
   larguraTotal?: boolean;
 }
 
 /**
- * Tabela "variante -> classes Tailwind".
- * Manter este mapa no topo do arquivo facilita o ajuste fino
- * da identidade visual sem mexer na lógica.
+ * Tabela que liga cada aparência ao conjunto de classes do Tailwind.
+ * Para incluir uma aparência nova basta adicionar uma chave aqui.
  */
 const variantes: Record<VarianteBotao, string> = {
   primario:

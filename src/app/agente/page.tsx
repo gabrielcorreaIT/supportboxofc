@@ -1,26 +1,25 @@
 /**
- * CAMADA: View (rota Next.js — Página do Agente)
- * ARQUIVO: src/app/agente/page.tsx
+ * Página do painel do agente.
  *
- * RESPONSABILIDADE
- *   "Casca" da página /agente. Injeta a lista (mock) e os callbacks
- *   no PainelAgente. Os callbacks aqui apenas registram no console;
- *   futuramente, virarão chamadas a `acaoAtribuirChamado`,
- *   `acaoConcluirChamado`, etc.
+ * Atua como casca da rota /agente. Pega a lista de chamados de
+ * exemplo e as funções de ação e passa tudo para o componente
+ * PainelAgente. As funções por enquanto só registram no console.
+ * Quando os controladores existirem, é aqui que entram as ações de
+ * verdade, sem precisar mexer no painel.
  */
 "use client";
 
 import { PainelAgente } from "@/views/agente/PainelAgente";
 import {
-  chamadosFakeAgente,
-  detalhesFakePorId,
-} from "@/views/compartilhado/dados-mock";
+  chamadosExemploAgente,
+  detalhesExemploPorId,
+} from "@/views/compartilhado/dados-de-exemplo";
 
 export default function PaginaAgente() {
   return (
     <PainelAgente
-      chamados={chamadosFakeAgente}
-      obterDetalhes={(id) => detalhesFakePorId[id] ?? null}
+      chamados={chamadosExemploAgente}
+      obterDetalhes={(id) => detalhesExemploPorId[id] ?? null}
       aoAssumir={(id) =>
         console.info("[apresentação] Chamado assumido (simulado):", id)
       }

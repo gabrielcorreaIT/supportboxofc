@@ -1,23 +1,16 @@
 /**
- * CAMADA: View — Barra de Filtros do Agente
- * ARQUIVO: src/views/agente/BarraFiltros.tsx
+ * Barra de filtros do agente.
  *
- * RESPONSABILIDADE
- *   Conjunto de campo de busca + abas de status. NÃO filtra a lista
- *   por conta própria — apenas avisa quem a usa, via callbacks, que
- *   o usuário trocou o termo de busca ou o filtro ativo.
- *
- * PRINCÍPIOS SOLID APLICADOS
- *   - SRP: dispara eventos quando o usuário interage. A regra de
- *          filtragem em si fica em quem consome este componente.
- *   - DIP: estado controlado de fora — a View pai mantém os valores
- *          atuais e os repassa de volta como props.
+ * Reúne o campo de busca por palavra e as abas de situação. O
+ * componente não filtra a lista por conta própria. Ele apenas avisa
+ * quem o usa, por meio das funções recebidas, que o usuário trocou
+ * o que está digitado ou a aba ativa.
  */
 "use client";
 
 import { Search } from "lucide-react";
 
-/** Conjunto de filtros de status (mais "Todos") usados nas abas. */
+/** Conjunto de filtros de situação, mais a opção Todos, usado nas abas. */
 export type AbaStatus = "todos" | "Aberto" | "Em Andamento" | "Concluído";
 
 interface PropsBarraFiltros {
@@ -54,7 +47,7 @@ export function BarraFiltros({
         />
       </div>
 
-      {/* Abas de status — acionam `aoMudarAba`. */}
+      {/* Abas de situação. Cada clique chama aoMudarAba. */}
       <div className="flex flex-wrap gap-1 bg-fundo p-1 rounded-md border border-linha">
         {ABAS.map(({ valor, rotulo }) => {
           const ativa = valor === abaAtiva;

@@ -1,16 +1,10 @@
 /**
- * CAMADA: View — Menu Lateral do Agente
- * ARQUIVO: src/views/agente/MenuLateralAgente.tsx
+ * Barra lateral fixa do agente.
  *
- * RESPONSABILIDADE
- *   Faixa lateral fixa que aparece em todas as páginas do agente.
- *   Mostra o nome do sistema, o link "Painel", a identificação do
- *   usuário e o botão "Sair".
- *
- * PRINCÍPIOS SOLID APLICADOS
- *   - SRP: cuida apenas da estrutura visual da barra lateral.
- *   - DIP: o callback de sair vem de fora; a View não sabe nem
- *          se importa COMO o sistema desloga.
+ * Aparece em todas as páginas do agente. Mostra o nome do sistema,
+ * o atalho para o painel, a identificação do usuário entrado e o
+ * botão para sair. O componente não sabe como o sistema desliga a
+ * sessão. Ele apenas dispara a função recebida em aoSairClicado.
  */
 "use client";
 
@@ -32,13 +26,13 @@ export function MenuLateralAgente({
 
   return (
     <aside className="w-60 bg-papel border-r border-linha flex flex-col h-screen">
-      {/* TOPO — identidade do sistema. */}
+      {/* Topo. Identidade do sistema. */}
       <div className="px-5 py-5 border-b border-linha">
         <h1 className="text-base font-semibold text-tinta">SupportBox</h1>
-        <p className="text-xs text-tintaFraca">Workspace de TI</p>
+        <p className="text-xs text-tintaFraca">Área do agente</p>
       </div>
 
-      {/* NAVEGAÇÃO. Só há um item nesta etapa; mais virão depois. */}
+      {/* Atalhos. Por ora só temos o painel. Outros virão depois. */}
       <nav className="flex-1 p-3">
         <Link
           href="/agente"
@@ -54,7 +48,7 @@ export function MenuLateralAgente({
         </Link>
       </nav>
 
-      {/* RODAPÉ — usuário + logout. */}
+      {/* Rodapé. Usuário entrado e botão de sair. */}
       <div className="p-3 border-t border-linha space-y-2">
         <div className="px-3 py-2 rounded-md bg-fundo border border-linha">
           <p className="text-sm font-medium text-tinta">{nomeUsuario}</p>

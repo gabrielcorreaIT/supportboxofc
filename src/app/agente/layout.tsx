@@ -1,21 +1,16 @@
 /**
- * CAMADA: View (rota Next.js — Layout do Agente)
- * ARQUIVO: src/app/agente/layout.tsx
+ * Estrutura usada por todas as páginas do agente.
  *
- * RESPONSABILIDADE
- *   Layout aplicado a todas as páginas dentro de "/agente".
- *   Renderiza a barra lateral fixa à esquerda e abre espaço, à
- *   direita, para o conteúdo das rotas filhas.
- *
- *   Como o painel do agente é a única página "logada" desta etapa,
- *   o callback de "Sair" também leva ao /login. Quando houver
- *   AuthController, a chamada `acaoLogout()` virá para cá.
+ * Coloca a barra lateral fixa à esquerda e deixa o resto do espaço
+ * para o conteúdo da página. Como o painel do agente é a única tela
+ * dentro de uma sessão nesta etapa, o botão de sair leva de volta
+ * para a tela de entrada.
  */
 "use client";
 
 import { useRouter } from "next/navigation";
 import { MenuLateralAgente } from "@/views/agente/MenuLateralAgente";
-import { usuarioAgenteFake } from "@/views/compartilhado/dados-mock";
+import { usuarioAgenteExemplo } from "@/views/compartilhado/dados-de-exemplo";
 
 export default function LayoutAgente({
   children,
@@ -27,7 +22,7 @@ export default function LayoutAgente({
   return (
     <div className="flex h-screen overflow-hidden bg-fundo">
       <MenuLateralAgente
-        nomeUsuario={usuarioAgenteFake.nome}
+        nomeUsuario={usuarioAgenteExemplo.nome}
         aoSairClicado={() => router.push("/login")}
       />
       <main className="flex-1 overflow-y-auto">{children}</main>

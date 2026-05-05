@@ -1,14 +1,9 @@
 /**
- * CAMADA: View (componente compartilhado)
- * ARQUIVO: src/views/compartilhado/CampoTextoArea.tsx
+ * Área de texto de várias linhas, com rótulo.
  *
- * RESPONSABILIDADE
- *   Versão padronizada de um <textarea> com rótulo. Pareada com
- *   CampoTexto/CampoSelect para manter formulários visualmente
- *   uniformes em todo o sistema.
- *
- * PRINCÍPIOS SOLID APLICADOS
- *   - SRP: renderiza apenas rótulo + textarea.
+ * Mantém a mesma aparência dos campos de uma linha e dos de
+ * seleção, para que os formulários fiquem visualmente parecidos em
+ * todo o sistema.
  */
 "use client";
 

@@ -1,16 +1,9 @@
 /**
- * CAMADA: View — Tabela de Chamados (agente)
- * ARQUIVO: src/views/agente/TabelaChamados.tsx
+ * Tabela de chamados do agente.
  *
- * RESPONSABILIDADE
- *   Exibir a lista de TODOS os chamados num formato tabular,
- *   adequado ao painel do agente. O agente quer comparar muitos
- *   chamados rapidamente — daí a escolha de tabela em vez de cartões.
- *
- * PRINCÍPIOS SOLID APLICADOS
- *   - SRP: só desenha a tabela.
- *   - ISP: a interface PropsTabelaChamados é mínima — recebe a
- *          lista já filtrada e um callback de seleção.
+ * Mostra a lista de chamados em formato de tabela. O agente precisa
+ * comparar muitos chamados de uma vez, então a tabela funciona
+ * melhor do que cartões.
  */
 "use client";
 
@@ -22,9 +15,9 @@ import {
 } from "@/views/compartilhado/Etiqueta";
 
 interface PropsTabelaChamados {
-  /** Lista já filtrada por quem chama o componente. */
+  /** Lista que já vem filtrada por quem usa o componente. */
   chamados: ChamadoResumo[];
-  /** Disparado ao clicar em "Detalhes". */
+  /** Função chamada quando o usuário clica em Detalhes. */
   aoSelecionar?: (idChamado: string) => void;
 }
 
@@ -32,7 +25,6 @@ export function TabelaChamados({
   chamados,
   aoSelecionar,
 }: PropsTabelaChamados) {
-  // Estado vazio.
   if (chamados.length === 0) {
     return (
       <div className="bg-papel border border-linha rounded-md p-8 text-center text-sm text-tintaFraca">
@@ -51,7 +43,7 @@ export function TabelaChamados({
             <Th>Solicitante</Th>
             <Th>Categoria</Th>
             <Th>Prioridade</Th>
-            <Th>Status</Th>
+            <Th>Situação</Th>
             <Th>Aberto em</Th>
             <Th className="text-right">Ações</Th>
           </tr>
@@ -93,10 +85,8 @@ export function TabelaChamados({
   );
 }
 
-// ---------------------------------------------------------------------------
-// Subcomponentes locais — só padronizam o espaçamento das células.
-// ---------------------------------------------------------------------------
-
+// Componentes auxiliares usados só dentro deste arquivo. Padronizam
+// o espaçamento das células do cabeçalho e do corpo da tabela.
 function Th({
   children,
   className = "",

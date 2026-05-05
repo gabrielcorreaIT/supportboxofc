@@ -1,21 +1,15 @@
 /**
- * CAMADA: View — Tela de Login
- * ARQUIVO: src/views/auth/FormularioLogin.tsx
+ * Formulário de entrada do sistema.
  *
- * RESPONSABILIDADE
- *   Apresentar o formulário de e-mail/senha e devolver os valores
- *   digitados ao chamador. Esta View NÃO sabe autenticar — apenas
- *   coleta as credenciais e dispara um callback.
+ * Apresenta os campos de e-mail e senha e devolve o que foi digitado
+ * para quem usa o componente. O formulário não sabe validar o
+ * acesso. Ele apenas coleta os dados e dispara a função recebida em
+ * aoEnviar.
  *
- * ENCAIXE NO MVC FUTURO
- *   Hoje, a página de login passa um callback de demonstração
- *   (que apenas redireciona). Quando o AuthController existir,
- *   o callback será `acaoLogin(email, senha)` e este componente
- *   continuará idêntico.
- *
- * PRINCÍPIOS SOLID APLICADOS
- *   - SRP: cuida só de coletar credenciais.
- *   - DIP: depende da prop `aoEnviar`, não de implementação concreta.
+ * Hoje a página de entrada usa esse retorno só para escolher o
+ * destino. Quando a parte de autenticação for adicionada, a função
+ * recebida em aoEnviar passa a fazer a validação real e nada deste
+ * arquivo precisa mudar.
  */
 "use client";
 
@@ -26,16 +20,16 @@ import { CampoTexto } from "@/views/compartilhado/CampoTexto";
 
 interface PropsFormularioLogin {
   /**
-   * Disparado ao submeter o formulário. Recebe e-mail e senha já
-   * limpos. Quem fornece o callback é responsável por autenticar
-   * (Controller no futuro) e por redirecionar o usuário.
+   * Função chamada quando o formulário é enviado. Recebe e-mail e
+   * senha já tratados. Quem fornece a função é responsável por
+   * validar o acesso e levar o usuário para o próximo lugar.
    */
   aoEnviar?: (email: string, senha: string) => void;
 
-  /** Mensagem de erro vinda de fora (ex.: "credenciais inválidas"). */
+  /** Mensagem de erro vinda de fora, como credenciais inválidas. */
   mensagemErro?: string | null;
 
-  /** Marca o formulário como "carregando" (ex.: durante a chamada). */
+  /** Marca o formulário como em processamento. */
   carregando?: boolean;
 }
 
@@ -44,12 +38,11 @@ export function FormularioLogin({
   mensagemErro,
   carregando = false,
 }: PropsFormularioLogin) {
-  // Estado interno do formulário.
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [mostrarSenha, setMostrarSenha] = useState(false);
 
-  /** Submete o formulário, repassando os valores ao callback externo. */
+  /** Envia o formulário, repassando os valores para a função externa. */
   const submeter = (e: React.FormEvent) => {
     e.preventDefault();
     aoEnviar?.(email.trim(), senha);
@@ -67,7 +60,6 @@ export function FormularioLogin({
         </p>
       </div>
 
-      {/* Aviso de erro (se houver). */}
       {mensagemErro && (
         <p
           role="alert"
@@ -88,7 +80,6 @@ export function FormularioLogin({
         autoComplete="email"
       />
 
-      {/* Senha com botão de mostrar/esconder. */}
       <div className="relative">
         <CampoTexto
           rotulo="Senha"

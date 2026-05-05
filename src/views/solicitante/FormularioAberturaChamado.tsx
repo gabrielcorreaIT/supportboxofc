@@ -1,20 +1,13 @@
 /**
- * CAMADA: View — Formulário de Abertura de Chamado
- * ARQUIVO: src/views/solicitante/FormularioAberturaChamado.tsx
+ * Formulário para abrir um novo chamado.
  *
- * RESPONSABILIDADE
- *   Coletar os dados de um novo chamado (título, descrição, categoria,
- *   tipo) e repassá-los ao chamador.
+ * Coleta os dados de um chamado novo (título, descrição, categoria
+ * e tipo) e devolve esse pacote para quem usa o componente.
  *
- *   IMPORTANTE: o fluxo de "triagem por IA" presente na versão final
- *   do produto NÃO está aqui — ele faz parte da regra de negócio
- *   (Controller). Esta etapa apresenta apenas a abertura tradicional;
- *   o passo da IA será adicionado mais tarde, sem alterar o que
- *   este formulário renderiza.
- *
- * PRINCÍPIOS SOLID APLICADOS
- *   - SRP: coleta o formulário; nada além disso.
- *   - DIP: depende de `aoEnviar`, contrato externo.
+ * A parte de triagem automática por inteligência artificial, que
+ * aparece na versão final do produto, não está aqui. Ela faz parte
+ * da camada de regras e será adicionada em uma etapa posterior, sem
+ * alterar o que este formulário mostra.
  */
 "use client";
 
@@ -30,7 +23,7 @@ import {
   type TipoChamado,
 } from "@/views/compartilhado/tipos-view";
 
-/** Pacote de dados que o formulário devolve ao ser enviado. */
+/** Pacote de dados que o formulário devolve quando é enviado. */
 export interface DadosNovoChamado {
   titulo: string;
   descricao: string;
@@ -39,7 +32,7 @@ export interface DadosNovoChamado {
 }
 
 interface PropsFormularioAberturaChamado {
-  /** Disparado quando o usuário clica em "Enviar". */
+  /** Função chamada quando o usuário aperta Enviar. */
   aoEnviar?: (dados: DadosNovoChamado) => void;
 }
 
@@ -51,7 +44,7 @@ export function FormularioAberturaChamado({
   const [categoria, setCategoria] = useState<string>("");
   const [tipo, setTipo] = useState<TipoChamado>("incidente");
 
-  /** O botão só fica disponível com todos os campos válidos. */
+  /** O botão só fica disponível com todos os campos preenchidos. */
   const podeEnviar =
     titulo.trim().length > 0 &&
     descricao.trim().length > 0 &&
@@ -66,7 +59,7 @@ export function FormularioAberturaChamado({
       categoria: categoria as CategoriaChamado,
       tipo,
     });
-    // A View se reseta após enviar — comportamento puramente visual.
+    // Limpa os campos depois de enviar.
     setTitulo("");
     setDescricao("");
     setCategoria("");

@@ -1,31 +1,24 @@
 /*
- * CAMADA: View (estilos globais)
- * ARQUIVO: src/app/globals.css
+ * Estilos globais do sistema.
  *
- * RESPONSABILIDADE
- *   Resetar e padronizar a base visual de todo o sistema.
- *   Mantemos o arquivo enxuto: apenas as três diretivas do
- *   Tailwind e ajustes globais mínimos. Toda a "personalidade"
- *   do projeto está nas classes utilitárias dos componentes.
- *
- * ENCAIXE NO MVC FUTURO
- *   Estilos globais não dependem de Controllers ou Models.
- *   Quando esses forem adicionados, este arquivo permanece igual.
+ * Mantemos o arquivo enxuto: as três diretivas do Tailwind e alguns
+ * ajustes de base. Toda a personalidade visual fica nas classes
+ * aplicadas direto nos componentes.
  */
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Ajustes globais simples — sem variáveis CSS, sem temas. */
+/* Cor de fundo e cor de texto padrão para todo o sistema. */
 html,
 body {
-  background-color: #f8fafc; /* tailwind: fundo (slate-50) */
-  color: #0f172a;            /* tailwind: tinta  (slate-900) */
+  background-color: #f8fafc;
+  color: #0f172a;
 }
 
-/* Foco visível e consistente — acessibilidade básica. */
+/* Faz o foco ficar visível ao navegar pelo teclado. */
 *:focus-visible {
-  outline: 2px solid #1d4ed8; /* marca */
+  outline: 2px solid #1d4ed8;
   outline-offset: 2px;
 }

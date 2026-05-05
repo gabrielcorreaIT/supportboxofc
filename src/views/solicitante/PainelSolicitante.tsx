@@ -1,24 +1,14 @@
 /**
- * CAMADA: View — Painel Orquestrador do Solicitante
- * ARQUIVO: src/views/solicitante/PainelSolicitante.tsx
+ * Painel do solicitante.
  *
- * RESPONSABILIDADE
- *   Compor a tela do solicitante: cabeçalho, formulário de abertura,
- *   lista "Meus Chamados" e o modal de detalhes (em modo leitura).
- *   Aqui há SOMENTE composição — toda a lógica visual fica delegada
- *   aos componentes filhos.
+ * Reúne em uma só tela o cabeçalho, o formulário de abertura, a
+ * lista Meus Chamados e a janela de detalhes em modo somente
+ * leitura. Aqui há apenas a montagem da tela. Toda a parte visual
+ * está nos componentes filhos.
  *
- * ESTADO LOCAL ACEITÁVEL
- *   Mantemos como estado de UI apenas o que NÃO é regra de negócio:
- *   - Qual chamado está selecionado para abrir o modal.
- *   - Se o modal está aberto.
- *   Essas decisões são puramente visuais (sem implicações no domínio).
- *
- * PRINCÍPIOS SOLID APLICADOS
- *   - SRP: orquestra os filhos; não busca dados, não autentica.
- *   - DIP: recebe TUDO que precisa via props (usuário, chamados,
- *          função para detalhes). Quando os Controllers existirem,
- *          a página passa as ações reais; este componente não muda.
+ * O único estado guardado neste arquivo é qual chamado está aberto
+ * na janela de detalhes, e se a janela está aberta ou fechada. Isso
+ * é só estado de tela, nada que mexa nos dados.
  */
 "use client";
 
@@ -35,20 +25,20 @@ import { ListaMeusChamados } from "./ListaMeusChamados";
 interface PropsPainelSolicitante {
   /** Nome exibido no cabeçalho. */
   nomeUsuario: string;
-  /** Lista resumida que alimenta "Meus Chamados". */
+  /** Lista resumida que alimenta a seção Meus Chamados. */
   chamados: ChamadoResumo[];
   /**
-   * Função síncrona que devolve os detalhes de um chamado pelo id.
-   * Mantemos síncrono nesta etapa porque os dados são mock; quando
-   * houver Controllers, esta prop pode virar `Promise<ChamadoDetalhado>`.
+   * Função que devolve a versão completa de um chamado a partir do
+   * id. Como por enquanto os dados são de exemplo, ela é síncrona.
+   * Mais para a frente pode passar a devolver uma promessa.
    */
   obterDetalhes: (idChamado: string) => ChamadoDetalhado | null;
 
-  /** Callback de logout — disparado pelo botão "Sair" do cabeçalho. */
+  /** Função chamada pelo botão Sair do cabeçalho. */
   aoSairClicado?: () => void;
-  /** Callback de envio do formulário de abertura. */
+  /** Função chamada quando o formulário de abertura é enviado. */
   aoCriarChamado?: (dados: DadosNovoChamado) => void;
-  /** Callback de comentário enviado no modal. */
+  /** Função chamada quando o usuário envia um comentário. */
   aoComentar?: (idChamado: string, texto: string) => void;
 }
 
@@ -60,10 +50,10 @@ export function PainelSolicitante({
   aoCriarChamado,
   aoComentar,
 }: PropsPainelSolicitante) {
-  // Estado VISUAL apenas — qual chamado está aberto no modal.
+  // Qual chamado está aberto na janela de detalhes. Estado só de tela.
   const [idSelecionado, setIdSelecionado] = useState<string | null>(null);
 
-  // Detalhes derivados de `idSelecionado`. Renderização pura — sem efeitos.
+  // Versão completa do chamado, calculada a partir do id selecionado.
   const detalhes = idSelecionado ? obterDetalhes(idSelecionado) : null;
 
   return (
@@ -75,12 +65,12 @@ export function PainelSolicitante({
       />
 
       <main className="max-w-5xl mx-auto px-6 py-8 space-y-8">
-        {/* SEÇÃO 1 — formulário de abertura. */}
+        {/* Primeira seção. Formulário para abrir um novo chamado. */}
         <section>
           <FormularioAberturaChamado aoEnviar={aoCriarChamado} />
         </section>
 
-        {/* SEÇÃO 2 — lista dos próprios chamados. */}
+        {/* Segunda seção. Lista dos chamados do próprio usuário. */}
         <section className="space-y-3">
           <h2 className="text-base font-semibold text-tinta">Meus Chamados</h2>
           <ListaMeusChamados
@@ -90,7 +80,7 @@ export function PainelSolicitante({
         </section>
       </main>
 
-      {/* Modal de detalhes — modo "leitura" para o solicitante. */}
+      {/* Janela de detalhes em modo somente leitura. */}
       <ModalDetalhesChamado
         chamado={detalhes}
         aberto={idSelecionado !== null}
