@@ -1,11 +1,7 @@
 /**
- * Página do painel do agente.
- *
- * Atua como casca da rota /agente. Pega a lista de chamados de
- * exemplo e as funções de ação e passa tudo para o componente
- * PainelAgente. As funções por enquanto só registram no console.
- * Quando os controladores existirem, é aqui que entram as ações de
- * verdade, sem precisar mexer no painel.
+ * Página /agente. Pega a lista de chamados de exemplo e passa para
+ * o PainelAgente, junto com as funções de ação. Por enquanto as
+ * funções só registram no console.
  */
 "use client";
 

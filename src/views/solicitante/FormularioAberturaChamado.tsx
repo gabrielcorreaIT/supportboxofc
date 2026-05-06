@@ -1,13 +1,9 @@
 /**
- * Formulário para abrir um novo chamado.
- *
- * Coleta os dados de um chamado novo (título, descrição, categoria
- * e tipo) e devolve esse pacote para quem usa o componente.
- *
- * A parte de triagem automática por inteligência artificial, que
- * aparece na versão final do produto, não está aqui. Ela faz parte
- * da camada de regras e será adicionada em uma etapa posterior, sem
- * alterar o que este formulário mostra.
+ * Formulário para abrir um novo chamado. Coleta título, descrição,
+ * categoria e tipo, e devolve esse pacote para quem usa o componente.
+ * A triagem automática por inteligência artificial, que aparece na
+ * versão final do produto, entra na camada de regras em uma etapa
+ * posterior.
  */
 "use client";
 
@@ -23,7 +19,6 @@ import {
   type TipoChamado,
 } from "@/views/compartilhado/tipos-view";
 
-/** Pacote de dados que o formulário devolve quando é enviado. */
 export interface DadosNovoChamado {
   titulo: string;
   descricao: string;
@@ -32,7 +27,6 @@ export interface DadosNovoChamado {
 }
 
 interface PropsFormularioAberturaChamado {
-  /** Função chamada quando o usuário aperta Enviar. */
   aoEnviar?: (dados: DadosNovoChamado) => void;
 }
 
@@ -44,7 +38,6 @@ export function FormularioAberturaChamado({
   const [categoria, setCategoria] = useState<string>("");
   const [tipo, setTipo] = useState<TipoChamado>("incidente");
 
-  /** O botão só fica disponível com todos os campos preenchidos. */
   const podeEnviar =
     titulo.trim().length > 0 &&
     descricao.trim().length > 0 &&
@@ -59,7 +52,6 @@ export function FormularioAberturaChamado({
       categoria: categoria as CategoriaChamado,
       tipo,
     });
-    // Limpa os campos depois de enviar.
     setTitulo("");
     setDescricao("");
     setCategoria("");

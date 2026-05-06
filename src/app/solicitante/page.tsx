@@ -1,13 +1,7 @@
 /**
- * Página do portal do solicitante.
- *
- * Atua como casca da rota /solicitante. Pega os dados de exemplo e
- * as funções de ação e passa tudo para o componente
- * PainelSolicitante.
- *
- * Quando os controladores existirem, esta página vai chamar as
- * ações reais de listagem, criação e comentário, e repassar os
- * resultados como hoje. O painel em si não muda.
+ * Página /solicitante. Pega os dados de exemplo e passa para o
+ * PainelSolicitante, junto com as funções de ação. Por enquanto as
+ * funções só registram no console.
  */
 "use client";
 

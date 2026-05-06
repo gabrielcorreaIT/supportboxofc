@@ -1,19 +1,13 @@
 /**
- * Campo de texto de uma linha, com rótulo.
- *
- * Padroniza a aparência de label e input para evitar repetição em
- * cada formulário. Aceita qualquer atributo nativo de um input
- * comum, como placeholder ou type, repassando tudo direto para o
- * elemento.
+ * Campo de texto de uma linha, com rótulo. Padroniza a aparência
+ * para os formulários ficarem parecidos sem repetir as classes.
  */
 "use client";
 
 import type { InputHTMLAttributes } from "react";
 
 interface PropsCampoTexto extends InputHTMLAttributes<HTMLInputElement> {
-  /** Texto que aparece acima do campo. */
   rotulo: string;
-  /** Mensagem curta de ajuda mostrada abaixo do campo. */
   ajuda?: string;
 }
 
@@ -24,7 +18,6 @@ export function CampoTexto({
   className = "",
   ...resto
 }: PropsCampoTexto) {
-  // Garante que label e input fiquem associados de forma acessível.
   const idCampo = id ?? `campo-${rotulo.toLowerCase().replace(/\s+/g, "-")}`;
 
   return (

@@ -1,9 +1,7 @@
 /**
- * Área de texto de várias linhas, com rótulo.
- *
- * Mantém a mesma aparência dos campos de uma linha e dos de
- * seleção, para que os formulários fiquem visualmente parecidos em
- * todo o sistema.
+ * Área de texto de várias linhas, com rótulo. Mantém a mesma
+ * aparência dos demais campos para que os formulários fiquem
+ * parecidos.
  */
 "use client";
 

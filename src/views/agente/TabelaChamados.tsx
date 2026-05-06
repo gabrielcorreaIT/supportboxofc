@@ -1,9 +1,6 @@
 /**
- * Tabela de chamados do agente.
- *
- * Mostra a lista de chamados em formato de tabela. O agente precisa
- * comparar muitos chamados de uma vez, então a tabela funciona
- * melhor do que cartões.
+ * Tabela de chamados do agente. O agente precisa comparar muitos
+ * chamados de uma vez, então a tabela funciona melhor do que cartões.
  */
 "use client";
 
@@ -15,9 +12,7 @@ import {
 } from "@/views/compartilhado/Etiqueta";
 
 interface PropsTabelaChamados {
-  /** Lista que já vem filtrada por quem usa o componente. */
   chamados: ChamadoResumo[];
-  /** Função chamada quando o usuário clica em Detalhes. */
   aoSelecionar?: (idChamado: string) => void;
 }
 
@@ -85,8 +80,6 @@ export function TabelaChamados({
   );
 }
 
-// Componentes auxiliares usados só dentro deste arquivo. Padronizam
-// o espaçamento das células do cabeçalho e do corpo da tabela.
 function Th({
   children,
   className = "",

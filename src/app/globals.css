@@ -1,8 +1,6 @@
 /*
- * Estilos globais do sistema.
- *
- * Mantemos o arquivo enxuto: as três diretivas do Tailwind e alguns
- * ajustes de base. Toda a personalidade visual fica nas classes
+ * Estilos globais do sistema. Apenas as três diretivas do Tailwind
+ * e ajustes de base. A personalidade visual fica nas classes
  * aplicadas direto nos componentes.
  */
 
@@ -10,14 +8,12 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Cor de fundo e cor de texto padrão para todo o sistema. */
 html,
 body {
   background-color: #f8fafc;
   color: #0f172a;
 }
 
-/* Faz o foco ficar visível ao navegar pelo teclado. */
 *:focus-visible {
   outline: 2px solid #1d4ed8;
   outline-offset: 2px;

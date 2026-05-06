@@ -1,16 +1,13 @@
 /**
- * Barra de filtros do agente.
- *
- * Reúne o campo de busca por palavra e as abas de situação. O
- * componente não filtra a lista por conta própria. Ele apenas avisa
- * quem o usa, por meio das funções recebidas, que o usuário trocou
- * o que está digitado ou a aba ativa.
+ * Barra de filtros do agente. Tem o campo de busca por palavra e as
+ * abas de situação. O componente não filtra a lista por conta
+ * própria, apenas avisa quem o usa, pelas funções recebidas, que o
+ * usuário trocou o termo digitado ou a aba ativa.
  */
 "use client";
 
 import { Search } from "lucide-react";
 
-/** Conjunto de filtros de situação, mais a opção Todos, usado nas abas. */
 export type AbaStatus = "todos" | "Aberto" | "Em Andamento" | "Concluído";
 
 interface PropsBarraFiltros {
@@ -35,7 +32,6 @@ export function BarraFiltros({
 }: PropsBarraFiltros) {
   return (
     <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
-      {/* Campo de busca. */}
       <div className="relative w-full sm:max-w-xs">
         <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-tintaFraca" />
         <input
@@ -47,7 +43,6 @@ export function BarraFiltros({
         />
       </div>
 
-      {/* Abas de situação. Cada clique chama aoMudarAba. */}
       <div className="flex flex-wrap gap-1 bg-fundo p-1 rounded-md border border-linha">
         {ABAS.map(({ valor, rotulo }) => {
           const ativa = valor === abaAtiva;

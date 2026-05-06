@@ -1,12 +1,7 @@
 /**
- * Marcação colorida usada para indicar situação, prioridade ou
- * tipo de chamado.
- *
- * Centraliza a relação entre o valor mostrado e a cor, evitando que
- * cada lista ou janela invente sua própria combinação. Para
- * adicionar uma nova paleta basta criar uma nova função do tipo
- * corPorAlgo neste arquivo, sem precisar mexer em quem já usa o
- * componente.
+ * Marca colorida usada para indicar situação, prioridade ou tipo do
+ * chamado. Centraliza a relação entre o valor mostrado e a cor, para
+ * que cada lista ou janela não invente sua própria combinação.
  */
 "use client";
 
@@ -15,7 +10,6 @@ import type { PrioridadeChamado, StatusChamado } from "./tipos-view";
 
 interface PropsEtiqueta {
   children: ReactNode;
-  /** Conjunto de classes do Tailwind para fundo e texto. */
   classeCor: string;
 }
 
@@ -33,10 +27,6 @@ export function Etiqueta({ children, classeCor }: PropsEtiqueta) {
   );
 }
 
-// Funções auxiliares de cor. Traduzem o valor de cada situação ou
-// prioridade no conjunto de classes correspondente.
-
-/** Cor por situação do chamado. */
 export function corPorStatus(status: StatusChamado): string {
   switch (status) {
     case "Aberto":
@@ -48,7 +38,6 @@ export function corPorStatus(status: StatusChamado): string {
   }
 }
 
-/** Cor por nível de prioridade. */
 export function corPorPrioridade(p: PrioridadeChamado): string {
   switch (p) {
     case "Baixa":

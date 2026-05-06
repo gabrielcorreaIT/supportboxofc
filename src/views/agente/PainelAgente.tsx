@@ -1,13 +1,8 @@
 /**
- * Painel do agente.
- *
- * Reúne na mesma tela a barra de filtros, a tabela de chamados e a
- * janela de detalhes em modo agente. Aplica em memória os filtros
- * locais (busca por palavra e aba de situação) sobre a lista
- * recebida.
- *
- * A filtragem aqui é só visual, ela não muda os dados, então faz
- * sentido ficar dentro do componente.
+ * Painel do agente. Reúne a barra de filtros, a tabela de chamados
+ * e a janela de detalhes em modo agente. A filtragem por palavra e
+ * por aba de situação é feita em memória, já que é só efeito visual
+ * sobre a lista recebida.
  */
 "use client";
 
@@ -23,12 +18,8 @@ import { TabelaChamados } from "./TabelaChamados";
 interface PropsPainelAgente {
   chamados: ChamadoResumo[];
   obterDetalhes: (idChamado: string) => ChamadoDetalhado | null;
-
-  /** Função chamada quando o agente clica em assumir. */
   aoAssumir?: (idChamado: string) => void;
-  /** Função chamada quando o agente clica em concluir. */
   aoConcluir?: (idChamado: string) => void;
-  /** Função chamada quando o agente envia um comentário. */
   aoComentar?: (idChamado: string, texto: string) => void;
 }
 
@@ -39,13 +30,10 @@ export function PainelAgente({
   aoConcluir,
   aoComentar,
 }: PropsPainelAgente) {
-  // Filtros e qual chamado está aberto na janela de detalhes.
   const [termoBusca, setTermoBusca] = useState("");
   const [abaStatus, setAbaStatus] = useState<AbaStatus>("todos");
   const [idSelecionado, setIdSelecionado] = useState<string | null>(null);
 
-  // useMemo evita refazer o cálculo a cada redesenho quando nada
-  // mudou. A filtragem combina situação e palavra digitada.
   const chamadosFiltrados = useMemo(() => {
     const termo = termoBusca.trim().toLowerCase();
     return chamados.filter((c) => {

@@ -1,10 +1,7 @@
 /**
- * Lista dos chamados do solicitante.
- *
- * Mostra os chamados do usuário entrado em formato de cartão. Cada
- * cartão, quando clicado, dispara aoSelecionar com o id do chamado.
- * Quem responde a esse clique cuida de carregar os detalhes e abrir
- * a janela.
+ * Lista dos chamados do solicitante em formato de cartão. Ao clicar,
+ * dispara aoSelecionar com o id do chamado para que quem usa o
+ * componente carregue os detalhes e abra a janela.
  */
 "use client";
 
@@ -14,7 +11,6 @@ import { Etiqueta, corPorStatus } from "@/views/compartilhado/Etiqueta";
 
 interface PropsListaMeusChamados {
   chamados: ChamadoResumo[];
-  /** Função chamada quando o usuário clica em um item da lista. */
   aoSelecionar?: (idChamado: string) => void;
 }
 

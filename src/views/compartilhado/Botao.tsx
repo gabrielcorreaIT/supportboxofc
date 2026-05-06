@@ -1,32 +1,20 @@
 /**
- * Botão padrão do sistema.
- *
- * Reúne em um só lugar a aparência dos botões para que todas as
- * telas fiquem visualmente parecidas sem precisar repetir as classes
- * em cada lugar. O componente cuida apenas de desenhar o botão. O
- * que acontece quando o usuário clica fica a cargo de quem usa o
- * componente, passando uma função em onClick.
+ * Botão padrão do sistema. Reúne a aparência num só lugar para que
+ * todas as telas fiquem parecidas sem repetir as classes. O que
+ * acontece no clique fica a cargo de quem usa o componente.
  */
 "use client";
 
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 
-/** Aparências disponíveis para o botão. */
 type VarianteBotao = "primario" | "secundario" | "perigo" | "fantasma";
 
 interface PropsBotao extends ButtonHTMLAttributes<HTMLButtonElement> {
-  /** Conteúdo do botão. Pode ser texto, ícone ou os dois. */
   children: ReactNode;
-  /** Aparência. Quando não informada, vale "primario". */
   variante?: VarianteBotao;
-  /** Quando verdadeiro, o botão ocupa toda a largura disponível. */
   larguraTotal?: boolean;
 }
 
-/**
- * Tabela que liga cada aparência ao conjunto de classes do Tailwind.
- * Para incluir uma aparência nova basta adicionar uma chave aqui.
- */
 const variantes: Record<VarianteBotao, string> = {
   primario:
     "bg-marca text-white hover:bg-marca-forte border border-marca",

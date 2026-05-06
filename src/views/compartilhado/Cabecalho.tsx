@@ -1,12 +1,6 @@
 /**
- * Faixa superior usada nas páginas do solicitante.
- *
- * Mostra o nome do sistema, o nome do usuário entrado e o botão
- * para sair. O painel do agente usa uma barra lateral em vez deste
- * cabeçalho. O componente apenas desenha a faixa, sem buscar dados
- * por conta própria. O que acontece ao clicar em sair é
- * responsabilidade de quem usa, passando a função em
- * aoSairClicado.
+ * Faixa superior usada nas páginas do solicitante. Mostra o nome do
+ * sistema, o usuário entrado e o botão de sair.
  */
 "use client";
 
@@ -14,11 +8,8 @@ import { LogOut } from "lucide-react";
 import { Botao } from "./Botao";
 
 interface PropsCabecalho {
-  /** Nome do usuário entrado, exibido à direita. */
   nomeUsuario: string;
-  /** Texto curto que identifica o papel, como Portal do Solicitante. */
   subtitulo?: string;
-  /** Função chamada quando o usuário clica em Sair. */
   aoSairClicado?: () => void;
 }
 

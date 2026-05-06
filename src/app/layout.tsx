@@ -1,13 +1,6 @@
 /**
- * Estrutura raiz do site.
- *
- * Envolve todas as páginas com as tags html e body, carrega o estilo
- * global e define o título exibido na aba do navegador. Aqui não
- * temos nada do sistema em si, apenas a moldura.
- *
- * Quando os controladores e modelos forem adicionados nas próximas
- * etapas, esse arquivo continua igual. Se um dia precisar de algo
- * global, como tema ou sessão de usuário, é aqui que entra.
+ * Estrutura raiz do site. Envolve todas as páginas com html e body,
+ * carrega o estilo global e define o título da aba do navegador.
  */
 import type { Metadata } from "next";
 import "./globals.css";

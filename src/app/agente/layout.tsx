@@ -1,10 +1,6 @@
 /**
- * Estrutura usada por todas as páginas do agente.
- *
- * Coloca a barra lateral fixa à esquerda e deixa o resto do espaço
- * para o conteúdo da página. Como o painel do agente é a única tela
- * dentro de uma sessão nesta etapa, o botão de sair leva de volta
- * para a tela de entrada.
+ * Estrutura comum às páginas do agente. Coloca a barra lateral fixa
+ * à esquerda e deixa o resto do espaço para o conteúdo.
  */
 "use client";
 

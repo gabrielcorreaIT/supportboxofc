@@ -1,10 +1,7 @@
 /**
- * Estrutura usada por todas as páginas do solicitante.
- *
- * Por enquanto define apenas a cor de fundo. Mais para a frente este
- * é o lugar natural para verificar se o usuário está realmente
- * autenticado e mandar de volta para a tela de entrada quando não
- * estiver.
+ * Estrutura comum às páginas do solicitante. Por ora só define a cor
+ * de fundo. Mais para a frente é aqui que entra a verificação de
+ * sessão.
  */
 export default function LayoutSolicitante({
   children,

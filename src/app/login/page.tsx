@@ -1,14 +1,8 @@
 /**
- * Tela de entrada do sistema.
- *
- * Centraliza o formulário em uma caixa simples sobre o fundo neutro.
- * Como ainda não temos a parte que valida usuário e senha, o envio
- * apenas leva a pessoa para um dos dois painéis com base no e-mail
- * digitado. Se o e-mail tiver a palavra agente, vai para o painel
- * do agente. Caso contrário, vai para o portal do solicitante.
- *
- * Esse desvio é só para a apresentação. Quando a autenticação for
- * adicionada, o formulário em si não precisa mudar.
+ * Tela de entrada do sistema. Como ainda não há validação real, o
+ * envio leva o usuário para um dos dois painéis com base no e-mail:
+ * com a palavra agente vai para /agente, qualquer outro vai para
+ * /solicitante. Esse atalho some quando a autenticação for adicionada.
  */
 "use client";
 
@@ -18,7 +12,6 @@ import { FormularioLogin } from "@/views/auth/FormularioLogin";
 export default function PaginaLogin() {
   const router = useRouter();
 
-  // Sem autenticação real ainda. Só direciona com base no e-mail.
   const aoEnviar = (email: string) => {
     const destino = email.toLowerCase().includes("agente")
       ? "/agente"

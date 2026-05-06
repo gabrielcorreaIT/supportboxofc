@@ -1,13 +1,6 @@
 /**
- * Página raiz do site.
- *
- * Quando o usuário acessa a barra inicial do endereço, mandamos
- * direto para a tela de entrada. Não existe página inicial pública,
- * o sistema é interno.
- *
- * No futuro, com a parte de autenticação ligada, esse desvio pode
- * passar a olhar a sessão e levar o usuário direto para o painel
- * dele caso já esteja entrado.
+ * Rota inicial. O sistema é interno, então não há página pública: o
+ * acesso à raiz manda direto para a tela de entrada.
  */
 import { redirect } from "next/navigation";
 

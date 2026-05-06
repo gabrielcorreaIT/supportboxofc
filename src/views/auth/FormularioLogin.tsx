@@ -1,15 +1,7 @@
 /**
- * Formulário de entrada do sistema.
- *
- * Apresenta os campos de e-mail e senha e devolve o que foi digitado
- * para quem usa o componente. O formulário não sabe validar o
- * acesso. Ele apenas coleta os dados e dispara a função recebida em
- * aoEnviar.
- *
- * Hoje a página de entrada usa esse retorno só para escolher o
- * destino. Quando a parte de autenticação for adicionada, a função
- * recebida em aoEnviar passa a fazer a validação real e nada deste
- * arquivo precisa mudar.
+ * Formulário de entrada do sistema. Coleta e-mail e senha e dispara
+ * aoEnviar com o que foi digitado. Não valida o acesso por conta
+ * própria, isso fica para quem usa o componente.
  */
 "use client";
 
@@ -19,17 +11,8 @@ import { Botao } from "@/views/compartilhado/Botao";
 import { CampoTexto } from "@/views/compartilhado/CampoTexto";
 
 interface PropsFormularioLogin {
-  /**
-   * Função chamada quando o formulário é enviado. Recebe e-mail e
-   * senha já tratados. Quem fornece a função é responsável por
-   * validar o acesso e levar o usuário para o próximo lugar.
-   */
   aoEnviar?: (email: string, senha: string) => void;
-
-  /** Mensagem de erro vinda de fora, como credenciais inválidas. */
   mensagemErro?: string | null;
-
-  /** Marca o formulário como em processamento. */
   carregando?: boolean;
 }
 
@@ -42,7 +25,6 @@ export function FormularioLogin({
   const [senha, setSenha] = useState("");
   const [mostrarSenha, setMostrarSenha] = useState(false);
 
-  /** Envia o formulário, repassando os valores para a função externa. */
   const submeter = (e: React.FormEvent) => {
     e.preventDefault();
     aoEnviar?.(email.trim(), senha);

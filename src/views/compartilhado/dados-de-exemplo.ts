@@ -1,12 +1,8 @@
 /**
- * Dados de exemplo para as telas funcionarem nesta etapa.
- *
- * Cada lista aqui simula uma resposta que mais para a frente vai vir
- * de um controlador. As telas recebem essas listas pelas suas
- * informações de entrada e não importam diretamente nada deste
- * arquivo. Quando os controladores existirem, basta apagar este
- * arquivo e trocar a origem das listas, sem mudar nada na parte
- * visual.
+ * Dados de exemplo para as telas funcionarem nesta etapa. Cada lista
+ * aqui simula uma resposta que mais para a frente vai vir de um
+ * controlador. Quando os controladores existirem, basta apagar este
+ * arquivo e trocar a origem das listas.
  */
 import type {
   ChamadoDetalhado,
@@ -15,21 +11,15 @@ import type {
   UsuarioVisivel,
 } from "./tipos-view";
 
-// Usuários de exemplo
-
-/** Usuário entrado como solicitante. */
 export const usuarioSolicitanteExemplo: UsuarioVisivel = {
   nome: "Joana Pereira",
   papel: "solicitante",
 };
 
-/** Usuário entrado como agente. */
 export const usuarioAgenteExemplo: UsuarioVisivel = {
   nome: "Marcos Silva",
   papel: "agente",
 };
-
-// Comentários de exemplo usados dentro da janela de detalhes
 
 const comentariosChamadoUm: ComentarioVisivel[] = [
   {
@@ -55,14 +45,6 @@ const comentariosChamadoDois: ComentarioVisivel[] = [
   },
 ];
 
-// Lista de chamados em formato resumido para alimentar listas e
-// tabelas
-
-/**
- * Lista usada pelo painel do agente. Contém chamados de várias
- * pessoas, com prioridades, situações e categorias diferentes para
- * mostrar a tela em vários estados.
- */
 export const chamadosExemploAgente: ChamadoResumo[] = [
   {
     id: "1",
@@ -124,22 +106,10 @@ export const chamadosExemploAgente: ChamadoResumo[] = [
   },
 ];
 
-/**
- * Lista usada pelo portal do solicitante. Mostra apenas os chamados
- * abertos pelo usuário de exemplo.
- */
 export const chamadosExemploSolicitante: ChamadoResumo[] = chamadosExemploAgente.filter(
   (c) => c.solicitante === usuarioSolicitanteExemplo.nome,
 );
 
-// Versões completas dos chamados, usadas quando a janela de detalhes
-// é aberta
-
-/**
- * Tabela que liga o id do chamado à sua versão completa, com
- * descrição e histórico. A janela de detalhes consulta este mapa
- * quando precisa carregar um chamado.
- */
 export const detalhesExemploPorId: Record<string, ChamadoDetalhado> = {
   "1": {
     ...chamadosExemploAgente[0],
