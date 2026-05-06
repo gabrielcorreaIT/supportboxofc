@@ -1,7 +1,15 @@
 /**
- * Formulário de entrada do sistema. Coleta e-mail e senha e dispara
- * aoEnviar com o que foi digitado. Não valida o acesso por conta
- * própria, isso fica para quem usa o componente.
+ * Formulário de entrada do sistema.
+ *
+ * Apresenta os campos de e-mail e senha em uma caixa simples e
+ * dispara aoEnviar com os valores digitados. O formulário não sabe
+ * validar o acesso por conta própria. Quem usa o componente recebe
+ * os dados e decide o que fazer.
+ *
+ * Hoje, a página de entrada usa esse retorno só para escolher o
+ * destino com base no e-mail. Quando a parte de autenticação for
+ * adicionada, a função recebida em aoEnviar passa a fazer a
+ * validação real e nada deste arquivo precisa mudar.
  */
 "use client";
 
@@ -11,8 +19,21 @@ import { Botao } from "@/views/compartilhado/Botao";
 import { CampoTexto } from "@/views/compartilhado/CampoTexto";
 
 interface PropsFormularioLogin {
+  /**
+   * Função chamada quando o formulário é enviado. Recebe e-mail
+   * já com espaços removidos das pontas, e a senha exatamente
+   * como digitada.
+   */
   aoEnviar?: (email: string, senha: string) => void;
+  /**
+   * Mensagem de erro vinda de fora, exibida em destaque acima
+   * dos campos. Útil para situações como credenciais inválidas.
+   */
   mensagemErro?: string | null;
+  /**
+   * Quando verdadeiro, marca o formulário como em processamento.
+   * Os campos ficam desabilitados e o botão muda para Entrando.
+   */
   carregando?: boolean;
 }
 
@@ -21,10 +42,18 @@ export function FormularioLogin({
   mensagemErro,
   carregando = false,
 }: PropsFormularioLogin) {
+  // Estado interno dos campos.
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
+  // Controla se a senha aparece em texto claro ou em pontos. Ajuda
+  // o usuário a conferir o que digitou sem precisar apagar tudo.
   const [mostrarSenha, setMostrarSenha] = useState(false);
 
+  /**
+   * Submete o formulário, repassando os valores digitados para
+   * a função externa. O e-mail é tratado com trim para evitar
+   * espaços acidentais no começo ou no fim.
+   */
   const submeter = (e: React.FormEvent) => {
     e.preventDefault();
     aoEnviar?.(email.trim(), senha);
@@ -42,6 +71,11 @@ export function FormularioLogin({
         </p>
       </div>
 
+      {/*
+        Aviso de erro. Só aparece se mensagemErro tiver conteúdo.
+        Usa role="alert" para que leitores de tela anunciem a
+        mensagem assim que ela aparece.
+      */}
       {mensagemErro && (
         <p
           role="alert"
@@ -62,6 +96,12 @@ export function FormularioLogin({
         autoComplete="email"
       />
 
+      {/*
+        Campo de senha junto com o botão para mostrar e esconder.
+        O botão fica posicionado de forma absoluta sobre o campo,
+        no canto direito, sem entrar na ordem de tabulação para
+        não atrapalhar quem usa o teclado.
+      */}
       <div className="relative">
         <CampoTexto
           rotulo="Senha"
@@ -87,6 +127,9 @@ export function FormularioLogin({
       <Botao
         type="submit"
         larguraTotal
+        // O botão só fica disponível quando o usuário digitou algo
+        // em e-mail e senha, e o formulário não está em
+        // processamento.
         disabled={carregando || !email.trim() || !senha.trim()}
       >
         <LogIn className="w-4 h-4" /> {carregando ? "Entrando..." : "Entrar"}

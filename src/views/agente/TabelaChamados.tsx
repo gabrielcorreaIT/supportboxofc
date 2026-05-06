@@ -1,6 +1,15 @@
 /**
- * Tabela de chamados do agente. O agente precisa comparar muitos
- * chamados de uma vez, então a tabela funciona melhor do que cartões.
+ * Tabela de chamados usada no painel do agente.
+ *
+ * Mostra os chamados em formato de tabela porque o agente precisa
+ * comparar muitos atendimentos de uma vez. Cada linha tem o
+ * protocolo, título, solicitante, categoria, prioridade, situação,
+ * data de abertura e um botão para abrir os detalhes em uma janela
+ * sobreposta.
+ *
+ * O componente é puramente visual: recebe a lista já filtrada e
+ * dispara aoSelecionar quando o usuário clica em Detalhes. A
+ * filtragem em si fica a cargo do PainelAgente.
  */
 "use client";
 
@@ -12,7 +21,12 @@ import {
 } from "@/views/compartilhado/Etiqueta";
 
 interface PropsTabelaChamados {
+  /** Lista que já foi filtrada por quem usa o componente. */
   chamados: ChamadoResumo[];
+  /**
+   * Função chamada quando o usuário clica em Detalhes em uma das
+   * linhas da tabela. Recebe o id do chamado correspondente.
+   */
   aoSelecionar?: (idChamado: string) => void;
 }
 
@@ -20,6 +34,9 @@ export function TabelaChamados({
   chamados,
   aoSelecionar,
 }: PropsTabelaChamados) {
+  // Quando a lista filtrada está vazia, mostramos uma mensagem
+  // amigável em vez de uma tabela com zero linhas. Isso ajuda o
+  // agente a perceber que os filtros aplicados não retornaram nada.
   if (chamados.length === 0) {
     return (
       <div className="bg-papel border border-linha rounded-md p-8 text-center text-sm text-tintaFraca">
@@ -80,6 +97,12 @@ export function TabelaChamados({
   );
 }
 
+/**
+ * Subcomponente local que padroniza o estilo das células de
+ * cabeçalho. Centraliza o texto pequeno em maiúsculas e o
+ * espaçamento horizontal para que o th fique consistente entre
+ * todas as colunas.
+ */
 function Th({
   children,
   className = "",
@@ -99,6 +122,11 @@ function Th({
   );
 }
 
+/**
+ * Subcomponente local que padroniza o estilo das células do
+ * corpo da tabela. Mantém o mesmo espaçamento horizontal do Th
+ * para que as colunas fiquem alinhadas.
+ */
 function Td({
   children,
   className = "",

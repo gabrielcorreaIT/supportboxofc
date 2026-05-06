@@ -1,8 +1,12 @@
 /**
- * Dados de exemplo para as telas funcionarem nesta etapa. Cada lista
- * aqui simula uma resposta que mais para a frente vai vir de um
- * controlador. Quando os controladores existirem, basta apagar este
- * arquivo e trocar a origem das listas.
+ * Dados de exemplo para alimentar as telas nesta etapa do projeto.
+ *
+ * Cada lista aqui simula uma resposta que mais para a frente vai
+ * vir de um controlador. Os componentes não importam diretamente
+ * deste arquivo. Quem importa são as páginas, que então passam os
+ * dados para os componentes pelas suas props. Quando os
+ * controladores existirem, basta apagar este arquivo e trocar a
+ * origem das listas, sem mudar nada na parte visual.
  */
 import type {
   ChamadoDetalhado,
@@ -11,16 +15,28 @@ import type {
   UsuarioVisivel,
 } from "./tipos-view";
 
+/**
+ * Usuário entrado como solicitante. Usado no cabeçalho do portal
+ * e para filtrar os chamados abertos por essa pessoa.
+ */
 export const usuarioSolicitanteExemplo: UsuarioVisivel = {
   nome: "Joana Pereira",
   papel: "solicitante",
 };
 
+/**
+ * Usuário entrado como agente. Usado na barra lateral do painel
+ * de TI.
+ */
 export const usuarioAgenteExemplo: UsuarioVisivel = {
   nome: "Marcos Silva",
   papel: "agente",
 };
 
+/**
+ * Comentários do primeiro chamado de exemplo. Mostram dois autores
+ * diferentes e ajudam a visualizar o histórico no modal de detalhes.
+ */
 const comentariosChamadoUm: ComentarioVisivel[] = [
   {
     id: "c1",
@@ -36,6 +52,7 @@ const comentariosChamadoUm: ComentarioVisivel[] = [
   },
 ];
 
+/** Comentários do segundo chamado, com apenas o registro inicial. */
 const comentariosChamadoDois: ComentarioVisivel[] = [
   {
     id: "c3",
@@ -45,6 +62,12 @@ const comentariosChamadoDois: ComentarioVisivel[] = [
   },
 ];
 
+/**
+ * Lista usada no painel do agente. Foi montada com chamados de
+ * solicitantes diferentes, várias categorias, prioridades e
+ * situações para conseguir mostrar a tela em todos os estados
+ * possíveis durante a apresentação.
+ */
 export const chamadosExemploAgente: ChamadoResumo[] = [
   {
     id: "1",
@@ -106,10 +129,20 @@ export const chamadosExemploAgente: ChamadoResumo[] = [
   },
 ];
 
+/**
+ * Lista usada no portal do solicitante. Mostra apenas os chamados
+ * abertos pelo usuário de exemplo, derivada da lista do agente
+ * para evitar duplicar dados.
+ */
 export const chamadosExemploSolicitante: ChamadoResumo[] = chamadosExemploAgente.filter(
   (c) => c.solicitante === usuarioSolicitanteExemplo.nome,
 );
 
+/**
+ * Tabela que liga o id de um chamado à sua versão completa, com
+ * descrição e histórico. A janela de detalhes consulta este mapa
+ * quando precisa carregar um chamado específico para exibir.
+ */
 export const detalhesExemploPorId: Record<string, ChamadoDetalhado> = {
   "1": {
     ...chamadosExemploAgente[0],

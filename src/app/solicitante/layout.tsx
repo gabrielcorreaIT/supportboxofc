@@ -1,7 +1,14 @@
 /**
- * Estrutura comum às páginas do solicitante. Por ora só define a cor
- * de fundo. Mais para a frente é aqui que entra a verificação de
- * sessão.
+ * Estrutura comum a todas as páginas dentro de /solicitante.
+ *
+ * Por ora só define a cor de fundo. O cabeçalho do solicitante
+ * ficou junto com o painel para que o componente principal cuide
+ * de tudo que aparece na tela.
+ *
+ * Mais para a frente, este é o lugar natural para incluir a
+ * verificação de sessão, ou seja, conferir se o usuário está
+ * realmente entrado e redirecioná-lo para a tela de entrada caso
+ * contrário.
  */
 export default function LayoutSolicitante({
   children,

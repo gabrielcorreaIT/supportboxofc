@@ -1,7 +1,11 @@
 /**
- * Área de texto de várias linhas, com rótulo. Mantém a mesma
- * aparência dos demais campos para que os formulários fiquem
- * parecidos.
+ * Área de texto de várias linhas, com rótulo.
+ *
+ * Acompanha a mesma identidade visual do CampoTexto e do
+ * CampoSelect, para que os formulários inteiros fiquem com a
+ * mesma cara. Como estende TextareaHTMLAttributes, qualquer
+ * atributo nativo de textarea, como rows, placeholder ou required,
+ * pode ser passado normalmente.
  */
 "use client";
 
@@ -9,6 +13,7 @@ import type { TextareaHTMLAttributes } from "react";
 
 interface PropsCampoTextoArea
   extends TextareaHTMLAttributes<HTMLTextAreaElement> {
+  /** Texto que aparece acima do campo. */
   rotulo: string;
 }
 
@@ -19,6 +24,9 @@ export function CampoTextoArea({
   rows = 4,
   ...resto
 }: PropsCampoTextoArea) {
+  // Mesmo princípio do CampoTexto: quando o id não é passado, ele
+  // é gerado a partir do rótulo para manter label e textarea
+  // associados de forma acessível.
   const idCampo = id ?? `area-${rotulo.toLowerCase().replace(/\s+/g, "-")}`;
 
   return (
