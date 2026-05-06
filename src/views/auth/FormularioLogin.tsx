@@ -25,23 +25,9 @@ interface PropsFormularioLogin {
    * como digitada.
    */
   aoEnviar?: (email: string, senha: string) => void;
-  /**
-   * Mensagem de erro vinda de fora, exibida em destaque acima
-   * dos campos. Útil para situações como credenciais inválidas.
-   */
-  mensagemErro?: string | null;
-  /**
-   * Quando verdadeiro, marca o formulário como em processamento.
-   * Os campos ficam desabilitados e o botão muda para Entrando.
-   */
-  carregando?: boolean;
 }
 
-export function FormularioLogin({
-  aoEnviar,
-  mensagemErro,
-  carregando = false,
-}: PropsFormularioLogin) {
+export function FormularioLogin({ aoEnviar }: PropsFormularioLogin) {
   // Estado interno dos campos.
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
@@ -50,8 +36,8 @@ export function FormularioLogin({
   const [mostrarSenha, setMostrarSenha] = useState(false);
 
   /**
-   * Submete o formulário, repassando os valores digitados para
-   * a função externa. O e-mail é tratado com trim para evitar
+   * Submete o formulário, repassando os valores digitados para a
+   * função externa. O e-mail é tratado com trim para evitar
    * espaços acidentais no começo ou no fim.
    */
   const submeter = (e: React.FormEvent) => {
@@ -71,20 +57,6 @@ export function FormularioLogin({
         </p>
       </div>
 
-      {/*
-        Aviso de erro. Só aparece se mensagemErro tiver conteúdo.
-        Usa role="alert" para que leitores de tela anunciem a
-        mensagem assim que ela aparece.
-      */}
-      {mensagemErro && (
-        <p
-          role="alert"
-          className="text-sm text-red-700 bg-red-50 border border-red-200 rounded-md px-3 py-2"
-        >
-          {mensagemErro}
-        </p>
-      )}
-
       <CampoTexto
         rotulo="E-mail"
         type="email"
@@ -92,7 +64,6 @@ export function FormularioLogin({
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         required
-        disabled={carregando}
         autoComplete="email"
       />
 
@@ -110,7 +81,6 @@ export function FormularioLogin({
           value={senha}
           onChange={(e) => setSenha(e.target.value)}
           required
-          disabled={carregando}
           autoComplete="current-password"
         />
         <button
@@ -127,12 +97,11 @@ export function FormularioLogin({
       <Botao
         type="submit"
         larguraTotal
-        // O botão só fica disponível quando o usuário digitou algo
-        // em e-mail e senha, e o formulário não está em
-        // processamento.
-        disabled={carregando || !email.trim() || !senha.trim()}
+        // Só fica disponível quando o usuário digitou algo em e-mail
+        // e senha.
+        disabled={!email.trim() || !senha.trim()}
       >
-        <LogIn className="w-4 h-4" /> {carregando ? "Entrando..." : "Entrar"}
+        <LogIn className="w-4 h-4" /> Entrar
       </Botao>
     </form>
   );

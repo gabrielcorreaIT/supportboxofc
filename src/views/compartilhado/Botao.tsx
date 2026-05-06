@@ -12,15 +12,11 @@
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 
 /**
- * Aparências disponíveis para o botão. Cada nome representa uma
- * intenção visual diferente:
- *
- * primario serve para a ação principal de cada tela.
- * secundario para ações de apoio que não precisam de destaque.
- * perigo para ações de remoção ou cancelamento.
- * fantasma para botões discretos que se misturam ao fundo.
+ * Aparências disponíveis para o botão. primario serve para a ação
+ * principal de cada tela e secundario para ações de apoio que não
+ * precisam de destaque.
  */
-type VarianteBotao = "primario" | "secundario" | "perigo" | "fantasma";
+type VarianteBotao = "primario" | "secundario";
 
 /**
  * Props do botão. Estende todos os atributos nativos de um
@@ -40,18 +36,13 @@ interface PropsBotao extends ButtonHTMLAttributes<HTMLButtonElement> {
  * Tabela que liga cada aparência ao conjunto de classes do Tailwind
  * correspondente. Manter este mapa no topo do arquivo facilita
  * ajustar a identidade visual sem precisar mexer na lógica do
- * componente. Para criar uma aparência nova, basta adicionar uma
- * chave aqui e o tipo VarianteBotao acima.
+ * componente.
  */
 const variantes: Record<VarianteBotao, string> = {
   primario:
     "bg-marca text-white hover:bg-marca-forte border border-marca",
   secundario:
     "bg-papel text-tinta hover:bg-fundo border border-linha",
-  perigo:
-    "bg-white text-red-700 hover:bg-red-50 border border-red-300",
-  fantasma:
-    "bg-transparent text-tintaFraca hover:bg-fundo border border-transparent",
 };
 
 export function Botao({

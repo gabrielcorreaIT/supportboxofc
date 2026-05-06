@@ -8,9 +8,6 @@
  * mantidos como uma versão preparada especialmente para a tela.
  */
 
-/** Papéis possíveis de um usuário no sistema. */
-export type PapelUsuario = "solicitante" | "agente";
-
 /**
  * Situações pelas quais um chamado passa ao longo do atendimento.
  * Os valores estão escritos com a inicial em maiúscula porque são
@@ -26,29 +23,10 @@ export type CategoriaChamado = "Hardware" | "Software" | "Acesso" | "Rede";
 
 /**
  * Distinção entre incidente, quando algo parou de funcionar, e
- * solicitação, quando o usuário pede um recurso novo. Os valores
- * estão em minúscula porque são códigos internos. Quando são
- * mostrados na tela, recebem rótulos formatados.
+ * solicitação, quando o usuário pede um recurso novo. Usado pelo
+ * formulário de abertura.
  */
 export type TipoChamado = "incidente" | "solicitacao";
-
-/**
- * Lista de situações disponíveis. Útil para alimentar campos de
- * seleção em filtros e formulários, sem precisar repetir o array
- * em cada lugar.
- */
-export const STATUS_DISPONIVEIS: StatusChamado[] = [
-  "Aberto",
-  "Em Andamento",
-  "Concluído",
-];
-
-/** Lista de prioridades disponíveis para campos de seleção. */
-export const PRIORIDADES_DISPONIVEIS: PrioridadeChamado[] = [
-  "Baixa",
-  "Média",
-  "Alta",
-];
 
 /** Lista de categorias disponíveis para campos de seleção. */
 export const CATEGORIAS_DISPONIVEIS: CategoriaChamado[] = [
@@ -59,15 +37,12 @@ export const CATEGORIAS_DISPONIVEIS: CategoriaChamado[] = [
 ];
 
 /**
- * Forma curta de um usuário, usada quando precisamos só do nome e
- * do papel. Aparece no cabeçalho do solicitante e na barra lateral
- * do agente.
+ * Forma curta de um usuário, usada quando precisamos só do nome
+ * para mostrar no cabeçalho ou na barra lateral.
  */
 export interface UsuarioVisivel {
   /** Nome completo do usuário, mostrado na tela. */
   nome: string;
-  /** Papel que o usuário cumpre no sistema. */
-  papel: PapelUsuario;
 }
 
 /**
@@ -105,8 +80,6 @@ export interface ChamadoResumo {
   prioridade: PrioridadeChamado;
   /** Em que parte do atendimento o chamado está. */
   status: StatusChamado;
-  /** Indica se é incidente ou solicitação. */
-  tipo: TipoChamado;
   /** Nome do agente responsável, quando já houver. */
   atribuidoA?: string;
   /** Data e hora de abertura, já formatadas para exibição. */

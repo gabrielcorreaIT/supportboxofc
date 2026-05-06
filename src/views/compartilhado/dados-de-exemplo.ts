@@ -11,7 +11,6 @@
 import type {
   ChamadoDetalhado,
   ChamadoResumo,
-  ComentarioVisivel,
   UsuarioVisivel,
 } from "./tipos-view";
 
@@ -21,7 +20,6 @@ import type {
  */
 export const usuarioSolicitanteExemplo: UsuarioVisivel = {
   nome: "Joana Pereira",
-  papel: "solicitante",
 };
 
 /**
@@ -30,37 +28,7 @@ export const usuarioSolicitanteExemplo: UsuarioVisivel = {
  */
 export const usuarioAgenteExemplo: UsuarioVisivel = {
   nome: "Marcos Silva",
-  papel: "agente",
 };
-
-/**
- * Comentários do primeiro chamado de exemplo. Mostram dois autores
- * diferentes e ajudam a visualizar o histórico no modal de detalhes.
- */
-const comentariosChamadoUm: ComentarioVisivel[] = [
-  {
-    id: "c1",
-    autor: "Sistema",
-    texto: "Chamado registrado e encaminhado à equipe de TI.",
-    criadoEm: "22/03 09:12",
-  },
-  {
-    id: "c2",
-    autor: "Marcos Silva",
-    texto: "Bom dia, Joana. Já estou olhando a impressora. Pode me confirmar se a luz vermelha está acesa?",
-    criadoEm: "22/03 10:30",
-  },
-];
-
-/** Comentários do segundo chamado, com apenas o registro inicial. */
-const comentariosChamadoDois: ComentarioVisivel[] = [
-  {
-    id: "c3",
-    autor: "Sistema",
-    texto: "Chamado registrado.",
-    criadoEm: "22/03 14:05",
-  },
-];
 
 /**
  * Lista usada no painel do agente. Foi montada com chamados de
@@ -77,7 +45,6 @@ export const chamadosExemploAgente: ChamadoResumo[] = [
     categoria: "Hardware",
     prioridade: "Média",
     status: "Em Andamento",
-    tipo: "incidente",
     atribuidoA: "Marcos Silva",
     criadoEmFormatado: "22/03/2026 09:12",
   },
@@ -89,7 +56,6 @@ export const chamadosExemploAgente: ChamadoResumo[] = [
     categoria: "Acesso",
     prioridade: "Baixa",
     status: "Aberto",
-    tipo: "solicitacao",
     criadoEmFormatado: "22/03/2026 14:05",
   },
   {
@@ -100,7 +66,6 @@ export const chamadosExemploAgente: ChamadoResumo[] = [
     categoria: "Software",
     prioridade: "Alta",
     status: "Aberto",
-    tipo: "incidente",
     criadoEmFormatado: "23/03/2026 08:40",
   },
   {
@@ -111,7 +76,6 @@ export const chamadosExemploAgente: ChamadoResumo[] = [
     categoria: "Acesso",
     prioridade: "Baixa",
     status: "Concluído",
-    tipo: "solicitacao",
     atribuidoA: "Marcos Silva",
     criadoEmFormatado: "20/03/2026 11:20",
   },
@@ -123,7 +87,6 @@ export const chamadosExemploAgente: ChamadoResumo[] = [
     categoria: "Rede",
     prioridade: "Alta",
     status: "Em Andamento",
-    tipo: "incidente",
     atribuidoA: "Marcos Silva",
     criadoEmFormatado: "23/03/2026 10:05",
   },
@@ -149,14 +112,35 @@ export const detalhesExemploPorId: Record<string, ChamadoDetalhado> = {
     descricao:
       "Tentei imprimir um relatório no setor de RH e a impressora não responde. " +
       "A luz vermelha está piscando e o painel mostra 'erro 0x80'.",
-    comentarios: comentariosChamadoUm,
+    comentarios: [
+      {
+        id: "c1",
+        autor: "Sistema",
+        texto: "Chamado registrado e encaminhado à equipe de TI.",
+        criadoEm: "22/03 09:12",
+      },
+      {
+        id: "c2",
+        autor: "Marcos Silva",
+        texto:
+          "Bom dia, Joana. Já estou olhando a impressora. Pode me confirmar se a luz vermelha está acesa?",
+        criadoEm: "22/03 10:30",
+      },
+    ],
   },
   "2": {
     ...chamadosExemploAgente[1],
     descricao:
       "Preciso de acesso aos módulos de Compras e Estoque do SAP para conseguir " +
       "lançar as notas fiscais do trimestre.",
-    comentarios: comentariosChamadoDois,
+    comentarios: [
+      {
+        id: "c3",
+        autor: "Sistema",
+        texto: "Chamado registrado.",
+        criadoEm: "22/03 14:05",
+      },
+    ],
   },
   "3": {
     ...chamadosExemploAgente[2],
@@ -167,8 +151,7 @@ export const detalhesExemploPorId: Record<string, ChamadoDetalhado> = {
   },
   "4": {
     ...chamadosExemploAgente[3],
-    descricao:
-      "Esqueci minha senha do e-mail corporativo após o feriado.",
+    descricao: "Esqueci minha senha do e-mail corporativo após o feriado.",
     comentarios: [
       {
         id: "c4",

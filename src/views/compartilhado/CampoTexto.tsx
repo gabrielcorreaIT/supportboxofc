@@ -15,16 +15,10 @@ import type { InputHTMLAttributes } from "react";
 interface PropsCampoTexto extends InputHTMLAttributes<HTMLInputElement> {
   /** Texto que aparece acima do campo. */
   rotulo: string;
-  /**
-   * Texto curto de apoio mostrado em cinza abaixo do campo. Útil
-   * para indicar formato esperado ou limites de tamanho.
-   */
-  ajuda?: string;
 }
 
 export function CampoTexto({
   rotulo,
-  ajuda,
   id,
   className = "",
   ...resto
@@ -50,7 +44,6 @@ export function CampoTexto({
         ].join(" ")}
         {...resto}
       />
-      {ajuda && <span className="text-xs text-tintaFraca">{ajuda}</span>}
     </div>
   );
 }
