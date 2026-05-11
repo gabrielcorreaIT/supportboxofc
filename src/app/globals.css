@@ -28,6 +28,6 @@ body {
  * básica: quem não usa o mouse precisa enxergar onde está.
  */
 *:focus-visible {
-  outline: 2px solid #1d4ed8;
+  outline: 2px solid #ff7000;
   outline-offset: 2px;
 }
