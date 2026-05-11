@@ -1,22 +1,16 @@
 /**
- * Estrutura raiz do site.
+ * Estrutura Molde HTML do site.
  *
- * Este é o layout que envolve todas as rotas do projeto. Ele
- * define as tags html e body, importa o CSS global e configura os
- * metadados que aparecem na aba do navegador. Não desenha nada do
- * sistema em si, só a moldura que sustenta o conteúdo das páginas.
+ * Aqui fica a estrutura HTML básica do sistema, como a tag <html>, <body> e o conteúdo que é compartilhado em todas as páginas, como o menu de navegação. O conteúdo específico de cada página é inserido via parâmetro, no momento em que a rota é acessada.
  *
- * Quando os controladores e os modelos forem adicionados nas
- * próximas etapas, este arquivo continua igual. Se um dia
- * precisarmos de algo global, como um tema ou a sessão do usuário,
- * é aqui que esses recursos entram, sem mexer no resto do projeto.
+ *Exemplo: function LayoutRaiz({ children }) é uma função que recebe um parâmetro chamado children. O children é o conteúdo da página atual. Quando o usuário está em /login, o children é o conteúdo do login. Quando ele vai para /agente, o children vira o conteúdo do agente. O Next.js cuida de injetar a coisa certa.
  */
+
 import type { Metadata } from "next";
 import "./globals.css";
 
 /**
- * Metadados da aba do navegador. O Next.js lê este objeto e gera
- * automaticamente as tags <title> e <meta> equivalentes.
+ * Metadados da aba do navegador. Isso aqui gera o título que aparece na aba do navegador e a descrição que apareceria nos resultados de busca no Google.
  */
 export const metadata: Metadata = {
   title: "SupportBox",

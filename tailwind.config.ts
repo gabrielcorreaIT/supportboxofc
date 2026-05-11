@@ -17,21 +17,21 @@
  * ──────────────────────────────────────────────────────────────
  * PALETA — onde cada cor é usada
  * ──────────────────────────────────────────────────────────────
- *   marca         botões primários, links em destaque
- *   marca-forte   áreas com profundidade extra
- *   marca-fraca   fundo de etiquetas da identidade
+ *   marca:         botões primários, links em destaque
+ *   marca-forte:   áreas com profundidade extra
+ *   marca-fraca:   fundo de etiquetas da identidade
  *
- *   destaque      texto/ícone de chamados em andamento
- *   destaque-fraca fundo das etiquetas desses chamados
+ *   destaque:      texto/ícone de chamados em andamento
+ *   destaque-fraca: fundo das etiquetas desses chamados
  *
- *   tinta         texto principal (quase preto)
- *   tintaFraca    texto secundário, descrições, datas
- *   linha         bordas e separadores
+ *   tinta:         texto principal (quase preto)
+ *   tintaFraca:    texto secundário, descrições, datas
+ *   linha:         bordas e separadores
  *
- *   papel         superfícies elevadas (cartões, tabelas, modais)
- *   fundo         plano de fundo da página
+ *   papel:         superfícies elevadas (cartões, tabelas, modais)
+ *   fundo:         plano de fundo da página
  *
- * Alterar um valor abaixo afeta TODAS as classes Tailwind que o usam.
+ * Alterar um valor abaixo afeta TODAS as classes que usam Tailwind. >>>>>>>>>MUITO CUIDADO AQUI PELO AMOR DE DEUS.<<<<<<<<<<<<<<<<<
  */
 import type { Config } from "tailwindcss";
 
