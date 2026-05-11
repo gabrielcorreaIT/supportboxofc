@@ -1,10 +1,10 @@
 /*
  * Estilos globais do sistema.
- *
- * Mantemos o arquivo enxuto: as três diretivas do Tailwind para
- * carregar a base, os componentes e os utilitários, e dois ajustes
- * gerais. Toda a personalidade visual fica nas classes aplicadas
- * direto nos componentes, em vez de regras CSS espalhadas.
+
+ 
+ * Diretivas que carregam o Tailwind no projeto. Habilitam as classes
+ * utilitárias usadas pelos componentes para cor, espaçamento,
+ * alinhamento e tipografia.
  */
 
 @tailwind base;
@@ -12,10 +12,7 @@
 @tailwind utilities;
 
 /*
- * Cor de fundo e cor de texto padrão para o sistema todo. Usamos
- * os mesmos valores das cores fundo e tinta definidas no Tailwind,
- * mas em formato literal porque variáveis CSS não fazem parte do
- * arquivo de configuração.
+ * Cor de fundo e cor de texto padrão para o sistema todo.
  */
 html,
 body {
@@ -24,8 +21,7 @@ body {
 }
 
 /*
- * Mantém o foco visível ao navegar pelo teclado. Acessibilidade
- * básica: quem não usa o mouse precisa enxergar onde está.
+ * Mantém o foco visível ao navegar pelo teclado. Acessibilidade quem não usa o mouse precisa enxergar onde está o foco para navegar pelo sistema.
  */
 *:focus-visible {
   outline: 2px solid #ff7000;
