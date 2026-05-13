@@ -4,7 +4,7 @@
  
  * Diretivas que carregam o Tailwind no projeto. Habilitam as classes
  * utilitárias usadas pelos componentes para cor, espaçamento,
- * alinhamento e tipografia.
+ * alinhamento e texto.
  */
 
 @tailwind base;
