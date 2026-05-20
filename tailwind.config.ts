@@ -42,7 +42,7 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        marca: { DEFAULT: "#FF9000", forte: "#FF7000", fraca: "#FF7000" },
+        marca: { DEFAULT: "#FF9000", forte: "#FF7000", fraca: "#FFEDD5" },
         destaque: { DEFAULT: "#d97706", fraca: "#fef3c7" },
 
         tinta: "#0f172a",
