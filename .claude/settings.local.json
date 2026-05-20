@@ -1,7 +1,26 @@
 {
   "permissions": {
     "allow": [
-      "Bash(Select-String -Pattern \"marca|fraca|forte\" -SimpleMatch)"
+      "Bash(Select-String -Pattern \"marca|fraca|forte\" -SimpleMatch)",
+      "WebSearch",
+      "Bash(ls C:/Users/User/Downloads/ | grep -i supportbox)",
+      "Bash(npm --version)",
+      "Bash(mkdir -p \"C:/Users/User/Downloads/supportbox-backend/src/controllers\" \"C:/Users/User/Downloads/supportbox-backend/src/services\" \"C:/Users/User/Downloads/supportbox-backend/src/routes\" \"C:/Users/User/Downloads/supportbox-backend/src/middlewares\" \"C:/Users/User/Downloads/supportbox-backend/src/lib\" \"C:/Users/User/Downloads/supportbox-backend/src/types\")",
+      "Bash(npm install *)",
+      "Bash(npx tsc *)",
+      "Bash(PORT=4001 npx tsx src/server.ts)",
+      "Bash(curl -s http://localhost:4001/saude)",
+      "Bash(curl -s -w \"\\\\nstatus: %{http_code}\\\\n\" http://localhost:4001/api/auth/me)",
+      "Bash(curl -s -w \"\\\\nstatus: %{http_code}\\\\n\" -X POST -H \"Content-Type: application/json\" -d '{\"email\":\"a@b.com\",\"senha\":\"123\"}' http://localhost:4001/api/auth/login)",
+      "Bash(git init *)",
+      "Bash(git -c user.name=gabrielcorreaIT -c user.email=rispxgames@gmail.com commit -m 'etapa 1: scaffold do backend + Controllers + regras de negocio *)",
+      "Bash(curl -s -w \"\\\\nstatus: %{http_code}\\\\n\" http://localhost:4001/api/chamados)",
+      "Bash(curl -s -w \"\\\\nstatus: %{http_code}\\\\n\" -X POST -H \"Content-Type: application/json\" -d '{\"email\":\"nao-eh-email\"}' http://localhost:4001/api/auth/login)",
+      "Bash(netstat -ano)",
+      "Bash(taskkill /F /PID 17268)",
+      "PowerShell(Stop-Process -Id 17268 -Force)",
+      "PowerShell(\"killed\")",
+      "PowerShell($p = Get-NetTCPConnection -LocalPort 4001 -ErrorAction SilentlyContinue | Select-Object -First 1; if \\($p\\) { Stop-Process -Id $p.OwningProcess -Force; \"stopped pid $\\($p.OwningProcess\\)\" } else { \"nothing on port 4001\" })"
     ]
   }
 }
